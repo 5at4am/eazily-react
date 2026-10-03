@@ -60,3 +60,38 @@ Problem: zero `ErrorBoundary` / `componentDidCatch` in the codebase, so any rend
   (2.37 s), `npm run test:error-boundary` PASS, dev server on :5173 still serving and hot-reloading.
 - Reverted one self-inflicted regression: the fixture initially had no exports, which added 2
   `react-refresh/only-export-components` warnings. Default-exporting the fixture component cleared them.
+
+## 2026-10-03 15:40 — Improvement #5: CI workflow + bundle-budget contradiction fixed
+
+Added `.github/workflows/ci.yml`:
+- `verify` (ubuntu-latest, **gating**): `npm ci` → `npm run lint` → `npm run build` →
+  `node scripts/bundle-report.cjs`, then uploads `.tmp/bundle-report.json`.
+  Note `npm run build` is itself a security gate: `vite.config.js` registers `buildPolicy()` as a plugin,
+  so every build fails on a privileged `VITE_` var, a staging-mode build, a server-only secret value
+  appearing in output, a remote Supabase endpoint being bundled, or `scripts/` demo modules leaking in.
+  No deploy job on purpose — `buildPolicy` throws for staging targets, this app is local-only.
+- `browser` (windows-latest, `continue-on-error: true`): `test:error-boundary` then `test:smoke`.
+  Advisory only — see the pre-existing failure below.
+- `concurrency` cancels superseded runs; `permissions: contents: read`; `workflow_dispatch` enabled.
+
+Fixed a contradiction that made `npm run analyze:bundle` fail on a clean checkout:
+`scripts/build-policy.mjs` `writeBundle` deliberately ships `eazily-launch-logo.png`,
+`eazily-partner-logo.png` and 5 demo portraits under `assets/demo/professional/`, but
+`scripts/bundle-report.cjs:8` rejected *any* `.png`/`.jpg`/`.map` in the output.
+- Scoped the exception via `sanctionedMedia` to exactly those two logos and `assets/demo/professional/*`.
+- The check keeps its teeth: `.map`, `.mp4`, `.mov` and every other raster asset still fail, and the
+  error now names the offending path. Verified by dropping a rogue PNG into `dist` (exit 1, named
+  `assets/rogue-test.png`) then removing it (exit 0).
+- Deliberately did **not** widen the exception to cover size, so the real problem stays visible:
+  `eazily-partner-logo.png` is 601 KB and `eazily-launch-logo.png` is 177 KB, both eagerly preloaded
+  in `index.html` for a 430 px-wide shell. They surface as the top entries of `report.largestAssets`.
+  Converting both to WebP is the correct fix — see improvement #6.
+
+Pre-existing failure recorded, not introduced here: `npm run test:smoke` fails on the baseline commit
+at `scripts/smoke.cjs:72` (`Cannot read properties of null (reading 'getBoundingClientRect')` asserting
+`.phone-shell` at 1280 px). Reproduced on `c41d5b5` with all `src/` changes reverted via
+`git checkout c41d5b5 -- src/`, so it is unrelated to the error boundary. Left untriaged and the CI
+browser job is advisory because of it.
+
+Verification of the exact CI sequence locally: lint exit 0, build exit 0, bundle budget exit 0,
+`test:error-boundary` PASS.

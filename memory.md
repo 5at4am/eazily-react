@@ -119,8 +119,19 @@ prop, `label` prop naming the failed area). Mounted twice: around `<App/>` in `m
 | 2 | Error boundary at app shell | 1–2 h | **done** + browser test |
 | 3 | Vitest unit tests for pure logic (`customerProfessionalEligibility`, `pricing`, `canonicalService`/`serviceNamesForLookup`) | ~1 day | pending |
 | 4 | Split `PartnerOnboarding.jsx` / `ServicePartnerOnboarding.jsx`; fix suppressed hook deps at `ServicePartnerOnboarding.jsx:251,317` | 2–3 days | pending |
-| 5 | CI workflow (`npm ci && npm run lint && npm run build`) | 1 h | pending (needs #1, now unblocked) |
+| 5 | CI workflow (`.github/workflows/ci.yml`) | 1 h | **done** — `verify` (lint, build, bundle budget) gating, `browser` (windows-latest, advisory) |
 | 6 | Pre-launch: real admin auth, replace 7 Unsplash URLs, `.env` documentation | 1–2 days | pending |
 
 `scripts/build-policy.mjs` already blocks privileged `VITE_` vars and scans build output for leaked credentials —
-use it in CI (item #5).
+it runs automatically on every `npm run build` because `vite.config.js` registers it as a plugin.
+
+## 9. Known Pre-existing Failures (do not assume your change caused these)
+
+- `npm run test:smoke` fails on the baseline commit at `scripts/smoke.cjs:72` —
+  `Cannot read properties of null (reading 'getBoundingClientRect')` while asserting `.phone-shell` at 1280 px.
+  Reproduced on `c41d5b5` with all my `src/` changes reverted, so it is independent of the error boundary.
+  Likely the launch-splash timing or the missing setup screen at desktop width. Untriaged.
+- `scripts/bundle-report.cjs:8` used to reject every `.png`/`.jpg` in `dist`, contradicting the deliberate
+  copies in `build-policy.mjs` `writeBundle`, so `npm run analyze:bundle` failed on a clean checkout.
+  Fixed 2026-10-03 by scoping the exception to the two brand logos and `assets/demo/professional/*`
+  (see `sanctionedMedia`); any other raster asset still fails, by name.
