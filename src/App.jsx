@@ -5,6 +5,10 @@ import { Brand, Toast } from './components/Ui.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { partnerRoles } from './data/partners.js';
 import { AccountContext } from './lib/account.js';
+import { isSupabaseConfigured } from './lib/supabase.js';
+import { useAuth } from './auth/useAuth.js';
+import AuthScreen from './auth/AuthScreen.jsx';
+import { routeAccess } from './auth/policy.js';
 import { RealtimeProvider } from './lib/realtime.jsx';
 import { ConsumerPolicyPage } from './features/legal/ConsumerLegal.jsx';
 import { catalog } from './data/catalog.js';
@@ -23,33 +27,71 @@ function initialView() {
   const role = Object.entries(workspacePaths).find(([key, path]) => key !== 'admin' && key !== 'customer' && path === location.pathname)?.[0];
   return role ? { stage: 'demo', role } : { stage: 'welcome', role: 'customer' };
 }
+// One message per routeAccess() outcome, so a refused workspace explains itself instead
+// of silently doing nothing.
+function partnerAccessMessage(access) {
+  if (access === 'signed_out') return 'Sign in to open a partner workspace.';
+  if (access === 'profile_required') return 'Complete your profile before opening a partner workspace.';
+  if (access === 'registration') return 'Start your partner registration to continue.';
+  if (access === 'approval_pending') return 'Your application is still under review.';
+  if (access === 'assessment_required') return 'Pass the consultant assessment to continue.';
+  if (access === 'rejected') return 'Your application was not approved.';
+  if (access === 'suspended' || access === 'blocked') return 'This account cannot open a partner workspace.';
+  return 'This workspace is not available for your account.';
+}
 export default function App() {
+  const auth = useAuth();
   const [view, setView] = useState(initialView);
   const [toast, setToast] = useState('');
+  const [authOpen, setAuthOpen] = useState(false);
   const timer = useRef();
   const notify = useCallback(message => { clearTimeout(timer.current); setToast(message); timer.current = setTimeout(() => setToast(''), 3400); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
   const enterCustomer = useCallback(() => { replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: 'customer' }, workspacePaths.customer); setView({ stage: 'customer', role: 'customer' }); }, []);
   const enterPartner = useCallback(role => { replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: role }, workspacePaths[role]); setView({ stage: 'demo', role }); }, []);
   const enterWelcome = useCallback(() => { replaceNavigationState({ eazilyDepth: 0 }, '/'); setView({ stage: 'welcome', role: 'customer' }); }, []);
+  // A session restored from a refresh or an OAuth redirect can land on any screen.
+  const account = isSupabaseConfigured ? auth.account : guest;
+  // Sample builds have no client, so the controller reports configuration_required and
+  // there is nothing to sign in to. Keep the guest account and say so plainly.
+  const requestAuth = useCallback(() => {
+    if (!isSupabaseConfigured) { notify('Local sample only. Sign-in is unavailable.'); return; }
+    setAuthOpen(true);
+  }, [notify]);
   useEffect(() => {
-    const onSignIn = () => notify('Local sample only. Account sign-in and saved requests are unavailable.');
+    // Pages call requestSignIn() when an unauthenticated visitor touches something that
+    // needs an account, so the prompt appears on demand rather than blocking browsing.
+    const onSignIn = () => requestAuth();
     const onPop = () => setView(initialView());
     window.addEventListener('eazily-sign-in', onSignIn);
     window.addEventListener('popstate', onPop);
     return () => { window.removeEventListener('eazily-sign-in', onSignIn); window.removeEventListener('popstate', onPop); };
-  }, [notify]);
+  }, [requestAuth]);
+  const openPartner = useCallback(role => {
+    // routeAccess() encodes the whole role state machine: no user, no profile, a blocked
+    // account, a missing application, or an application still in review. A connected build
+    // honours it; a sample build has no account to check and stays open.
+    if (isSupabaseConfigured && routeAccess(account, role) !== 'allowed') {
+      notify(partnerAccessMessage(routeAccess(account, role)));
+      requestAuth();
+      return;
+    }
+    enterPartner(role);
+  }, [account, enterPartner, notify, requestAuth]);
+  const logout = useCallback(() => { if (isSupabaseConfigured) void auth.controller.logout(); enterWelcome(); }, [auth.controller, enterWelcome]);
   useNativeShellBack(() => {
+    if (authOpen) { setAuthOpen(false); return true; }
     if (view.stage === 'partner-choice' || view.stage === 'demo') { enterWelcome(); return true; }
     return false;
-  }, view.stage === 'welcome');
-  const context = { ...guest, requestAuth: () => notify('Local sample only. Sign-in is unavailable.'), refresh: async () => guest, logout: enterWelcome };
+  }, view.stage === 'welcome' || authOpen);
+  const context = { ...account, requestAuth, refresh: isSupabaseConfigured ? () => auth.controller.refresh() : async () => guest, logout };
   let content;
-  if (location.pathname === '/terms' || location.pathname === '/privacy') content = <ConsumerPolicyPage kind={location.pathname === '/terms' ? 'terms' : 'privacy_policy'} />;
+  if (authOpen && isSupabaseConfigured) content = <AuthScreen auth={auth} onBack={() => setAuthOpen(false)} onContinue={() => { setAuthOpen(false); notify(translate('Signed in')); }} />;
+  else if (location.pathname === '/terms' || location.pathname === '/privacy') content = <ConsumerPolicyPage kind={location.pathname === '/terms' ? 'terms' : 'privacy_policy'} />;
   else if (view.stage === 'welcome') content = <Welcome onCustomer={enterCustomer} onService={enterCustomer} onPartner={() => setView({ stage: 'partner-choice', role: 'customer' })} onEnterDemo={() => setView({ stage: 'demo', role: 'customer' })} />;
-  else if (view.stage === 'partner-choice') content = <PartnerChoice onSelect={enterPartner} onBack={enterWelcome} />;
+  else if (view.stage === 'partner-choice') content = <PartnerChoice onSelect={openPartner} onBack={enterWelcome} />;
   else if (view.stage === 'demo') content = <DemoWorkspace initialRole={view.role} onExit={enterWelcome} />;
-  else content = <UserApp notify={notify} account={guest} onWorkspace={enterPartner} onAddRole={() => setView({ stage: 'partner-choice', role: 'customer' })} />;
+  else content = <UserApp notify={notify} account={account} onWorkspace={enterPartner} onAddRole={() => setView({ stage: 'partner-choice', role: 'customer' })} />;
   return <AccountContext.Provider value={context}><RealtimeProvider value={offlineRealtime}><div className={'phone-shell' + (view.stage === 'customer' ? ' customer-workspace' : '')}><ErrorBoundary label={translate('this screen')}><Suspense fallback={<Loading/>}>{content}</Suspense></ErrorBoundary><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider>;
 }
 const welcomeServiceGroups = catalog.find(item => item.id === 'manpower')?.groups || [];
@@ -85,7 +127,7 @@ function Welcome({
       <span className="welcome-preview-grid">{visibleServices.map(({ name, src }) => <span className="welcome-preview-image" key={src}><img src={src} alt="" loading="eager" decoding="async" draggable="false" /><span>{translate(name)}</span></span>)}</span>
       </button>
     </section>
-    <p className="welcome-sign-in">Local sample preview. No account, booking or payment is created.</p>
+    <p className="welcome-sign-in">{isSupabaseConfigured ? translate('Browse freely. Sign in when you book, save or post.') : translate('Local sample preview. No account, booking or payment is created.')}</p>
     {PARTNER_DEMO_ENABLED && onEnterDemo && <button type="button" className="btn btn-outline welcome-demo-entry" onClick={onEnterDemo}>Enter Demo Mode</button>}
   </main>;
 }
