@@ -213,6 +213,27 @@ Deliberate omissions, asserted by the test: `partner_earnings`, `finance_transac
 `customer_payments`, `service_requests` and `partner_orders` stay empty, because a seeded rupee would appear
 in admin finance views as revenue.
 
-Verification: `npm run test:seed` PASS (13 services, 6 vendors, 8 reviews, idempotent on replay, anon can
-read but not write), lint 0 errors / 1 pre-existing warning, sample build 118 modules and clean, bundle
-budget exit 0.
+---
+
+## 2026-10-03 18:40 — Session closed
+
+Cleanup: stopped the dev server started at the beginning of the session. `Stop-Process` on the
+`npm.cmd` wrapper left the child vite process holding port 5173, so the listener was located with
+`Get-NetTCPConnection -LocalPort 5173` and the owning `node` process stopped directly. Port is free.
+Worth remembering on Windows: killing a `.cmd` wrapper does not kill what it spawned.
+
+State at close: working tree clean, 8 commits, HEAD `01bac09`.
+
+| Command | Result |
+| --- | --- |
+| `npm run lint` | 0 errors, 1 pre-existing warning (`service-partner-verify-mobile-fixture.jsx:39`) |
+| `npm run build` (sample) | 126 modules, no client/endpoint/key in `dist` |
+| `node scripts/bundle-report.cjs` | exit 0 |
+| `npm run test:error-boundary` | PASS |
+| `npm run test:seed` | PASS |
+| `npm run test:introspect` | PASS |
+| `npm run test:connected` | PASS against `ahwbgmnfmzsaiwjglbkb` |
+
+Also updated `memory.md`: added a **Resume Here** section at the top with the two operator actions
+needed next, recorded the auth wiring contract in a new section 4d, corrected the sample-build module
+count, and renumbered the colliding second `## 9.` heading to `## 10.`.

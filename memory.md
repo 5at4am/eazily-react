@@ -3,7 +3,39 @@
 Persistent project memory. Read this first at the start of every session before touching code.
 Update it whenever facts change. Do NOT put change history here — that belongs in `history.md`.
 
-Last verified: 2026-10-03
+Last verified: 2026-10-03 (end of session 1)
+
+---
+
+## 0. Resume Here
+
+Nothing is committed-but-uncommitted; the tree is clean at `01bac09`.
+
+**Do these two things next, both of them need only your dashboard and your DB password.**
+Full steps in `docs/staging/AUTH-ENABLEMENT.md`.
+
+1. Enable Google OAuth in Supabase -> Authentication -> Providers, and set Site URL +
+   redirect URLs (`http://localhost:5173`, `http://localhost:5173/**`). Phone OTP also
+   needs Twilio credentials and a verified sender, so Google alone is the fast path.
+   Then run `node scripts/hosted-recon.cjs` and paste back the phone/google/providers line.
+2. Apply the seed so discovery has content (see section 9 and `seed/README.md`):
+   ```powershell
+   psql "$env:EAZILY_DATABASE_URL" -v ON_ERROR_STOP=1 -f seed/001_catalogue.sql  # then 002, 003, verify-seed
+   ```
+
+**Then run `npm run test:connected`.** It is the single command that proves the app talks
+to `ahwbgmnfmzsaiwjglbkb`. It is self-contained: it builds in staging mode, boots the real
+bundle in headless Edge, and asserts RLS. It cannot do an OTP or Google round trip, because
+that needs a real SMS-capable number or a real Google session.
+
+**Optional but valuable:** `supabase link --project-ref ahwbgmnfmzsaiwjglbkb` (run it in
+your own terminal; it prompts for the DB password) unlocks
+`scripts/staging-migrate.ps1 -Verify`, which is the only way to audit real per-table RLS
+and grants on the hosted project.
+
+**Known open items, in priority order:** authenticated-JWT RLS matrix, the two unlisted
+`*_legal_drafts` SQL files, `npm run test:smoke` failing at `scripts/smoke.cjs:72`
+independently of any of this, and the 601 KB `eazily-partner-logo.png`.
 
 ---
 
@@ -89,16 +121,15 @@ Two build modes, chosen by `scripts/build-policy.mjs` from `EAZILY_TARGET_ENV`:
 
 | Mode | Trigger | `src/lib/supabase.js` resolves to | Result |
 | --- | --- | --- | --- |
-| sample (default) | no target declared, or `production` | `src/lib/supabase.sample.js` (null stub) | 118 modules, no client/endpoint/key in `dist`; every `if (!supabase)` demo guard holds |
-| connected | `EAZILY_TARGET_ENV` = `staging` \| `development` \| `local` | the real module | 161 modules, `@supabase/supabase-js` + `.supabase.co` present |
+| sample (default) | no target declared, or `production` | `src/lib/supabase.sample.js` (null stub) | 126 modules, no client/endpoint/key in `dist`; every `if (!supabase)` demo guard holds |
+| connected | `EAZILY_TARGET_ENV` = `staging` \| `development` \| `local` | the real module | client and `.supabase.co` inlined from `.env.staging.local` |
 
 Key mechanics, easy to break:
 - The real `src/lib/supabase.js` imports the SDK **statically**, so tree-shaking cannot remove it from a
   sample bundle. The plugin's `resolveId` hook (`enforce:'pre'`) swaps the whole module for the stub instead.
 - `SUPABASE_ENTRY=/(^|[/\\])supabase\.js$/` must stay broad enough to catch the sibling import
   `'./supabase.js'` in `src/lib/realtime.jsx`, not just `'../lib/supabase.js'`.
-- `build:staging` **without** `EAZILY_TARGET_ENV` now fails by design. Connected builds need
-  `EAZILY_TARGET_ENV=staging npm run build:staging`.
+- `build:staging` **without** `EAZILY_TARGET_ENV` fails by design.
 - Credentials live in `.env.staging.local` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
   Vite's dev server reads `.env.development.local` by default, so use `--mode staging` to develop connected.
 - Never put a service-role or other server secret in any `VITE_` variable. `privilegedJwt` in the policy
@@ -108,6 +139,30 @@ Key mechanics, easy to break:
 
 Read-only recon: `node scripts/hosted-recon.cjs` (journey relations) or `--all` (every relation found in
 `supabase/*.sql`). GET only, prints no credentials.
+
+## 4d. Auth wiring (added 2026-10-03 — read this before touching auth)
+
+`src/auth/` is 33 KB across 9 files and is now live. The shape:
+
+- `src/App.jsx` mounts `useAuth()` **once** and owns everything. `useAuth.js` keeps a module-level
+  `sharedController` so `usePhoneVerification()` in `ServicePartnerOnboarding.jsx` reaches the same
+  controller instead of creating a second Supabase auth listener. Never mount the controller twice.
+- `useAuth()` returns `{...snapshot, controller}`. Pass that whole object to `<AuthScreen auth={...} />`;
+  `AuthScreen` reads `auth.controller`, `auth.status`, `auth.developmentOtp`, `auth.otpLength`,
+  `auth.resendAt`, `auth.contactType`, `auth.contact`, `auth.phone`, `auth.error`.
+- Controller statuses: `initialising`, `configuration_required`, `signed_out`, `otp_sending`, `otp_sent`,
+  `verifying`, `profile_required`, `authenticated`, `blocked`, `suspended`, `session_expired`, `error`.
+  `configuration_required` means **no Supabase client**, i.e. sample mode. That is not the same as phone
+  being disabled server-side.
+- Sign-in is **on demand**. Pages call `requestSignIn()` (`src/lib/account.js`) when a guest touches
+  something needing an account; `App.jsx` listens for `eazily-sign-in` and opens `AuthScreen`. Browsing
+  stays public. `UserApp.jsx:31` gates on `PARTNER_DEMO_ENABLED && !isSupabaseConfigured && !account?.user`.
+- Partner workspace entry goes through `routeAccess(account, role)` from `src/auth/policy.js`, which
+  encodes the whole role state machine (`signed_out`, `profile_required`, `registration`,
+  `approval_pending`, `assessment_required`, `rejected`, `suspended`, `blocked`, `allowed`).
+  `partnerAccessMessage()` in `App.jsx` maps each outcome to its own message.
+- Sample mode is the fallback, not removed: `isSupabaseConfigured` selects the real session vs `guest`,
+  and `requestAuth` keeps the old demo toast when there is no client.
 
 ## 9. Hosted Project Status (verified 2026-10-03)
 
@@ -225,16 +280,24 @@ Modes: default (local dry-run), `-Verify` (read-only target check), `-Apply` (ne
 | # | Item | Effort | State |
 | --- | --- | --- | --- |
 | 1 | `git init` + baseline commit | 30 min | **done** `c41d5b5` |
-| 2 | Error boundary at app shell | 1–2 h | **done** + browser test |
+| 2 | Error boundary at app shell | 1–2 h | **done** `3f620d5` + `test:error-boundary` |
 | 3 | Vitest unit tests for pure logic (`customerProfessionalEligibility`, `pricing`, `canonicalService`/`serviceNamesForLookup`) | ~1 day | pending |
 | 4 | Split `PartnerOnboarding.jsx` / `ServicePartnerOnboarding.jsx`; fix suppressed hook deps at `ServicePartnerOnboarding.jsx:251,317` | 2–3 days | pending |
-| 5 | CI workflow (`.github/workflows/ci.yml`) | 1 h | **done** — `verify` (lint, build, bundle budget) gating, `browser` (windows-latest, advisory) |
-| 6 | Pre-launch: real admin auth, replace 7 Unsplash URLs, `.env` documentation | 1–2 days | pending |
+| 5 | CI workflow | 1 h | **done** `0e719e0` — `verify` gating, `browser` advisory |
+| 6 | Pre-launch: replace 7 Unsplash URLs, `.env` documentation, convert the 601 KB partner logo | 1–2 days | pending |
+| 7 | Supabase client reachable only for non-production targets | 1 h | **done** `36da111` |
+| 8 | Determine which migrations are actually applied | 30 min | **done** — all 48, per the local ledger |
+| 9 | Schema introspection + manifest comparator | 2 h | **done** `9db19be` + `test:introspect` |
+| 10 | Seed data for the customer directory | 3 h | **done** `0233fed` + `test:seed` |
+| 11 | Wire `App.jsx` to the real auth controller | 2 h | **done** `01bac09` + `test:connected` |
+| 12 | Enable phone OTP / Google in the dashboard | 10 min | **blocked on you** — see `docs/staging/AUTH-ENABLEMENT.md` |
+| 13 | Authenticated-JWT RLS matrix on staging | 1 day | pending, needs a real signed-in session |
+| 14 | Split the two 40 KB onboarding files | 2–3 days | pending |
 
 `scripts/build-policy.mjs` already blocks privileged `VITE_` vars and scans build output for leaked credentials —
 it runs automatically on every `npm run build` because `vite.config.js` registers it as a plugin.
 
-## 9. Known Pre-existing Failures (do not assume your change caused these)
+## 10. Known Pre-existing Failures (do not assume your change caused these)
 
 - `npm run test:smoke` fails on the baseline commit at `scripts/smoke.cjs:72` —
   `Cannot read properties of null (reading 'getBoundingClientRect')` while asserting `.phone-shell` at 1280 px.
