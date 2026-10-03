@@ -133,3 +133,45 @@ Read-only probe of `ahwbgmnfmzsaiwjglbkb` found:
 - 12 anon-readable; `categories`, `app_configuration`, `partner_public_config`, `referral_config` hold real rows.
 - **Auth blocks login:** `phone` absent (OTP disabled), `google` false, `uri_sites_allowed` empty.
 - **No content data**, so discovery returns nothing until seeded.
+
+## 2026-10-03 16:55 — Supabase CLI, and read-only schema verification tooling
+
+Installed `supabase` 2.119.0 globally (was not on PATH; `.temp/cli-latest` recorded 2.118.0).
+`supabase link` needs the database password interactively, so it is left for the operator.
+
+Found that `scripts/staging-migrate.ps1` already implements the staged deployment this work needed, and
+more rigorously than a fresh implementation would: Docker-pinned psql with `--pull never`, credentials via
+PGSERVICE + PGPASSFILE outside the repo (never `PGPASSWORD`), lock file, per-file postconditions, SHA-256 and
+dependency gates, and a guard that refuses to replay into a populated database. Kept it as the primary tool
+and added tooling only for what it does not answer.
+
+**Deployment status resolved: nothing needs applying.**
+`.tmp/staging-migrations/ahwbgmnfmzsaiwjglbkb.ledger.json` records all 48 migrations `applied` with
+`exitCode 0`, operator `ajayk`, `2026-09-27T15:49Z` through `2026-09-29T06:39Z`. `staging-migrate.ps1`
+dry-run confirms `Plan: 48 recorded as applied, 0 to apply`, with the linked ref, manifest size, all 48
+SHA-256 hashes and every dependency check passing.
+
+Added:
+- `scripts/introspect-remote.sql` — read-only catalog query emitting `object_kind | object_name | detail`
+  for relations, RLS-disabled tables, functions with their definer mode and `search_path`, policies,
+  triggers, browser grants, realtime publications and any migration ledger.
+- `scripts/compare-manifest.cjs` — diffs that output against the manifest, so a gap names the specific
+  missing object. `-Verify` cannot do this because it compares the target to the local ledger, not the
+  manifest.
+- `scripts/introspect-tooling-test.cjs` (`npm run test:introspect`) — replays all 48 migrations into the
+  local PGlite fixture, asserts the introspection query does not change the schema, and asserts the
+  comparator reports a complete deployment. Two real bugs surfaced here and were fixed:
+  1. the `UNION ALL` failed with SQLSTATE 42725 because `pg_policy.polcmd` is `"char"`; every column is now
+     cast to `text` explicitly.
+  2. the comparator reported 54 then 21 false "missing" objects: the manifest's `objects` field mixes
+     object names with prose (`explicit profile/category SELECT grants`), and `public_view_rpc_boundary.sql`
+     declares functions in `eazily_public_read_internal`, which a `public`-only query never sees. The
+     comparator now only compares schema-qualified or bare-token entries and counts prose separately
+     (11 entries), and the query covers every application schema.
+- npm scripts `recon:hosted`, `recon:hosted:all`, `compare:manifest`, `test:introspect`.
+
+Two findings for the operator, not acted on:
+- `consultant_legal_drafts_2026_09_20.sql` and `consumer_legal_drafts_2026_09_20.sql` (41 KB each) are not
+  in the 48-file manifest, so the runner will never apply them. `staging-migrate.ps1` warns about both.
+- `staging-migrate.ps1 -Verify` cannot run yet: `public.ecr.aws/supabase/postgres:17.6.1.171` is not pulled
+  locally (the runner never pulls it) and `PGSERVICE`/`PGSERVICEFILE`/`PGPASSFILE` are unconfigured.

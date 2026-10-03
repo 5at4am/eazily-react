@@ -109,23 +109,61 @@ Key mechanics, easy to break:
 Read-only recon: `node scripts/hosted-recon.cjs` (journey relations) or `--all` (every relation found in
 `supabase/*.sql`). GET only, prints no credentials.
 
-## 9. Hosted Project Status (probed 2026-10-03, read-only)
+## 9. Hosted Project Status (verified 2026-10-03)
 
 Project `ahwbgmnfmzsaiwjglbkb` / `eazily-staging`, ap-south-1, PG 17.6, GoTrue v2.197.
 
-- **The schema is already deployed.** 88 of 100 relations return `401` to the browser role, which means they
-  exist and are correctly not granted to `anon` — not that they are absent. `docs/staging/REPORT.md`
-  (2026-09-18) claiming "0 applied" is stale.
-- 12 relations are anon-readable: `categories`, `app_configuration`, `partner_public_config`, `referral_config`
-  (all populated with real rows), plus the empty public views `vendor_directory`,
-  `customer_professional_directory`, `customer_professional_reviews`, `customer_reviews`,
-  `customer_service_verification`, `partner_directory`, `consent_events`, `service_policies`.
-- **Auth is not configured, which blocks login entirely:** `phone` is absent (phone OTP disabled),
-  `google` is `false`, `uri_sites_allowed` empty. `sms_provider` is `twilio` but credentials are unverifiable
-  from outside the dashboard. `mailer_autoconfirm` is `false`.
-- **No content data:** vendors, services and profiles are empty, so discovery returns nothing until seeded.
-- No migration ledger exists in the repo, so which of the 48 manifest files are applied cannot be answered
-  through PostgREST. Determining that needs the Supabase CLI and the DB password.
+### The database is fully deployed. Nothing needs applying.
+
+- `.tmp/staging-migrations/ahwbgmnfmzsaiwjglbkb.ledger.json` records **all 48 migrations `applied`,
+  exitCode 0**, run by operator `ajayk` from `2026-09-27T15:49Z` to `2026-09-29T06:39Z`.
+- `scripts/staging-migrate.ps1` (dry-run) reports `Plan: 48 recorded as applied, 0 to apply`.
+- A read-only PostgREST probe agrees: 88 of 100 relations answer `401` to the browser role, meaning they
+  exist and are correctly not granted to `anon`.
+- `docs/staging/REPORT.md` (2026-09-18) claiming "0 applied" is **stale** — it predates the deploy by 9 days.
+- Never replay the manifest. The manifest is not generally idempotent and later files replace earlier
+  function definitions.
+
+### What actually blocks a working login-to-discovery flow
+
+1. **Auth providers are disabled.** `phone` is absent (phone OTP off), `google` is `false`,
+   `uri_sites_allowed` is empty. `sms_provider` is `twilio` but its credentials cannot be verified from
+   outside the dashboard. Dashboard work, not code.
+2. **No content data.** `categories`, `app_configuration`, `partner_public_config`, `referral_config` are
+   populated; vendors, services, profiles and all public views are empty, so discovery returns nothing.
+
+### Tooling gaps found
+
+- `consultant_legal_drafts_2026_09_20.sql` and `consumer_legal_drafts_2026_09_20.sql` (41 KB each) are
+  **not in the 48-file manifest**, so `staging-migrate.ps1` will never apply them. Confirm whether that is
+  deliberate (drafts awaiting legal sign-off, per `docs/CONSULTANT-LEGAL-HANDOFF.md`) or an omission.
+- `staging-migrate.ps1 -Verify` cannot run yet: the pinned image
+  `public.ecr.aws/supabase/postgres:17.6.1.171` is not pulled locally (the runner never pulls), and
+  `PGSERVICE` / `PGSERVICEFILE` / `PGPASSFILE` are unconfigured.
+
+### Staging runner (`scripts/staging-migrate.ps1`) — prefer it over ad-hoc psql
+
+Modes: default (local dry-run), `-Verify` (read-only target check), `-Apply` (needs `-ConfirmProjectRef`).
+- psql runs from the pinned Supabase Postgres Docker image with `--pull never`, so no client install.
+- Credentials live outside the repo in a libpq service file plus `PGPASSFILE`. `PGPASSWORD` is never read or
+  passed. Only names, sequences, hashes, exit codes, SQLSTATEs and object names are printed.
+- Refuses to run if `.temp/project-ref` is not `ahwbgmnfmzsaiwjglbkb`, if any SHA-256 drifts, if the lock
+  file exists, or if `supabase_migrations.schema_migrations` / `eazily_private.staging_migration_history`
+  hold rows. Per-file postconditions, stops at the first failure.
+
+### Schema verification tooling added 2026-10-03
+
+- `scripts/introspect-remote.sql` — one read-only SELECT emitting `object_kind | object_name | detail`
+  across all application schemas. Covers relations, RLS-disabled tables, functions (incl.
+  `SECURITY DEFINER` + pinned `search_path`), policies, triggers, anon/authenticated grants, realtime
+  publications, and any migration ledger. Asserted non-mutating by `test:introspect`.
+- `scripts/compare-manifest.cjs` — diffs that output against `supabase/migration-manifest.json`. Object-level
+  and manifest-driven, so it answers *which* declared object is absent, which `-Verify` cannot (it compares
+  against the local ledger, not the manifest).
+- `scripts/hosted-recon.cjs` — GET-only PostgREST probe, no DB password needed.
+- Two parsing traps both tools hit: the manifest's `objects` mix object names with **prose**
+  (`explicit profile/category SELECT grants`), and functions live outside `public`
+  (`eazily_public_read_internal.read_*`), so a `public`-only function query misses them.
 
 ## 5. Conventions Observed
 

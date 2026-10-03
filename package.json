@@ -39,7 +39,11 @@
     "test:partner-navigation:browser": "node scripts/partner-navigation-browser-test.cjs",
     "test:professional-discovery": "node scripts/professional-discovery-test.cjs",
     "test:professional-discovery:database": "node scripts/professional-discovery-database-test.cjs",
-    "test:professional-discovery:browser": "node scripts/professional-discovery-browser-test.cjs"
+    "test:professional-discovery:browser": "node scripts/professional-discovery-browser-test.cjs",
+    "recon:hosted": "node scripts/hosted-recon.cjs",
+    "recon:hosted:all": "node scripts/hosted-recon.cjs --all",
+    "compare:manifest": "node scripts/compare-manifest.cjs",
+    "test:introspect": "node scripts/introspect-tooling-test.cjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
