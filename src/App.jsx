@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { translate } from './lib/translate.js';
 import Icon from './components/Icon.jsx';
 import { Brand, Toast } from './components/Ui.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { partnerRoles } from './data/partners.js';
 import { AccountContext } from './lib/account.js';
 import { RealtimeProvider } from './lib/realtime.jsx';
@@ -49,7 +50,7 @@ export default function App() {
   else if (view.stage === 'partner-choice') content = <PartnerChoice onSelect={enterPartner} onBack={enterWelcome} />;
   else if (view.stage === 'demo') content = <DemoWorkspace initialRole={view.role} onExit={enterWelcome} />;
   else content = <UserApp notify={notify} account={guest} onWorkspace={enterPartner} onAddRole={() => setView({ stage: 'partner-choice', role: 'customer' })} />;
-  return <AccountContext.Provider value={context}><RealtimeProvider value={offlineRealtime}><div className={'phone-shell' + (view.stage === 'customer' ? ' customer-workspace' : '')}><Suspense fallback={<Loading/>}>{content}</Suspense><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider>;
+  return <AccountContext.Provider value={context}><RealtimeProvider value={offlineRealtime}><div className={'phone-shell' + (view.stage === 'customer' ? ' customer-workspace' : '')}><ErrorBoundary label={translate('this screen')}><Suspense fallback={<Loading/>}>{content}</Suspense></ErrorBoundary><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider>;
 }
 const welcomeServiceGroups = catalog.find(item => item.id === 'manpower')?.groups || [];
 const welcomePreviewServices = [...new Map(Array.from({ length: Math.max(0, ...welcomeServiceGroups.map(group => group.items.length)) }, (_, index) => welcomeServiceGroups.map(group => group.items[index])).flat().filter(Boolean).map(name => {

@@ -33,6 +33,7 @@
     "test:staging": "node scripts/staging-test.cjs",
     "staging:preflight": "node scripts/staging-preflight.cjs",
     "test:smoke": "node scripts/smoke.cjs",
+    "test:error-boundary": "node scripts/error-boundary-test.cjs",
     "test:catalog": "node scripts/catalog-service-test.cjs",
     "test:mobile-prototype": "node scripts/mobile-prototype-test.cjs",
     "test:partner-navigation:browser": "node scripts/partner-navigation-browser-test.cjs",

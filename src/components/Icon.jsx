@@ -41,6 +41,7 @@ const paths = {
   volumeOff: ["M11 5 6 9H3v6h3l5 4z", "m22 9-6 6", "m16 9 6 6"],
   share: ["M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7", "m16 6-4-4-4 4", "M12 2v13"],
   external: ["M14 4h6v6", "M20 4 10 14", "M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"],
+  alert: ["M10.3 3.9 1.8 18.2A2 2 0 0 0 3.5 21h17a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z", "M12 9v4", "M12 17h.01"],
 };
 
 export default function Icon({ name, size = 22, className = "", title }) {

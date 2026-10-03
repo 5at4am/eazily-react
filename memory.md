@@ -14,7 +14,7 @@ Last verified: 2026-10-03
 | Name | `eazily-react` (private, v1.0.0) |
 | Root | `E:\Satyam\AMAZON_ML\eazily-react\eazily-react` |
 | Description | Multi-sided marketplace (customer / seller / service partner / consultant / influencer / admin) converted from a legacy HTML/CSS/JS prototype to modular React. Runs in demo mode without a backend. |
-| VCS | **Not a git repository.** Treat with care — no history, no diff safety net. |
+| VCS | **Git repo initialised 2026-10-03** on branch `main`, baseline commit `c41d5b5`. `.gitattributes` normalises LF and marks binaries. |
 | Shell | Windows / PowerShell 5.1. Use `npm.cmd` in scripts. |
 
 ## 2. Stack
@@ -68,8 +68,20 @@ Test commands are per-domain `.cjs` harnesses, not a unit-test runner:
 `test:consultant-legal`, `test:consumer-legal`, `test:service-registration`,
 `test:service-posting`, `test:partner-registration-flow`, `test:realtime`,
 `test:chat`, `test:automation`, `test:staging`, `staging:preflight`,
-`test:smoke`, `test:catalog`, `test:mobile-prototype`, plus `:browser` variants
+`test:smoke`, `test:catalog`, `test:mobile-prototype`, `test:error-boundary`, plus `:browser` variants
 (`test:partner-navigation:browser`, `test:professional-discovery*`).
+
+Browser harnesses use **no test framework**: headless Edge over raw CDP
+(`--remote-debugging-port`) with a hand-rolled `send/evaluate/waitFor/click` helper, `esbuild` bundling a
+`scripts/*-fixture.jsx` into `.tmp/fixture.js`, and a local `node:http` server. Follow this shape for any new
+browser test. Every fixture must default-export a component or ESLint's `react-refresh` rule warns.
+
+## 4b. Crash Handling
+
+`src/components/ErrorBoundary.jsx` (default-exported class, `getDerivedStateFromError` + optional `onError`
+prop, `label` prop naming the failed area). Mounted twice: around `<App/>` in `main.jsx`, and around the
+`Suspense` content inside `App.jsx` so one workspace crash cannot take down the shell. Styles in the
+`/* Error boundary fallback */` block at the end of `src/styles.css`. Verified by `npm run test:error-boundary`.
 
 ## 5. Conventions Observed
 
@@ -97,4 +109,18 @@ Test commands are per-domain `.cjs` harnesses, not a unit-test runner:
 - Lint: 1 warning — `scripts/service-partner-verify-mobile-fixture.jsx:39` `react-refresh/only-export-components`.
 - Zero `console.log`/`debugger`, zero `TODO`/`FIXME`, zero `any`, zero `dangerouslySetInnerHTML` in `src/`.
 - Largest modules: `PartnerOnboarding.jsx` (44 KB), `ServicePartnerOnboarding.jsx` (41 KB), `translate.js` (29 KB), `PartnerApp.jsx` (29 KB).
-- Weak spots: no unit-test runner or CI (`.github` holds only `modernize/` hooks), no git, oversized single-purpose feature files, demo Unsplash remote images still referenced.
+- Weak spots: no unit-test runner or CI (`.github` holds only `modernize/` hooks), oversized single-purpose feature files, demo Unsplash remote images still referenced.
+
+## 8. Improvement Backlog (ranked, 2026-10-03)
+
+| # | Item | Effort | State |
+| --- | --- | --- | --- |
+| 1 | `git init` + baseline commit | 30 min | **done** `c41d5b5` |
+| 2 | Error boundary at app shell | 1–2 h | **done** + browser test |
+| 3 | Vitest unit tests for pure logic (`customerProfessionalEligibility`, `pricing`, `canonicalService`/`serviceNamesForLookup`) | ~1 day | pending |
+| 4 | Split `PartnerOnboarding.jsx` / `ServicePartnerOnboarding.jsx`; fix suppressed hook deps at `ServicePartnerOnboarding.jsx:251,317` | 2–3 days | pending |
+| 5 | CI workflow (`npm ci && npm run lint && npm run build`) | 1 h | pending (needs #1, now unblocked) |
+| 6 | Pre-launch: real admin auth, replace 7 Unsplash URLs, `.env` documentation | 1–2 days | pending |
+
+`scripts/build-policy.mjs` already blocks privileged `VITE_` vars and scans build output for leaked credentials —
+use it in CI (item #5).
