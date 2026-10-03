@@ -83,6 +83,50 @@ prop, `label` prop naming the failed area). Mounted twice: around `<App/>` in `m
 `Suspense` content inside `App.jsx` so one workspace crash cannot take down the shell. Styles in the
 `/* Error boundary fallback */` block at the end of `src/styles.css`. Verified by `npm run test:error-boundary`.
 
+## 4c. Supabase: sample mode vs connected mode
+
+Two build modes, chosen by `scripts/build-policy.mjs` from `EAZILY_TARGET_ENV`:
+
+| Mode | Trigger | `src/lib/supabase.js` resolves to | Result |
+| --- | --- | --- | --- |
+| sample (default) | no target declared, or `production` | `src/lib/supabase.sample.js` (null stub) | 118 modules, no client/endpoint/key in `dist`; every `if (!supabase)` demo guard holds |
+| connected | `EAZILY_TARGET_ENV` = `staging` \| `development` \| `local` | the real module | 161 modules, `@supabase/supabase-js` + `.supabase.co` present |
+
+Key mechanics, easy to break:
+- The real `src/lib/supabase.js` imports the SDK **statically**, so tree-shaking cannot remove it from a
+  sample bundle. The plugin's `resolveId` hook (`enforce:'pre'`) swaps the whole module for the stub instead.
+- `SUPABASE_ENTRY=/(^|[/\\])supabase\.js$/` must stay broad enough to catch the sibling import
+  `'./supabase.js'` in `src/lib/realtime.jsx`, not just `'../lib/supabase.js'`.
+- `build:staging` **without** `EAZILY_TARGET_ENV` now fails by design. Connected builds need
+  `EAZILY_TARGET_ENV=staging npm run build:staging`.
+- Credentials live in `.env.staging.local` (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`).
+  Vite's dev server reads `.env.development.local` by default, so use `--mode staging` to develop connected.
+- Never put a service-role or other server secret in any `VITE_` variable. `privilegedJwt` in the policy
+  decodes bundled JWTs and fails the build on any role other than `anon`.
+- `npm run dev` with no credentials keeps the local OTP bypass (`VITE_ENABLE_LOCAL_OTP=true`, code `0000`);
+  with a real client the dev runtime disables itself automatically via `DEVELOPMENT_OTP_ENABLED && !supabase`.
+
+Read-only recon: `node scripts/hosted-recon.cjs` (journey relations) or `--all` (every relation found in
+`supabase/*.sql`). GET only, prints no credentials.
+
+## 9. Hosted Project Status (probed 2026-10-03, read-only)
+
+Project `ahwbgmnfmzsaiwjglbkb` / `eazily-staging`, ap-south-1, PG 17.6, GoTrue v2.197.
+
+- **The schema is already deployed.** 88 of 100 relations return `401` to the browser role, which means they
+  exist and are correctly not granted to `anon` — not that they are absent. `docs/staging/REPORT.md`
+  (2026-09-18) claiming "0 applied" is stale.
+- 12 relations are anon-readable: `categories`, `app_configuration`, `partner_public_config`, `referral_config`
+  (all populated with real rows), plus the empty public views `vendor_directory`,
+  `customer_professional_directory`, `customer_professional_reviews`, `customer_reviews`,
+  `customer_service_verification`, `partner_directory`, `consent_events`, `service_policies`.
+- **Auth is not configured, which blocks login entirely:** `phone` is absent (phone OTP disabled),
+  `google` is `false`, `uri_sites_allowed` empty. `sms_provider` is `twilio` but credentials are unverifiable
+  from outside the dashboard. `mailer_autoconfirm` is `false`.
+- **No content data:** vendors, services and profiles are empty, so discovery returns nothing until seeded.
+- No migration ledger exists in the repo, so which of the 48 manifest files are applied cannot be answered
+  through PostgREST. Determining that needs the Supabase CLI and the DB password.
+
 ## 5. Conventions Observed
 
 - Thin `src/services/*.js` layer wraps Supabase; components never query directly.

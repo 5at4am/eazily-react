@@ -95,3 +95,41 @@ browser job is advisory because of it.
 
 Verification of the exact CI sequence locally: lint exit 0, build exit 0, bundle budget exit 0,
 `test:error-boundary` PASS.
+
+## 2026-10-03 16:20 — Connect the frontend to Supabase (non-production targets only)
+
+Findings first. The requested work was mostly already done:
+- All **64/64** RPCs the service layer calls are defined in the SQL; all **55** referenced relations exist
+  (the 8 apparent gaps are views, not tables). 90 tables, 179 functions, 143 policies, 89/90 tables with RLS
+  (the exception is the deliberately browser-denied `eazily_private` schema).
+- `docs/staging/REPORT.md` (2026-09-18) says "0 applied", but `supabase/.temp/linked-project.json` links a
+  real project and a read-only probe shows the schema deployed. **That report is stale.**
+
+Changes:
+- `npm install @supabase/supabase-js` (^2.117.2). The 4 npm audit findings all trace to `@capacitor/cli`
+  (`xcode`, `uuid`, `brace-expansion`) and are pre-existing.
+- `src/lib/supabase.js` now builds a real client from `VITE_SUPABASE_URL` + publishable/anon key, still
+  exporting `null` when either is absent so every existing demo guard keeps working, and warning when only
+  one of the pair is set instead of failing silently.
+- `scripts/build-policy.mjs`: a connected build now requires `EAZILY_TARGET_ENV` in
+  {staging, development, local}. Production and undeclared builds stay credential-free.
+- Added the `resolveId` stub swap. The real module imports the SDK statically and cannot be tree-shaken;
+  a sample build resolves `src/lib/supabase.js` to the new `src/lib/supabase.sample.js`.
+  First attempt failed twice, both worth remembering:
+  1. a normal-plugin `resolveId` runs *after* Vite's core resolver for relative paths — needs `enforce:'pre'`.
+  2. the entry regex `[/\\]lib[/\\]supabase\.js$` silently missed `src/lib/realtime.jsx`'s sibling import
+     `'./supabase.js'`, so the SDK was still bundled. Widened to `/(^|[/\\])supabase\.js$/`.
+- `.env.example` documents the connected variables and the never-`VITE_` rule.
+- New `scripts/hosted-recon.cjs`: GET-only probe of a hosted project's relation catalog and auth settings.
+  Adds `--all` to derive relations from `supabase/*.sql` rather than a hand-kept list.
+
+Guard behaviour verified in all directions: default build passes demo-only (118 modules, clean of the SDK);
+`build:staging` with no target refuses; `EAZILY_TARGET_ENV=production` refuses; `=staging` connects
+(161 modules). The one `sb_secret_` hit in the connected bundle is supabase-js's own key-format detection
+string, correctly ignored by the policy's stricter `/sb_secret_[\w-]{16,}/`.
+
+Read-only probe of `ahwbgmnfmzsaiwjglbkb` found:
+- 88/100 relations return 401 to the browser role, i.e. **present and correctly not granted to `anon`**.
+- 12 anon-readable; `categories`, `app_configuration`, `partner_public_config`, `referral_config` hold real rows.
+- **Auth blocks login:** `phone` absent (OTP disabled), `google` false, `uri_sites_allowed` empty.
+- **No content data**, so discovery returns nothing until seeded.
