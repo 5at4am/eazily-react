@@ -141,6 +141,33 @@ Project `ahwbgmnfmzsaiwjglbkb` / `eazily-staging`, ap-south-1, PG 17.6, GoTrue v
   `public.ecr.aws/supabase/postgres:17.6.1.171` is not pulled locally (the runner never pulls), and
   `PGSERVICE` / `PGSERVICEFILE` / `PGPASSFILE` are unconfigured.
 
+### Seed data (`seed/`, added 2026-10-03)
+
+`001_catalogue.sql` (13 services under the existing `manpower` category), `002_service_professionals.sql`
+(auth.users + profiles + 6 vendors), `003_reviews.sql` (8 published reviews), `verify-seed.sql` (read-only
+assertions), `test-seed.cjs` (`npm run test:seed`, rehearses everything in PGlite). Deliberately **not** in
+the migration manifest: it is data, not schema.
+
+**The modern partner path cannot be seeded.** `enforce_current_service_partner_registration()` runs the
+six-step validator on every insert of a `professional` application in status
+submitted/under_review/approved, and it demands real Aadhaar/PAN/Gumasta uploads confirmed in
+`storage.objects`. Fabricating those, or disabling the trigger, is refused. So professionals are seeded
+into the legacy `public.vendors` table instead — no KYC guard, and `src/services/marketplace.js` already
+merges `vendor_directory` with `customer_professional_directory` under one eligibility filter
+(`customerProfessionalEligibility.js`: needs `published`, `verification_status='verified'`, matching
+`service_names`, `coverage`, and `prices` for `starting_price`).
+
+Other guards worth remembering when writing SQL that touches these tables:
+- `guard_account_write()` only restricts when `auth.uid() IS NOT NULL`, so a JWT-less `postgres` session
+  keeps full insert rights. That is why the seed must run as `postgres`.
+- `guard_published_post()` requires, for a published professional offering: approved application with a
+  matching role, `details.category` byte-identical to the application's, `details.service` present in the
+  application's `services` array, no media unless `storage.objects` rows exist, and
+  `post_price()` yielding `totalPaise` (so `serviceCharge` must parse as a number).
+- `categories.slug` is unique and already holds `manpower`, `loans`, `influencers`, `consultancy`,
+  `transportation`, `blood-bank` from `staging_prelaunch_foundations.sql`. Do not re-add those.
+- `services` is unique on `(category_id, slug)`, not `slug` alone.
+
 ### Staging runner (`scripts/staging-migrate.ps1`) — prefer it over ad-hoc psql
 
 Modes: default (local dry-run), `-Verify` (read-only target check), `-Apply` (needs `-ConfirmProjectRef`).

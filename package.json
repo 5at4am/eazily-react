@@ -43,7 +43,8 @@
     "recon:hosted": "node scripts/hosted-recon.cjs",
     "recon:hosted:all": "node scripts/hosted-recon.cjs --all",
     "compare:manifest": "node scripts/compare-manifest.cjs",
-    "test:introspect": "node scripts/introspect-tooling-test.cjs"
+    "test:introspect": "node scripts/introspect-tooling-test.cjs",
+    "test:seed": "node seed/test-seed.cjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

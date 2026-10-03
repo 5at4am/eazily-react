@@ -175,3 +175,44 @@ Two findings for the operator, not acted on:
   in the 48-file manifest, so the runner will never apply them. `staging-migrate.ps1` warns about both.
 - `staging-migrate.ps1 -Verify` cannot run yet: `public.ecr.aws/supabase/postgres:17.6.1.171` is not pulled
   locally (the runner never pulls it) and `PGSERVICE`/`PGSERVICEFILE`/`PGPASSFILE` are unconfigured.
+
+## 2026-10-03 17:30 — Seed data in a new top-level seed/ folder
+
+Goal: give the customer directory real content. The schema needed nothing; the data was empty.
+
+**Key architectural finding, which changed the design.** The modern partner path cannot be seeded.
+`public.enforce_current_service_partner_registration()` runs the full six-step registration validator on
+every insert of a `professional` application in status submitted/under_review/approved, and
+`validate_service_partner_registration()` requires genuine Aadhaar, PAN and Gumasta uploads confirmed in
+private storage (`raise exception 'A document upload was not confirmed by private storage'`). So an approved
+partner is only reachable with real identity documents.
+
+Fabricating KYC, or disabling the trigger to bypass the check, was rejected. Instead professionals are seeded
+into the legacy `public.vendors` table, which carries no KYC guard and is already read by the frontend:
+`src/services/marketplace.js` merges `vendor_directory` with `customer_professional_directory`, dedupes, and
+applies one eligibility filter. `test-seed.cjs` asserts the KYC trigger is still armed after seeding.
+
+Added:
+- `seed/001_catalogue.sql` — 13 services. Keyed on `(category_id, slug)` and resolving the category by
+  subquery, because `categories.slug` is unique and already holds `manpower` from
+  `staging_prelaunch_foundations.sql`. All services go under `manpower` because `marketplace.js` hardcodes
+  `categoryId: 'manpower'`.
+- `seed/002_service_professionals.sql` — auth.users placeholders, profiles, and 6 vendors written to satisfy
+  every field `customerProfessionalEligibility.js` and `vendor_directory` require.
+- `seed/003_reviews.sql` — 8 published reviews, so ratings aggregate.
+- `seed/verify-seed.sql` — read-only inspection plus assertions, including that the KYC trigger survives.
+- `seed/README.md` — apply order, why the legacy table, honest limitations, and scoped removal SQL.
+- `seed/test-seed.cjs` (`npm run test:seed`) — rehearses all 48 migrations plus the seed in PGlite.
+
+Two mistakes caught by the rehearsal rather than by inspection: the first draft of `001` re-added categories
+that `staging_prelaunch_foundations.sql` already seeds, which collided on the `slug` unique index; and the
+first draft of `002` targeted `partner_applications`, which failed on the phone-confirmation guard before
+reaching the KYC check that revealed the real constraint.
+
+Deliberate omissions, asserted by the test: `partner_earnings`, `finance_transactions`, `wallet_lots`,
+`customer_payments`, `service_requests` and `partner_orders` stay empty, because a seeded rupee would appear
+in admin finance views as revenue.
+
+Verification: `npm run test:seed` PASS (13 services, 6 vendors, 8 reviews, idempotent on replay, anon can
+read but not write), lint 0 errors / 1 pre-existing warning, sample build 118 modules and clean, bundle
+budget exit 0.
