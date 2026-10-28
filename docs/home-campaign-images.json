@@ -1,0 +1,32 @@
+[
+  {
+    "id": "cleaning",
+    "path": "src/features/home/campaign/cleaning.jpg",
+    "tool": "built-in imagegen",
+    "prompt": "Use case: ads-marketing. Asset type: promotional service photograph for Eazily home-services marketplace, part of a cohesive professional image collection. Scene: a friendly Indian woman home-cleaning professional in a lavender polo using a microfiber cloth to wipe a wood coffee table in a bright modern cream apartment; compact cleaning caddy nearby. Style: premium realistic editorial lifestyle photography, natural Indian people, warm sunlit apartment, cream and warm wood interior, subtle lavender accents, realistic hands and equipment, inviting and trustworthy. Composition: wide landscape 3:2, main subjects grouped on the right two thirds, uncluttered softly lit wall on the left for possible live headline overlay, enough breathing room for responsive card cropping. No written words, no logos, no watermark, no collage, no UI. Marketing photography rather than a provider profile."
+  },
+  {
+    "id": "ac-care",
+    "path": "src/features/home/campaign/ac-care.jpg",
+    "tool": "built-in imagegen",
+    "prompt": "Use case: ads-marketing. Asset type: promotional service photograph for Eazily home-services marketplace, part of a cohesive professional image collection. Scene: an Indian air conditioning technician in a neat lavender work shirt inspecting an open white wall-mounted air conditioner with an appropriate handheld inspection tool in a modern cream living room; safely on a sturdy step ladder, believable equipment. Style: premium realistic editorial lifestyle photography, natural Indian people, warm sunlit apartment, cream and warm wood interior, subtle lavender accents, realistic hands and equipment, inviting and trustworthy. Composition: wide landscape 3:2, main subjects grouped on the right two thirds, uncluttered softly lit wall on the left for possible live headline overlay, enough breathing room for responsive card cropping. No written words, no logos, no watermark, no collage, no UI. Marketing photography rather than a provider profile."
+  },
+  {
+    "id": "electrical",
+    "path": "src/features/home/campaign/electrical.jpg",
+    "tool": "built-in imagegen",
+    "prompt": "Use case: ads-marketing. Asset type: promotional service photograph for Eazily home-services marketplace, part of a cohesive professional image collection. Scene: an Indian electrician in a neat lavender work shirt with insulated tools inspecting a disconnected wall switch plate on a modern cream apartment wall; calm professional, no sparks or unsafe contact with live wires. Style: premium realistic editorial lifestyle photography, natural Indian people, warm sunlit apartment, cream and warm wood interior, subtle lavender accents, realistic hands and equipment, inviting and trustworthy. Composition: wide landscape 3:2, main subjects grouped on the right two thirds, uncluttered softly lit wall on the left for possible live headline overlay, enough breathing room for responsive card cropping. No written words, no logos, no watermark, no collage, no UI. Marketing photography rather than a provider profile."
+  },
+  {
+    "id": "moving",
+    "path": "src/features/home/campaign/moving.jpg",
+    "tool": "built-in imagegen",
+    "prompt": "Use case: ads-marketing. Asset type: promotional service photograph for Eazily home-services marketplace, part of a cohesive professional image collection. Scene: two Indian movers in neat lavender polo shirts carrying a closed unbranded cardboard box together into a bright modern apartment, several tidy moving boxes in the background, warm wood floor. Style: premium realistic editorial lifestyle photography, natural Indian people, warm sunlit apartment, cream and warm wood interior, subtle lavender accents, realistic hands and equipment, inviting and trustworthy. Composition: wide landscape 3:2, main subjects grouped on the right two thirds, uncluttered softly lit wall on the left for possible live headline overlay, enough breathing room for responsive card cropping. No written words, no logos, no watermark, no collage, no UI. Marketing photography rather than a provider profile."
+  },
+  {
+    "id": "beauty",
+    "path": "src/features/home/campaign/beauty.jpg",
+    "tool": "built-in imagegen",
+    "prompt": "Use case: ads-marketing. Asset type: promotional service photograph for Eazily home-services marketplace, part of a cohesive professional image collection. Scene: a professional Indian woman beautician in a neat lavender blouse arranging clean makeup brushes beside a seated Indian woman at a bright home dressing table, elegant mirror, natural everyday beauty, hygienic workspace. Style: premium realistic editorial lifestyle photography, natural Indian people, warm sunlit apartment, cream and warm wood interior, subtle lavender accents, realistic hands and equipment, inviting and trustworthy. Composition: wide landscape 3:2, main subjects grouped on the right two thirds, uncluttered softly lit wall on the left for possible live headline overlay, enough breathing room for responsive card cropping. No written words, no logos, no watermark, no collage, no UI. Marketing photography rather than a provider profile."
+  }
+]

@@ -1,0 +1,66 @@
+:root {
+  --product-ink: var(--ink);
+  --product-muted: var(--ink-muted);
+  --product-surface: var(--surface);
+  --product-soft: var(--surface-soft);
+  --product-control: var(--control-border);
+  --product-accent: var(--brand);
+  --product-space: var(--space-4);
+  --product-radius: var(--radius-card);
+}
+.connection-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--product-space);
+  padding: var(--product-space);
+  border-bottom: 1px solid var(--product-control);
+  background: var(--product-soft);
+  color: var(--product-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.connection-notice > div { flex: 1 1 200px; }
+.connection-notice p { margin: 4px 0 0; color: var(--product-muted); }
+.connection-notice .btn { min-height: 44px; font-size: 14px; }
+.app-recovery { gap: var(--product-space); }
+.app-recovery p { max-width: 45ch; font-size: 16px; line-height: 1.6; }
+.phone-shell :is(button,a,input,select,textarea,summary):focus-visible {
+  outline: 3px solid var(--product-accent);
+  outline-offset: 3px;
+}
+.phone-shell :is(.field,textarea,select) { border-color: var(--product-control); }
+.phone-shell .toast {
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.phone-shell.peazily-ui .empty-state-action { align-self:center; min-height:var(--control-size); margin-top:var(--space-2); }
+.phone-shell.peazily-ui .empty-state.large { display:grid; justify-items:center; gap:var(--space-3); padding:var(--space-6) var(--space-4); color:var(--ink); text-align:center; }
+.phone-shell.peazily-ui .empty-state.large > svg { color:var(--brand); }
+.phone-shell.peazily-ui .empty-state.large > b { font-size:var(--fs-lg); line-height:1.35; }
+.phone-shell.peazily-ui .empty-state.large > span { max-width:38ch; color:var(--ink-muted); font-size:var(--fs-small); line-height:1.55; }
+.phone-shell.peazily-ui :is(.connection-notice,.toast,[role="alert"]) { overflow-wrap:anywhere; }
+.phone-shell .summary-row b { overflow-wrap: anywhere; min-width: 0; }
+.phone-shell .summary-row { gap: 12px; }
+.chat-retry-send,.chat-more,.chat-menu-button { min-height: 44px; }
+.phone-shell .chat-search input { min-height: 44px; font-size: 16px; }
+html[data-customer-theme="dark"] {
+  --product-ink: var(--ink);
+  --product-muted: var(--ink-muted);
+  --product-surface: var(--surface);
+  --product-soft: var(--surface-soft);
+  --product-control: var(--control-border);
+  --product-accent: var(--brand);
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-shell *, .phone-shell *::before, .phone-shell *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

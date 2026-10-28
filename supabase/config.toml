@@ -1,0 +1,72 @@
+# Eazily local sample — local dev only.
+# Run with: npx supabase start
+project_id = "eazily-react"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+# Per-function deployment settings.
+#
+# verify_jwt = true  -> Supabase rejects the call unless it carries a valid user JWT.
+#                      Correct for anything a signed-in customer or partner can trigger.
+# verify_jwt = false -> The function authenticates its own caller (signature, shared
+#                      secret). It MUST then enforce that check itself, which the
+#                      payment and worker functions already do.
+[functions.seller-create-payment]
+verify_jwt = true
+
+[functions.cashfree-create-collaboration]
+verify_jwt = true
+
+# Authenticates via Cashfree HMAC-SHA256 signature over timestamp + raw body.
+[functions.cashfree-webhook]
+verify_jwt = false
+
+# Authenticates via the x-eazily-scheduler-secret header.
+[functions.automation-worker]
+verify_jwt = false
+
+# Authenticates via the x-eazily-internal-secret header. Never expose to clients.
+[functions.cashfree-release-hold]
+verify_jwt = false
+
+[functions.cashfree-release-split]
+verify_jwt = false
+
+# Deliberately public read-only YouTube RSS proxy. No user data, no writes.
+[functions.youtube-feed]
+verify_jwt = false
+
+# Local email OTP parity. Hosted provider settings are managed separately.
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+otp_length = 8
+
+[auth.email.template.magic_link]
+subject = "Your Eazily verification code"
+content_path = "./supabase/templates/email-otp.html"
+
+[auth.email.template.confirmation]
+subject = "Verify your Eazily email"
+content_path = "./supabase/templates/email-otp.html"
+
+[auth.sms]
+enable_signup = false
+enable_confirmations = false

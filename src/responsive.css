@@ -1,0 +1,275 @@
+/* Responsive shell rules shared by customer, partner, and staff workspaces.
+   Phone layouts stay fluid; wider workspaces use the space rather than a
+   centered 430px device frame. */
+@media (min-width: 600px) {
+  .phone-shell.peazily-ui:has(> .welcome-screen.welcome-entry) {
+    width:min(100%,600px);
+    max-width:600px;
+    margin-inline:auto;
+  }
+  .phone-shell.peazily-ui > .welcome-screen.welcome-entry { width:100%; max-width:none; }
+  .phone-shell.peazily-ui:has(> .welcome-screen:not(.welcome-entry)) {
+    width:min(100%,720px);
+    max-width:720px;
+    margin-inline:auto;
+  }
+  .phone-shell.peazily-ui > .welcome-screen:not(.welcome-entry) { width:100%; max-width:none; }
+
+  .phone-shell.peazily-ui.customer-workspace {
+    width: min(100%, 1200px);
+    max-width: 1200px;
+    margin-inline: auto;
+    overflow-x: clip;
+  }
+
+  .phone-shell.peazily-ui.customer-workspace > .screen {
+    width: 100%;
+    max-width: none;
+  }
+
+  .phone-shell.peazily-ui.customer-workspace .user-app-root > .screen {
+    width: 100%;
+    max-width: none;
+  }
+
+  .phone-shell.peazily-ui:has(> .admin-screen) {
+    width: min(100%, 1200px);
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-top: 0;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { width:100%; max-width:none; }
+
+  .phone-shell.customer-workspace .bottom-nav.customer-nav {
+    left: 50%;
+    width: min(100%, 760px);
+    max-width: 760px;
+    transform: translateX(-50%);
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace),
+  .phone-shell.peazily-ui:has(> .partner-onboarding) {
+    width: min(100%, 1200px);
+    max-width: 1200px;
+    margin-inline: auto;
+    overflow-x: clip;
+    overflow-y: visible;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) > .partner-workspace,
+  .phone-shell.peazily-ui:has(> .partner-onboarding) > .partner-onboarding {
+    width: 100%;
+    max-width: none;
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen {
+    width: 100%;
+    max-width: none;
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > .seller-content {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: clamp(24px, 4vw, 48px);
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > :is(.pd-topbar, .dashboard-header) {
+    width: 100%;
+    max-width: 1180px;
+    margin-inline: auto;
+    padding-inline: clamp(24px, 4vw, 48px);
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-dashboard-home-view,
+  .phone-shell.peazily-ui:has(> .partner-workspace.partner-dashboard-home-view) {
+    max-width: 1200px;
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > .bottom-nav:not(.customer-nav) {
+    left: 50%;
+    width: min(calc(100% - 48px), 760px);
+    max-width: 760px;
+    transform: translateX(-50%);
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-onboarding) > .partner-onboarding > :is(form, .partner-onboarding-body, .service-registration) {
+    width: 100%;
+    max-width: 860px;
+    margin-inline: auto;
+  }
+
+  .phone-shell.peazily-ui:has(> .partner-onboarding) > .partner-onboarding { padding-inline:clamp(20px, 4vw, 48px); }
+
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > .seller-content { padding-inline:24px; }
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > :is(.pd-topbar,.dashboard-header) { padding-inline:24px; }
+}
+
+@media (min-width: 700px) {
+  /* Restore the staff console's desktop grid; the legacy phone rule had
+     accidentally forced its icon rail layout at every viewport width. */
+  body:has(.phone-shell > .admin-screen) { padding: 0; }
+  .phone-shell.peazily-ui:has(> .admin-screen) {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen {
+    display: grid;
+    grid-template-columns: 248px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    min-height: 100dvh;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar {
+    grid-row: 1 / 3;
+    position: sticky;
+    top: 0;
+    width: 248px;
+    height: 100dvh;
+    min-height: 100dvh;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar :is(.brand-lockup span:last-child, .admin-nav-label, button span, .admin-logo > span) {
+    display: initial;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    display: flex;
+    justify-content: flex-start;
+    margin: 3px 0;
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 900px) {
+  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { grid-template-columns: 220px minmax(0, 1fr); }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar { width: 220px; padding-inline: 10px; }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar :is(.admin-nav-label, button span, .admin-logo > span) { display:initial; }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button { width:100%; min-width:0; justify-content:flex-start; padding:0 10px; }
+}
+
+@media (max-width: 699px) {
+  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { display:block; }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar {
+    position:sticky;
+    top:0;
+    z-index:40;
+    display:flex;
+    flex-direction:row;
+    width:100%;
+    height:auto;
+    min-height:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:7px;
+    border-right:0;
+    border-bottom:1px solid var(--divider);
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar .admin-logo > span { display:inline-flex; }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button {
+    flex:0 0 auto;
+    width:auto;
+    min-width:max-content;
+    min-height:44px;
+    justify-content:flex-start;
+    margin:0;
+    gap:7px;
+    padding:0 10px;
+  }
+  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button span {
+    display:inline;
+    white-space:nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .phone-shell.peazily-ui .sheet-overlay {
+    align-items: center !important;
+    padding: 24px !important;
+  }
+  .phone-shell.peazily-ui :is(.sheet, .form-sheet, .vendor-sheet, .partner-post-sheet) {
+    width: min(100%, 640px) !important;
+    max-width: 640px !important;
+    max-height: calc(100dvh - 48px) !important;
+    border-radius: var(--radius-panel) !important;
+    padding-bottom: 24px;
+  }
+  .phone-shell.peazily-ui:has(> .partner-onboarding) .chip-grid {
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > .seller-content { padding-inline:40px; }
+  .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > :is(.pd-topbar,.dashboard-header) { padding-inline:40px; }
+}
+
+@media (min-width: 900px) {
+  .phone-shell.peazily-ui:has(> .welcome-screen.welcome-entry) {
+    width: min(100%, 1040px);
+    max-width: 1040px;
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding: 48px;
+    border-radius: var(--radius-panel);
+  }
+  .phone-shell.peazily-ui > .welcome-screen.welcome-entry {
+    width: 100%;
+    max-width: none;
+    min-height: calc(100dvh - 96px);
+    height: auto;
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    align-content: center;
+    gap: 20px 48px;
+    padding: 0;
+    overflow: visible;
+  }
+  .phone-shell.peazily-ui .welcome-entry .welcome-intro,
+  .phone-shell.peazily-ui .welcome-entry .welcome-tabs,
+  .phone-shell.peazily-ui .welcome-entry .welcome-sign-in,
+  .phone-shell.peazily-ui .welcome-entry .welcome-demo-entry { grid-column: 1; }
+  .phone-shell.peazily-ui .welcome-entry .welcome-customer-preview {
+    grid-column: 2;
+    grid-row: 1 / 5;
+    min-height: 520px;
+    max-height: 640px;
+    align-self: center;
+  }
+}
+
+@media (max-width: 359px) {
+  .phone-shell.peazily-ui .admin-main { padding-inline: 8px; }
+  .phone-shell.peazily-ui .admin-sidebar > button { flex-basis: 40px; width: 40px; min-width: 40px; }
+  .phone-shell.peazily-ui .welcome-screen.welcome-entry { padding-inline: 12px; }
+  .phone-shell.peazily-ui .welcome-entry .welcome-tabs button { font-size: 13px; }
+}
+
+@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .phone-shell.peazily-ui > .welcome-screen.welcome-entry {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+  .phone-shell.peazily-ui .welcome-entry .welcome-customer-preview {
+    flex: none;
+    min-height: 240px;
+    max-height: none;
+  }
+}
