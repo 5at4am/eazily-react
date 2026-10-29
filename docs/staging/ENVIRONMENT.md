@@ -7,7 +7,6 @@ Names and descriptions only. Put real values in the operator's secret manager or
 | VITE_SUPABASE_URL | Public URL of the independently confirmed staging project; required for staging builds |
 | VITE_SUPABASE_PUBLISHABLE_KEY | Public publishable key from that same project; never a service-role or secret key |
 | VITE_PARTNER_DEMO | Explicitly disable for staging |
-| VITE_ENABLE_CONSULTANT_ASSESSMENT_TEST_SKIP | Explicitly disable for staging |
 | VITE_ENABLE_SERVICE_REGISTRATION_TEST_SKIP | Explicitly disable for staging |
 | EAZILY_TARGET_ENV | Operator's non-production environment label; not sufficient identity proof |
 | SUPABASE_PROJECT_REF | Explicit staging reference; must equal link and browser URL reference |

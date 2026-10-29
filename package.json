@@ -12,6 +12,7 @@
     "analyze:bundle": "npm run build && node scripts/bundle-report.cjs",
     "test:auth": "node scripts/auth-test.cjs",
     "test:source": "node scripts/source-integrity-test.cjs",
+    "test:build-policy": "node scripts/build-policy-test.cjs",
     "test:functionality": "node scripts/functionality-regression.cjs --skip-browser",
     "test:connection-recovery": "node scripts/connection-recovery-test.cjs",
     "audit:backend": "node scripts/backend-contract-audit.cjs",

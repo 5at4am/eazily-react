@@ -3,6 +3,20 @@ import { resolve, dirname } from 'node:path';
 import { loadEnv } from 'vite';
 const PRIVILEGED=/(SERVICE_ROLE|SECRET|PASSWORD|ACCESS_TOKEN|PRIVATE_KEY)/;
 const privilegedJwt=code=>(code.match(/eyJ[\w-]+\.eyJ[\w-]+\.[\w-]+/g)||[]).some(jwt=>{try{return JSON.parse(Buffer.from(jwt.split('.')[1],'base64url')).role!=='anon';}catch{return false;}});
+export function stagingBuildErrors(env){
+  const errors=[];
+  const ref=env.SUPABASE_PROJECT_REF||'';
+  if(env.EAZILY_TARGET_ENV!=='staging')errors.push('EAZILY_TARGET_ENV must explicitly be staging');
+  if(!/^[a-z0-9]{20}$/.test(ref))errors.push('SUPABASE_PROJECT_REF must identify the approved staging project');
+  try{const url=new URL(env.VITE_SUPABASE_URL||'');if(url.protocol!=='https:'||url.hostname!==`${ref}.supabase.co`)errors.push('VITE_SUPABASE_URL must match SUPABASE_PROJECT_REF');}catch{errors.push('VITE_SUPABASE_URL must be a valid HTTPS Supabase URL');}
+  const key=env.VITE_SUPABASE_PUBLISHABLE_KEY||'';
+  let publicKey=key.startsWith('sb_publishable_');
+  if(!publicKey&&key.split('.').length===3){try{publicKey=JSON.parse(Buffer.from(key.split('.')[1],'base64url').toString()).role==='anon';}catch{publicKey=false;}}
+  if(!publicKey)errors.push('VITE_SUPABASE_PUBLISHABLE_KEY must be a publishable or anon key');
+  if(env.VITE_PARTNER_DEMO!=='false')errors.push('VITE_PARTNER_DEMO must be explicitly false');
+  if(env.VITE_ENABLE_SERVICE_REGISTRATION_TEST_SKIP!=='false')errors.push('VITE_ENABLE_SERVICE_REGISTRATION_TEST_SKIP must be explicitly false');
+  return errors;
+}
 export function buildPolicy(){
   let output, secretValues=[];
   return {
@@ -11,7 +25,10 @@ export function buildPolicy(){
       const allEnv={...loadEnv(config.mode,config.envDir||process.cwd(),''),...process.env};
       // Values of server-only secrets (never VITE_) must not appear anywhere in the output.
       secretValues=Object.entries(allEnv).filter(([name,value])=>PRIVILEGED.test(name)&&typeof value==='string'&&value.length>=12).map(([,value])=>value);
-      if(config.mode==='staging'||allEnv.EAZILY_TARGET_ENV==='staging')throw new Error('Staging build blocked: this app is local-only and cannot connect to hosted staging.');
+      if(config.mode==='staging'){
+        const errors=stagingBuildErrors(allEnv);
+        if(errors.length)throw new Error('Staging build blocked: '+errors.join('; '));
+      }else if(allEnv.EAZILY_TARGET_ENV==='staging')throw new Error('Staging build blocked: use `npm run build:staging` so the staging-only checks run.');
       for(const [name,value] of Object.entries({...config.env,...process.env})){
         if(name.startsWith('VITE_')&&/(AUTH_BYPASS|MOCK_AUTH|TEST_AUTH)/.test(name)&&value==='true')throw new Error('Authentication bypass flags are prohibited in application builds.');
         if(name.startsWith('VITE_')&&/(SERVICE_ROLE|SECRET|PASSWORD|ACCESS_TOKEN)/.test(name)&&value)throw new Error('Privileged Vite configuration is prohibited.');

@@ -39,10 +39,17 @@ record('No privileged Vite variables',!Object.keys(env).some(k=>/^VITE_.*(SERVIC
 let publicKey=false;
 try { const key=env.VITE_SUPABASE_PUBLISHABLE_KEY||'';publicKey=key.startsWith('sb_publishable_')||JSON.parse(Buffer.from(key.split('.')[1]||'','base64url').toString()).role==='anon'; } catch { /* Never echo key or parser errors. */ }
 record('Browser credential is public',publicKey,'requires publishable key or anon-role JWT; service-role and secret keys rejected');
-for(const name of ['VITE_PARTNER_DEMO','VITE_ENABLE_CONSULTANT_ASSESSMENT_TEST_SKIP','VITE_ENABLE_SERVICE_REGISTRATION_TEST_SKIP','EAZILY_FINANCIAL_PROVIDERS_ENABLED'])record(`${name} disabled`,env[name]==='false','must explicitly be false for staging');
+for(const name of ['VITE_PARTNER_DEMO','VITE_ENABLE_SERVICE_REGISTRATION_TEST_SKIP','EAZILY_FINANCIAL_PROVIDERS_ENABLED'])record(`${name} disabled`,env[name]==='false','must explicitly be false for staging');
 const filenames=manifest.migrations.map(m=>m.file);
 const excludedDrafts=['consumer_legal_drafts_2026_09_20.sql','consultant_legal_drafts_2026_09_20.sql'];
-record('Canonical SQL inventory',new Set(filenames).size===filenames.length&&fs.readdirSync('supabase').filter(f=>f.endsWith('.sql')).every(f=>filenames.includes(f)||excludedDrafts.includes(f)),'48 manifest files; two legal content drafts are excluded from deployment');
+const testOnlySeeds=['influencer_test_legal_documents.sql','service_partner_test_legal_documents.sql'];
+const rootSql=fs.readdirSync('supabase').filter(f=>f.endsWith('.sql'));
+const timestampedDir=path.join('supabase','migrations');
+const timestampedFiles=fs.existsSync(timestampedDir)?fs.readdirSync(timestampedDir):[];
+const hasTimestampedCopy=file=>timestampedFiles.some(name=>/^\d{14}_/.test(name)&&name.endsWith(`_${file}`));
+const supplementalSafe=file=>testOnlySeeds.includes(file)||hasTimestampedCopy(file);
+const manifestFilesPresent=filenames.every(file=>fs.existsSync(path.join('supabase',file)));
+record('Canonical SQL inventory',new Set(filenames).size===filenames.length&&manifestFilesPresent&&rootSql.every(f=>filenames.includes(f)||excludedDrafts.includes(f)||supplementalSafe(f)),'48 manifest files; legal test seeds are excluded and the email-identity source is represented in timestamped history');
 record('Migration execution path reconciled',!fs.existsSync('supabase/migrations')||fs.readdirSync('supabase/migrations').length===0,'timestamped migrations coexist with the manifest; inspect hosted history before choosing an execution path');
 const migrations=manifest.migrations.map(m=>({sequence:m.sequence,file:m.file,sha256:createHash('sha256').update(fs.readFileSync(path.join('supabase',m.file))).digest('hex'),status:'blocked'}));
 record('Manifest checksums',migrations.every((m,i)=>m.sha256===manifest.migrations[i].sha256),'local file hashes must match reviewed manifest; this is not remote migration history');
