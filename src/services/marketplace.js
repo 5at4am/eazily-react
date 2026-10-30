@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase.js";
 import { canonicalService, readRows, rpc, serviceNamesForLookup } from "./experience.js";
 import { isCustomerEligibleProfessional } from './customerProfessionalEligibility.js';
+import { readDirectorySources } from './directoryRead.js';
 export { isCustomerEligibleProfessional } from './customerProfessionalEligibility.js';
 
 export async function createServiceRequest(payload) {
@@ -78,18 +79,20 @@ async function withServicePartnerFacts(rows) {
 export async function getCustomerProfessionals(serviceName, location) {
   if (!supabase) return [];
   const aliases = serviceNamesForLookup(serviceName);
-  const modern = await readRows('customer_professional_directory', query => query.overlaps('service_names', aliases).limit(50)).catch(() => []);
-  const legacy = await readRows('vendor_directory', query => query.overlaps('service_names', aliases).limit(50)).catch(() => []);
+  const [modern, legacy] = await readDirectorySources(
+    () => readRows('customer_professional_directory', query => query.overlaps('service_names', aliases).limit(50)),
+    () => readRows('vendor_directory', query => query.overlaps('service_names', aliases).limit(50))
+  );
   return dedupeProfessionals([...(await withServicePartnerFacts(modern)), ...legacy])
     .filter(vendor => isCustomerEligibleProfessional(vendor, serviceName, location));
 }
 
 export async function getNearbyCustomerProfessionals(location) {
   if (!supabase) return [];
-  const [modern, legacy] = await Promise.all([
-    readRows('customer_professional_directory', query => query.limit(50)).catch(() => []),
-    readRows('vendor_directory', query => query.limit(50)).catch(() => []),
-  ]);
+  const [modern, legacy] = await readDirectorySources(
+    () => readRows('customer_professional_directory', query => query.limit(50)),
+    () => readRows('vendor_directory', query => query.limit(50))
+  );
   return dedupeProfessionals([...(await withServicePartnerFacts(modern)), ...legacy])
     .filter(profile => profile.service_names?.some(name => isCustomerEligibleProfessional(profile, name, location)))
     .sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0))
@@ -99,8 +102,11 @@ export async function getNearbyCustomerProfessionals(location) {
 export async function getCustomerProfessionalById(id, serviceName, location) {
   if (!supabase) return null;
   const tables = ['customer_professional_directory', 'vendor_directory'];
-  for (const table of tables) {
-    const rows = await readRows(table, query => query.eq('id', id).limit(1)).catch(() => []);
+  const [modern, legacy] = await readDirectorySources(
+    () => readRows(tables[0], query => query.eq('id', id).limit(1)),
+    () => readRows(tables[1], query => query.eq('id', id).limit(1))
+  );
+  for (const rows of [modern, legacy]) {
     if (rows[0] && isCustomerEligibleProfessional(rows[0], serviceName, location)) {
       return (await withServicePartnerFacts(rows))[0];
     }
@@ -149,4 +155,3 @@ export async function getCurrentProfile() {
   if (error) throw error;
   return data;
 }
-

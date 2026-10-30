@@ -15,9 +15,12 @@ Deno.serve(async req => {
   if (!config?.cashfree_enabled) return json({ error: 'Cashfree checkout is not enabled' }, 503);
   const { data: post } = await admin.from('partner_posts').select('*,partner_applications!inner(*)').eq('id', postId).eq('role', 'influencer').eq('status', 'published').single();
   if (!post) return json({ error: 'Published collaboration not found' }, 404);
-  const customerTotal = Number(post.details.packagePrice), fee = Math.round(customerTotal * Number(config.influencer_platform_fee_percent)) / 100;
-  const payout = customerTotal - fee, initial = Math.round(payout * Number(config.influencer_initial_release_percent)) / 100, hold = payout - initial;
-  const { data: order, error: orderError } = await admin.from('partner_orders').insert({ partner_id: post.partner_id, customer_id: user.id, role: 'influencer', title: post.details.title, status: 'awaiting_acceptance', details: post.details, deadline: post.details.deadline || null }).select().single();
+  const { data: price, error: priceError } = await admin.rpc('get_published_post_price', { p_post: post.id });
+  if (priceError || !price?.totalPaise || !price?.sellerBasePaise) return json({ error: priceError?.message || 'A valid published price is unavailable' }, 409);
+  const customerTotal = Number(price.totalPaise) / 100, fee = Number(price.markupPaise || 0) / 100;
+  const payout = Number(price.sellerBasePaise) / 100, initial = Math.round(payout * Number(config.influencer_initial_release_percent)) / 100, hold = payout - initial;
+  const priceSnapshot = { ruleId: price.ruleId, version: price.version, basePaise: price.sellerBasePaise, markupPaise: price.markupPaise, customerTotalPaise: price.totalPaise };
+  const { data: order, error: orderError } = await admin.from('partner_orders').insert({ partner_id: post.partner_id, customer_id: user.id, role: 'influencer', title: post.details.title, status: 'awaiting_acceptance', details: { ...post.details, priceSnapshot }, deadline: post.details.deadline || null }).select().single();
   if (orderError) return json({ error: orderError.message }, 400);
   const cashfreeOrderId = `eazily_${order.id.replaceAll('-', '')}`;
   const cf = await fetch(`${Deno.env.get('CASHFREE_BASE_URL') || 'https://sandbox.cashfree.com'}/pg/orders`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-version': '2025-01-01', 'x-client-id': Deno.env.get('CASHFREE_CLIENT_ID')!, 'x-client-secret': Deno.env.get('CASHFREE_CLIENT_SECRET')!, 'x-idempotency-key': order.id }, body: JSON.stringify({ order_id: cashfreeOrderId, order_amount: customerTotal, order_currency: 'INR', customer_details: { customer_id: user.id, customer_phone: user.phone, customer_email: user.email || post.details.email || 'payments@eazily.invalid' }, order_meta: { notify_url: `${url}/functions/v1/cashfree-webhook` }, order_note: `Prepaid collaboration: ${post.details.title}` }) });

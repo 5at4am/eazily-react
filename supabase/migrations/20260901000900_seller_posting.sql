@@ -78,7 +78,7 @@ revoke all on function eazily_private.post_price(partner_posts) from public,anon
 grant execute on function eazily_private.pick(jsonb,text[]),eazily_private.post_price(partner_posts) to anon,authenticated;
 create or replace view public.partner_directory as
 select p.id,p.partner_id,p.role as partner_role,
- eazily_private.pick(p.details,array['postType','title','description','category','service','caption','area','availability','hashtags','linkedPostId','packageId','packageSnapshot','deliverables','deliverableCount','timeline','revisions','usageRights','advertisingPermissions','audience','mode','duration','offerBenefit','offerStarts','offerEnds','offerTerms']) || eazily_private.post_price(p) as details,
+ eazily_private.pick(p.details,array['postType','title','description','category','service','caption','area','availability','hashtags','linkedPostId','packageId','packageSnapshot','deliverables','deliverableCount','timeline','revisions','usageRights','advertisingPermissions','audience','mode','duration','offerBenefit','offerStarts','offerEnds','offerTerms']) || eazily_private.pick(eazily_private.post_price(p),array['servicePaise','feePaise','taxPaise','totalPaise']) as details,
  eazily_private.pick(a.details,array['creatorName','name','businessName','city','category','services','specialisation','experience','qualificationName','language']) as profile_details,
  coalesce(a.details->>'creatorName',a.details->>'name') as display_name,
  coalesce(a.details->>'businessName',a.details->>'creatorName',a.details->>'name') as business_name,

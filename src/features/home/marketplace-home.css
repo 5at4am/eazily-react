@@ -2,9 +2,9 @@
 .marketplace-home {
   --store-mint: #e4f5f0;
   --store-peach: #fff1df;
-  --store-hero: #f5ece1;
-  --store-hero-ink: #30251d;
-  --store-hero-muted: #564738;
+  --store-hero: var(--brand-soft);
+  --store-hero-ink: var(--ink);
+  --store-hero-muted: var(--ink-soft);
   --store-navy: #211736;
   --store-white: #ffffff;
   background: var(--paper);
@@ -46,7 +46,7 @@
 .phone-shell.peazily-ui .marketplace-home .section { margin:var(--space-6) var(--space-5); }
 .phone-shell.peazily-ui .marketplace-home .section-head h2 { font-size:var(--fs-heading); letter-spacing:-.035em; }
 .phone-shell.peazily-ui .marketplace-home .explore-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-5) var(--space-2); }
-.phone-shell.peazily-ui .marketplace-home .explore-grid i { height:80px; padding:var(--space-2); border:0; background:var(--surface-soft); border-radius:var(--radius-card); margin-bottom:var(--space-2); }
+.phone-shell.peazily-ui .marketplace-home .explore-grid i { height:80px; padding:var(--space-2); border:0; background:transparent; border-radius:0; margin-bottom:var(--space-2); }
 .phone-shell.peazily-ui .marketplace-home .explore-grid b { font-size:var(--fs-small); line-height:1.4; }
 .marketplace-collection-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
 .marketplace-collection { position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; overflow:hidden; text-align:left; min-width:0; padding:var(--space-4); border:1px solid var(--control-border); border-radius:var(--radius-card); background:var(--store-mint); color:var(--store-hero-ink); cursor:pointer; }
@@ -108,6 +108,37 @@
 .marketplace-collection .collection-copy > span { margin-top:auto; padding-top:var(--space-3); color:var(--brand); }
 .marketplace-collection .collection-copy > small { color:var(--ink-muted); }
 .marketplace-home .marketplace-collection-grid { align-items:stretch; }
+.phone-shell.peazily-ui .marketplace-home :is(.eyebrow,.service-showcase-heading > div > span) {
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.phone-shell.peazily-ui .marketplace-home .marketplace-brand small {
+  max-width: 30ch;
+  color: var(--store-white);
+  font-size: var(--fs-small);
+  line-height: 1.4;
+}
+.phone-shell.peazily-ui .marketplace-home .hero-header .btn-white,
+.phone-shell.peazily-ui .marketplace-home .hero-theme-today .btn-white {
+  box-shadow: none;
+}
+.phone-shell.peazily-ui .marketplace-home .marketplace-brand small {
+  max-width: 25ch;
+}
+.phone-shell.peazily-ui .marketplace-home .marketplace-collection-grid { grid-auto-rows: 1fr; }
+.phone-shell.peazily-ui .marketplace-home .marketplace-collection {
+  border-color: var(--divider);
+}
+.phone-shell.peazily-ui .marketplace-home :is(.home-provider-photo span, .home-provider-facts span, .market-card-body i, .home-service-showcase i) {
+  box-shadow: none;
+}
+@media (min-width: 600px) and (max-width: 900px) {
+  .phone-shell.peazily-ui .marketplace-home .user-brand-row { gap: var(--space-5); }
+  .phone-shell.peazily-ui .marketplace-home .marketplace-brand small { max-width: 30ch; }
+}
 @media(min-width:768px) {
   .marketplace-home .marketplace-collection-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
   .marketplace-collection .collection-copy > b { font-size:var(--fs-lg); }

@@ -1898,6 +1898,25 @@
       "existingDatabase": "Append after verified migration history; preserves saved applications and existing follower bands",
       "manualConfiguration": "Requires one linked platform in the 5K-or-higher bands; other linked platforms may be below 5K",
       "sha256": "6e04218bb20c6f67ede8bdda615265d84c6ab7ed7b0d59f4f9218df0d30ef7c3"
+    },
+    {
+      "sequence": 50,
+      "file": "support_admin_pricing_hardening.sql",
+      "objects": [
+        "support_ticket_replies closed-ticket insert policy",
+        "support-ticket reply realtime invalidation",
+        "public.admin_enable_confirmed_seller_pricing()"
+      ],
+      "requiredPredecessors": [
+        "support_ticket_conversations.sql",
+        "realtime_events.sql",
+        "seller_pricing.sql",
+        "influencer_minimum_follower_threshold.sql"
+      ],
+      "cleanDatabase": "PASS in local PGlite tests for discovery pricing, closed-ticket denial, reply realtime invalidation and atomic Admin pricing; hosted verification pending",
+      "existingDatabase": "Append after verified migration 49; does not rewrite existing tickets, replies, or pricing history",
+      "manualConfiguration": "Apply only through reviewed staging rollout; Admin RPC is limited to platform admins",
+      "sha256": "149bdc36e78a1db628548d2a84a8605d1aa5a4b51dc519f5373ee565bdc76a14"
     }
   ],
   "dependencyPolicy": "Conservative cumulative predecessor set: install every listed predecessor; later replacement functions must not be overwritten by replaying earlier scripts."

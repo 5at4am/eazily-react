@@ -109,7 +109,12 @@
   display: none;
 }
 
-/* Keep page-level sticky headers below the app bar. */.user-app-root > .screen > :is(.topbar, .catalog-header) { top: var(--page-navigation-height); }
+/* Keep page-level sticky headers below the app bar without letting their
+   visual offset cover the first content section. */
+.user-app-root > .screen > :is(.topbar, .catalog-header) {
+  top: var(--page-navigation-height);
+  margin-bottom: var(--page-navigation-height);
+}
 .user-app-root > .service-experience > .topbar > .icon-btn:first-child { display: none; }
 .user-app-root > .screen { scroll-margin-top: var(--page-navigation-height); }
 .phone-shell.peazily-ui:has(.user-app-root) { padding-top: 0; }

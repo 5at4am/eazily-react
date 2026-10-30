@@ -8,7 +8,7 @@ const { randomUUID } = require('node:crypto');
   const db = new PGlite({ extensions: { pgcrypto } });
   try {
     // Local Supabase Auth contract; all application migrations run unmodified.
-    await db.exec(`create role anon; create role authenticated;
+    await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
       create schema auth;
       create table auth.users(id uuid primary key,phone text,raw_user_meta_data jsonb default '{}');
       create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;
@@ -31,7 +31,7 @@ const { randomUUID } = require('node:crypto');
     const consultantApplication = randomUUID(), consultantPost = randomUUID();
     await db.exec("update seller_pricing_rules set enabled=true,seller_tax_bps=0,customer_tax_bps=0,fee_tax_bps=0,separate_fee_paise=0,include_visiting=false,include_additional=false where role='consultant'; insert into consultant_rates(category,duration,price) values('Career',30,200);");
     await db.query("insert into partner_applications(id,customer_id,role,status,details) values($1,$2,'consultant','approved','{\"category\":\"Career\"}')", [consultantApplication, c]);
-    await db.query("insert into partner_posts(id,partner_id,role,status,details) values($1,$2,'consultant','published','{\"mode\":\"Online\",\"category\":\"Career\",\"duration\":30}')", [consultantPost, consultantApplication]);
+     await db.query("insert into partner_posts(id,partner_id,role,status,details) values($1,$2,'consultant','published','{\"mode\":\"Online\",\"category\":\"Career\",\"duration\":30,\"packagePrice\":\"200\"}')", [consultantPost, consultantApplication]);
     await user(b);
     await db.query("select book_free_introduction($1,now()+interval '1 day')", [consultantPost]);
     await assert.rejects(db.query("select book_free_introduction($1,now()+interval '2 days')", [consultantPost]), /already been used or reserved/);

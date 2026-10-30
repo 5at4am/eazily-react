@@ -32,7 +32,7 @@ select p.id,p.partner_id,p.role as partner_role,
          or (item.key=any(array['deliverableCount','packagePrice','timeline','revisions'])
              and jsonb_typeof(item.value) in ('string','number')
              and length(item.value #>> '{}') <= 32)))
- else '{}'::jsonb end || eazily_private.post_price(p) as details,
+ else '{}'::jsonb end || eazily_private.pick(eazily_private.post_price(p),array['servicePaise','feePaise','taxPaise','totalPaise']) as details,
  eazily_private.pick(a.details,array['creatorName','name','businessName','city','category','services','specialisation','experience','qualificationName','language']) ||
  case when p.role='influencer' then jsonb_build_object('platforms',
    (select coalesce(jsonb_agg(jsonb_build_object('name',left(coalesce(platform->>'name',''),80),

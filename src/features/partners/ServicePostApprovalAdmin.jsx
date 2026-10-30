@@ -11,6 +11,7 @@ export default function ServicePostApprovalAdmin({ notify }) {
   const [decisions, setDecisions] = useState([]);
   const [config, setConfig] = useState(null);
   const [reasons, setReasons] = useState({});
+  const [statusFilter, setStatusFilter] = useState('pending');
   const load = useCallback(async () => {
     const [nextPosts, nextEdits, nextDecisions, rules] = await Promise.all([
       readRows('partner_posts', q => q.eq('role', 'professional').order('updated_at', { ascending: false }).limit(100)),
@@ -30,7 +31,12 @@ export default function ServicePostApprovalAdmin({ notify }) {
     try {
       await rpc('admin_review_post', { p_id: post.id, p_status: status, p_notes: reasons[post.id]?.trim() || '' });
       await load();
-    } catch (error) { notify(error.message); }
+    } catch (error) {
+      const message = /pricing configuration is incomplete|complete customer pricing/i.test(error.message)
+        ? 'This post is still pending. Customer pricing is not fully configured or enabled. Complete every required field for the Professional pricing rule under Seller subscription and pricing configuration, save a new enabled version, then publish again.'
+        : error.message;
+      notify(message);
+    }
   }
   async function reviewEdit(edit, approve) {
     try {
@@ -57,7 +63,9 @@ export default function ServicePostApprovalAdmin({ notify }) {
   }
   return <>
     <section className="admin-panel"><h2>Service Partner post approval</h2>
-      {posts.map(post => {
+      <Field label="Show records" as="select" options={['pending', 'published', 'rejected', 'all']} value={statusFilter} onChange={event => setStatusFilter(event.target.value)} />
+      <p>Approved posts remain available in this record list. Publishing requires a complete, enabled customer-pricing rule; configure it under Seller subscription and pricing configuration before approving a post.</p>
+      {posts.filter(post => statusFilter === 'all' || (statusFilter === 'pending' ? ['pending_review', 'draft'].includes(post.status) : post.status === statusFilter)).map(post => {
         const latest = decisions.find(item => item.post_id === post.id);
         const autoApproved = decisions.some(item => item.post_id === post.id && item.decision === 'auto_published');
         return <article className="activity" key={post.id}>
@@ -71,6 +79,7 @@ export default function ServicePostApprovalAdmin({ notify }) {
               <button onClick={() => reviewPost(post, 'rejected')}>Reject</button></>}</div>
         </article>;
       })}
+      {!posts.some(post => statusFilter === 'all' || (statusFilter === 'pending' ? ['pending_review', 'draft'].includes(post.status) : post.status === statusFilter)) && <p>No {statusFilter === 'pending' ? 'pending' : statusFilter} posts.</p>}
       {edits.map(edit => <article className="activity" key={edit.id}><div>
         <b>Pending edit: {edit.details?.title || 'Service post'}</b>
         <p>{edit.details?.category} · {edit.details?.service}</p><p>{edit.details?.description}</p>

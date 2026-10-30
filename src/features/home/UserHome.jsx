@@ -72,12 +72,11 @@ export default function UserHome({
         setProfessionalsLoading(false);
       }
     }).catch(e => {
-      if (active) { setProfessionalsLoading(false); setProfessionalsError(e.message); }
-      notify(e.message);
+      if (active) { setProfessionalsLoading(false); setProfessionalsError(e.message); notify(e.message); }
     });
     if (!demoMode) getCurrentProfile().then(p => {
       if (active) setCustomer(p);
-    }).catch(e => notify(e.message));
+    }).catch(e => { if (active) notify(e.message); });
     return () => {
       active = false;
     };
@@ -175,7 +174,7 @@ export default function UserHome({
     setHeroPaused(false);
   }
   return <main className="screen home-v3 user-art-home marketplace-home">
-    <section className="home-discovery-header"><header className="user-home-header"><div className="user-brand-row"><span className="user-brand-lead">{onMenu && <button type="button" className="user-menu-button" onClick={onMenu} aria-label={translate("Open menu")}><Icon name="menu" size={22} /></button>}<span className="marketplace-brand">eazily<span>.</span><small>{translate("A little help. A better day.")}</small></span></span><button className="location-selector compact-location" onClick={() => { setAddressSearch(city); setLocationOpen(true); }}><Icon name="location" size={15} /><span><b>{translate(location.locality)}</b><small>{translate(location.address)}</small></span><Icon name="chevronRight" size={13} /></button></div><h1>{translate(greeting)}{translate(customer?.full_name ? `, ${customer.full_name}` : "")}</h1><p>{translate("What can we make easier for you today?")}</p></header><div className="search-cart-row">{translate(searchArea)}</div></section>
+    <section className="home-discovery-header"><header className="user-home-header"><div className="user-brand-row"><span className="user-brand-lead">{onMenu && <button type="button" className="user-menu-button" onClick={onMenu} aria-label={translate("Open menu")}><Icon name="menu" size={22} /></button>}<span className="marketplace-brand">eazily<span>.</span><small>{translate("A little help, every day.")}</small></span></span><button className="location-selector compact-location" onClick={() => { setAddressSearch(city); setLocationOpen(true); }}><Icon name="location" size={15} /><span><b>{translate(location.locality)}</b><small>{translate(location.address)}</small></span><Icon name="chevronRight" size={13} /></button></div><h1>{translate(greeting)}{translate(customer?.full_name ? `, ${customer.full_name}` : "")}</h1><p>{translate("What can we make easier for you today?")}</p></header><div className="search-cart-row">{translate(searchArea)}</div></section>
     <section className={`hero-carousel hero-header hero-theme-${slide.id}`} style={{ '--promotion-image': `url("${homeHeroArtwork[slide.id]}")` }} onFocusCapture={() => setHeroPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHeroPaused(false); }} onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onTouchStart={event => {
       touchStart.current = event.touches[0].clientX;
       setHeroPaused(true);
@@ -189,7 +188,7 @@ export default function UserHome({
           categoryId: service.categoryId ?? "manpower",
           serviceName: service.requestName
         })}><i><ServiceIllustration name={service.requestName} /></i><b>{translate(service.name)}</b></button>))}</div></section>
-    <section className="section marketplace-collections" aria-labelledby="marketplace-collections-title"><div className="section-head"><div><span className="eyebrow">{translate("LIFE, MADE EASIER")}</span><h2 id="marketplace-collections-title">{translate("Small fixes. Big relief.")}</h2></div></div><div className="marketplace-collection-grid">{[
+    <section className="section marketplace-collections" aria-labelledby="marketplace-collections-title"><div className="section-head"><div><span className="eyebrow">{translate("Life made easier")}</span><h2 id="marketplace-collections-title">{translate("Small fixes. Big relief.")}</h2></div></div><div className="marketplace-collection-grid">{[
       { id: 'home', label: 'A fresh start at home', text: 'Make room for the good days.', action: 'Explore cleaning', service: 'Deep Cleaning', image: serviceCampaignImages.cleaning, theme: 'mint' },
       { id: 'repairs', label: 'Give your appliances a little care', text: 'Keep everyday life running.', action: 'Explore repairs', service: 'AC Service', image: serviceCampaignImages.acCare, theme: 'peach' },
       { id: 'beauty', label: 'A little time for yourself', text: 'Discover beauty and salon care at home.', action: 'Explore beauty', service: 'Salon at Home', image: serviceCampaignImages.beauty, theme: 'mint' },
@@ -200,7 +199,7 @@ export default function UserHome({
     </section>
       <section className="home-bulk-orders-strip" aria-labelledby="home-bulk-orders-title" onTouchStart={event => event.stopPropagation()} onTouchEnd={event => event.stopPropagation()}>
         <div className="home-bulk-orders-top">
-          <div className="home-bulk-orders-label"><span className="home-bulk-orders-icon"><Icon name="building" size={17} /></span><h2 id="home-bulk-orders-title">{translate("BULK ORDERS")}</h2></div>
+          <div className="home-bulk-orders-label"><span className="home-bulk-orders-icon"><Icon name="building" size={17} /></span><h2 id="home-bulk-orders-title">{translate("Bulk orders")}</h2></div>
           <button className="home-bulk-orders-cta" type="button" onClick={onBulkOrders}>{translate("Get Quote")} <Icon name="chevronRight" size={16} /></button>
         </div>
         <div className="home-bulk-orders-ticker-row">
@@ -214,7 +213,7 @@ export default function UserHome({
       </section>
     <section className="section home-service-showcase more-service-showcase" ref={node => { serviceShowcases.current[0] = node; }}>
       <i className="service-showcase-glow" aria-hidden="true" />
-      <div className="section-head service-showcase-heading"><div><span>{translate("QUICK ACCESS")}</span><h2>{translate("More services")}</h2><p>{translate("More ways Eazily can help at home.")}</p></div><button onClick={() => navigate("categories")}>{translate("See all")}</button></div>
+      <div className="section-head service-showcase-heading"><div><span>{translate("Quick access")}</span><h2>{translate("More services")}</h2><p>{translate("More ways Eazily can help at home.")}</p></div><button onClick={() => navigate("categories")}>{translate("See all")}</button></div>
       <div className="more-service-grid">{translate(moreServicePool.slice(0, 6).map((service, index) => <button type="button" className="more-service-card" key={`more-${service.id || service.requestName}`} style={{ '--service-order': index }} onClick={() => setRequest({ categoryId: service.categoryId ?? "manpower", serviceName: service.requestName })}><i><ServiceIllustration name={service.requestName} /></i><span><b>{translate(service.name)}</b><small>{translate("Explore service")}</small></span><Icon name="chevronRight" size={17} /></button>))}</div>
     </section>
     <section className="section promise-section"><span className="eyebrow">{translate("SERVICE STANDARDS")}</span><h2>{translate("The Eazily Promise")}</h2><div className="promise-rail">{translate(promiseItems.map(item => <article key={item.id}><b>{translate(item.number)}</b><div><h3>{translate(item.title)}</h3><p>{translate(item.text)}</p></div></article>))}</div><small>{translate("Eazily protection applies only to payments completed through the official Eazily payment system or company QR. Cash payments and payments made to a professional\u2019s personal QR are not covered.")}</small></section>

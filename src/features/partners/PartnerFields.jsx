@@ -39,7 +39,8 @@ export default function PartnerFields({ role, values, setValues, profile = {}, o
       {field('mode', 'Consultation mode', { as: 'select', options: ['Online consultation','Offline consultation','Both'], required: true })}
       {values.mode !== 'Online consultation' && field('offlineLocation','Offline consultation location',{ required: true })}
       {field('duration', 'Paid session duration (minutes)', { as: 'select', options: ['15','30','45','60'], required: true })}
-      <p className="policy-note">{t('Eazily manages consultation pricing. Save a draft while rate assignment is pending.')}</p>
+      {field('packagePrice', 'Your consultation price (₹)', { type: 'number', min: '.01', step: '.01', required: true })}
+      <p className="policy-note">Your entered price is the base price. Eazily calculates the customer price using the active pricing rule; the admin reviews both before publishing.</p>
       <p>{t('Five-minute free introduction. Paid sessions require separate, explicit customer confirmation.')}</p>
     </>}
     {offer && <>{field('offerBenefit','Offer benefit',{ required: true })}{field('offerStarts','Starts',{ type:'datetime-local',required:true })}{field('offerEnds','Ends',{ type:'datetime-local',required:true })}{field('offerTerms','Offer conditions',{ as:'textarea',required:true })}<p>{t('Discounts require approval and do not change existing booking prices.')}</p></>}

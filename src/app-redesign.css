@@ -1,0 +1,146 @@
+/* Shared Eazily interface layer. Workspace-specific layouts stay in their
+   feature stylesheets; this file makes their controls and surfaces coherent. */
+.phone-shell.peazily-ui {
+  --purple: var(--brand);
+  --violet: var(--brand);
+  --blue: var(--brand);
+  --deep: var(--brand-deep);
+  --navy: var(--ink);
+  --lav: var(--brand-soft);
+  --bg: var(--paper);
+  --white: var(--surface);
+  --muted: var(--ink-muted);
+  --line: var(--divider);
+  --shadow: var(--elevation-1);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: none;
+}
+.phone-shell.peazily-ui:not(:has(.marketplace-home, .admin-screen)) { box-shadow: none; }
+
+html,
+body { background: var(--surface-soft); color: var(--ink); }
+.phone-shell.peazily-ui :is(.screen, .setup, .welcome-screen, .partner-screen, .partner-onboarding) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.phone-shell.peazily-ui :is(h1, h2, h3) { color: var(--ink); }
+.phone-shell.peazily-ui :is(p, li) { color: var(--ink-soft); }
+.phone-shell.peazily-ui :is(small, .muted, .location, .vendor-meta, .field-hint) { color: var(--ink-muted); }
+
+/* One solid Eazily action colour; role hues remain reserved for role status. */
+.phone-shell.peazily-ui :is(.btn-primary, .pd-primary, .chat-send, .cart-button) {
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
+  color: var(--on-brand);
+  box-shadow: none;
+}
+.phone-shell.peazily-ui :is(.btn-primary, .pd-primary, .chat-send, .cart-button):hover:not(:disabled) {
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
+}
+.phone-shell.peazily-ui :is(.btn-outline, .pd-secondary, .icon-btn, .sheet-close, .sheet-back) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--control-border);
+}
+.phone-shell.peazily-ui :is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+}
+.phone-shell.peazily-ui :is(input, textarea, select, .field) {
+  color: var(--ink);
+  border-color: var(--control-border);
+}
+.phone-shell.peazily-ui :is(input, textarea, select)::placeholder { color: var(--ink-muted); opacity: 1; }
+
+/* Surfaces use a quiet tone step and a single divider, not stacked shadows. */
+.phone-shell.peazily-ui :is(
+  .service-card, .vendor-card, .pro-card, .booking-card, .flow-card, .conversation,
+  .service-option, .group-card, .main-category-card, .market-card, .compact-service,
+  .home-provider-card, .professional-profile-section, .account-panel, .partner-list-card,
+  .pd-card, .pd-identity, .pd-metrics article, .package-card, .creator-identity
+) {
+  border-color: var(--divider);
+  background: var(--surface);
+  box-shadow: none;
+}
+.phone-shell.peazily-ui :is(.service-card, .vendor-card, .pro-card, .booking-card, .flow-card, .partner-list-card, .pd-card) {
+  border-radius: var(--radius-card);
+}
+.phone-shell.peazily-ui :is(.topbar, .catalog-header, .simple-head, .page-title, .customer-navigation, .pd-topbar) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--divider);
+  box-shadow: 0 1px 0 var(--divider);
+  backdrop-filter: none;
+}
+.phone-shell.peazily-ui :is(.bottom-nav, .customer-nav) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--divider);
+  box-shadow: 0 -1px 0 var(--divider);
+  backdrop-filter: none;
+}
+.phone-shell.peazily-ui :is(.bottom-nav .nav-item, .customer-nav .nav-item) { color: var(--ink-muted); }
+.phone-shell.peazily-ui :is(.bottom-nav .nav-item.active, .customer-nav .nav-item.active) { color: var(--brand-deep); }
+
+/* Home stays image-led; the photo, service art and real listings carry colour. */
+.phone-shell.peazily-ui .home-v3 { background: var(--paper); }
+.phone-shell.peazily-ui :is(.home-service-showcase, .promise-section, .service-experience .experience-section) {
+  border-color: var(--divider);
+  background: var(--surface);
+  box-shadow: none;
+}
+.phone-shell.peazily-ui :is(.main-category-card, .group-card, .service-option, .market-card, .compact-service) {
+  color: var(--ink);
+}
+.phone-shell.peazily-ui :is(.main-category-card, .group-card, .service-option):hover:not(:disabled) {
+  border-color: var(--control-border);
+  background: var(--brand-soft);
+}
+.phone-shell.peazily-ui .catalog-welcome {
+  background: var(--brand-soft);
+  color: var(--ink);
+}
+.phone-shell.peazily-ui .catalog-welcome h1 { color: var(--ink); }
+
+/* Sheets and menus may float; ordinary content remains flat. */
+.phone-shell.peazily-ui :is(.sheet, .form-sheet, .vendor-sheet) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--divider);
+}
+.phone-shell.peazily-ui .sheet-overlay { background: rgb(25 23 44 / 45%); }
+.phone-shell.peazily-ui .toast { background: var(--ink); color: var(--surface); }
+.phone-shell.peazily-ui .refer-card {
+  border: 1px solid var(--divider);
+  border-radius: var(--radius-card);
+  background: var(--brand-soft);
+  color: var(--ink);
+  box-shadow: none;
+}
+.phone-shell.peazily-ui .refer-card :is(h2, p, small) { color: var(--ink); }
+.phone-shell.peazily-ui .refer-card > span { color: var(--brand-deep); letter-spacing: 0; }
+.phone-shell.peazily-ui .refer-card .btn-white { box-shadow: none; }
+.phone-shell.peazily-ui .customer-drawer .drawer-row-icon {
+  background: transparent;
+  color: var(--ink);
+  border-color: transparent;
+}
+
+@media (min-width: 600px) {
+  .phone-shell.peazily-ui:has(> .partner-workspace),
+  .phone-shell.peazily-ui:has(> .partner-onboarding) { box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-shell.peazily-ui *,
+  .phone-shell.peazily-ui *::before,
+  .phone-shell.peazily-ui *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

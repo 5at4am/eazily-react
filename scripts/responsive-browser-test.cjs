@@ -4,7 +4,8 @@ const { spawn } = require('node:child_process');
 const { resolve } = require('node:path');
 const { mkdirSync, writeFileSync } = require('node:fs');
 const pause = ms => new Promise(r => setTimeout(r, ms));
-const widths = [320, 375, 430, 640, 768, 1024, 1280, 1440, 1920];
+const widths = [320, 375, 390, 430, 640, 768, 1024, 1280, 1366, 1440, 1920];
+const requestedViewportHeights = new Map([[375, 812], [390, 844], [768, 1024], [1366, 768], [1920, 1080]]);
 let browser, socket;
 
 (async () => {
@@ -74,7 +75,7 @@ let browser, socket;
   await waitFor("document.querySelector('.welcome-entry')", 'welcome page');
   for (const width of widths) {
     const welcomeCap = width < 600 ? 430 : width < 900 ? 600 : 1040;
-    await viewport(width, width >= 1024 ? 1000 : 844, welcomeCap);
+    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844), welcomeCap);
     if ([320, 1024].includes(width)) await capture(`welcome-${width}`);
     console.log(`PASS welcome shell ${width}px`);
   }
@@ -82,7 +83,7 @@ let browser, socket;
   await evaluate(`(()=>{const button=[...document.querySelectorAll('.welcome-tabs button')].find(item=>item.textContent.includes('Find & Book Services'));if(!button)throw new Error('Customer entry action missing');button.click()})()`);
   await waitFor("document.querySelector('.user-app-root .marketplace-home')", 'customer home');
   for (const width of widths) {
-    await viewport(width, width >= 1024 ? 1000 : 844);
+    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844));
     assert.ok(await evaluate(`[...document.querySelectorAll('.user-app-root > main')].every(page=>page.scrollWidth<=page.clientWidth+1)`), `Customer page fits at ${width}px`);
     const navigation = await evaluate(`(()=>{const app=document.querySelector('.phone-shell'),nav=document.querySelector('.bottom-nav.customer-nav');if(!nav)return null;const a=app.getBoundingClientRect(),n=nav.getBoundingClientRect(),s=getComputedStyle(nav);return {left:n.left,right:n.right,width:n.width,appLeft:a.left,appRight:a.right,innerWidth,cssLeft:s.left,position:s.position,transform:s.transform,safeRight:getComputedStyle(document.documentElement).getPropertyValue('--eazily-safe-right')}})()`);
     assert.ok(navigation && navigation.left >= navigation.appLeft - 1 && navigation.right <= navigation.appRight + 1, `Customer navigation stays inside the app shell at ${width}px: ${JSON.stringify(navigation)}`);
@@ -97,8 +98,10 @@ let browser, socket;
   await evaluate(`(()=>{const button=[...document.querySelectorAll('.bottom-nav.customer-nav button')].find(item=>item.textContent.includes('Explore'));if(!button)throw new Error('Explore navigation missing');button.click()})()`);
   await waitFor("document.querySelector('.catalog-screen .main-category-grid')", 'service categories');
   for (const width of widths) {
-    await viewport(width, width >= 1024 ? 1000 : 844);
+    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844));
     assert.ok(await evaluate(`[...document.querySelectorAll('.main-category-card,.group-card,.service-option')].every(card=>card.scrollWidth<=card.clientWidth+1)`), `Category cards fit at ${width}px`);
+    const categoryHeader = await evaluate(`(()=>{const header=document.querySelector('.catalog-header'),welcome=document.querySelector('.catalog-welcome');if(!header||!welcome)return null;return {headerBottom:header.getBoundingClientRect().bottom,welcomeTop:welcome.getBoundingClientRect().top}})()`);
+    assert.ok(categoryHeader && categoryHeader.welcomeTop >= categoryHeader.headerBottom - 1, `Category welcome panel is not covered by its sticky search header at ${width}px: ${JSON.stringify(categoryHeader)}`);
     if ([320, 768, 1920].includes(width)) await capture(`customer-categories-${width}`);
     console.log(`PASS service categories ${width}px`);
   }
@@ -113,7 +116,7 @@ let browser, socket;
   await evaluate('window.renderRole("professional")');
   await waitFor("document.querySelector('.partner-workspace.role-professional')", 'partner workspace');
   for (const width of widths) {
-    await viewport(width, width >= 1024 ? 1000 : 844);
+    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844));
     assert.ok(await evaluate(`document.querySelectorAll('.partner-screen').length === 1`), 'Partner app remains mounted');
     assert.ok(await evaluate(`[...document.querySelectorAll('.partner-screen,.seller-content')].every(region=>region.scrollWidth<=region.clientWidth+1)`), `Partner content stays within its layout at ${width}px`);
     const navigation = await evaluate(`(()=>{const app=document.querySelector('.phone-shell').getBoundingClientRect(),nav=document.querySelector('.partner-screen .bottom-nav');if(!nav)return null;const r=nav.getBoundingClientRect();return {left:r.left,right:r.right,appLeft:app.left,appRight:app.right}})()`);
@@ -130,7 +133,7 @@ let browser, socket;
   await send('Page.navigate', { url: 'http://127.0.0.1:5173/scripts/admin-responsive-fixture.html' });
   await waitFor("document.querySelector('.admin-screen')", 'staff console');
   for (const width of widths) {
-    await viewport(width, width >= 1024 ? 1000 : 844, width >= 700 ? 5000 : 1200);
+    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844), width >= 700 ? 5000 : 1200);
     const navState = await evaluate(`(()=>{const screen=document.querySelector('.admin-screen'),sidebar=document.querySelector('.admin-sidebar'),s=getComputedStyle(screen),n=sidebar.getBoundingClientRect();return {display:s.display,columns:s.gridTemplateColumns,sidebarWidth:n.width,navScroll:sidebar.scrollWidth,navClient:sidebar.clientWidth}})()`);
     if (width >= 700) {
       assert.equal(navState.display, 'grid', `Staff console restores its desktop shell at ${width}px`);
@@ -144,7 +147,12 @@ let browser, socket;
     console.log(`PASS staff console ${width}px`);
   }
 
+  await send('Page.navigate', { url: 'http://127.0.0.1:5173/' });
+  await waitFor("document.querySelector('.marketplace-home')", 'returning customer home');
+  assert.equal(await evaluate("Boolean(document.querySelector('.welcome-entry'))"), false, 'Returning visits skip the first-use welcome screen');
+
   for (const [width, height] of [[844, 390], [812, 375]]) {
+    await evaluate("localStorage.removeItem('eazily-welcome-completed')");
     await send('Page.navigate', { url: 'http://127.0.0.1:5173/' });
     await waitFor("document.querySelector('.welcome-entry')", 'welcome screen in landscape');
     await viewport(width, height, width < 900 ? 600 : 1040);

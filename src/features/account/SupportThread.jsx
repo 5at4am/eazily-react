@@ -27,6 +27,10 @@ export default function SupportThread({ ticket, revision = 0 }) {
   async function send(event) {
     event.preventDefault();
     if (submitLock.current || !body.trim()) return;
+    if (['resolved', 'closed'].includes(ticket.status)) {
+      setSendError('This ticket is resolved or closed. Open a new ticket if you still need help.');
+      return;
+    }
     submitLock.current = true;
     setSending(true);
     setSendError('');
@@ -57,12 +61,12 @@ export default function SupportThread({ ticket, revision = 0 }) {
       {!loading && !loadError && !rows.length && <p>No replies yet.</p>}
       {!loading && rows.map(row => <p className="support-thread-entry" key={row.id}><b>{row.author_id === ticket.customer_id ? 'Customer' : 'Support'}</b> · <small>{new Date(row.created_at).toLocaleString('en-IN')}</small><br />{row.body}</p>)}
       <button type="button" className="link" disabled={loading} onClick={() => setReload(value => value + 1)}>Refresh replies</button>
-      <form onSubmit={send}>
+       {!['resolved', 'closed'].includes(ticket.status) ? <form onSubmit={send}>
         <label className="form-label" htmlFor={`support-reply-${ticket.id}`}>Reply</label>
         <textarea id={`support-reply-${ticket.id}`} className="field" required maxLength={2000} value={body} onChange={event => setBody(event.target.value)} />
         {sendError && <p role="alert">Reply was not sent: {sendError}</p>}
         <button type="submit" className="btn btn-outline" disabled={sending || !body.trim()}>{sending ? 'Sending…' : 'Send reply'}</button>
-      </form>
+       </form> : <p role="status">This ticket is {ticket.status}. Replies are closed.</p>}
     </>}
   </details>;
 }

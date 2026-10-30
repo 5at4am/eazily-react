@@ -1,0 +1,1879 @@
+{
+ "url": "http://127.0.0.1:5173/user/home",
+ "at": "2026-10-30T13:00:03.599Z",
+ "allow": [
+  "palette-purple"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 4,
+   "filled": [
+    0.98,
+    1,
+    0.93,
+    1
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 3215,
+     "screens": 3.6,
+     "words": 338,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 58,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 5,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial.jpg",
+      "cleaning.jpg",
+      "ac-care.jpg",
+      "beauty.jpg",
+      "moving.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 1.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help. A better day.",
+      "words": 7,
+      "chars": 36,
+      "lines": 2,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.11,
+      "top": 24,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 52,
+      "vw": 3.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.31,
+      "top": 315,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 7,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      52
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.7
+     },
+     "measureChars": 160,
+     "max": {
+      "size": 52,
+      "vw": 3.6,
+      "font": "Manrope",
+      "text": "Need help today?"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.016,
+     "microSamples": [
+      "Life made easier",
+      "SERVICE STANDARDS"
+     ],
+     "upperShare": 0.02,
+     "centerShare": 0.15,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 280
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 2561
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 2630
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 2699
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 2767
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5ece1",
+       "top": 201,
+       "hsl": {
+        "h": 33,
+        "s": 0.5,
+        "l": 0.92
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2458,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#53546a",
+       "share": 0.31
+      },
+      {
+       "color": "#19172c",
+       "share": 0.28
+      },
+      {
+       "color": "#38364a",
+       "share": 0.25
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.07
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.04
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": [
+      {
+       "text": "A little help. A better day.",
+       "ratio": 2.3,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#53546a",
+       "bg": "#211736"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 2,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 2,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px",
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px"
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "section.refer-card → linear-gradient(135deg, rgb(95, 22, 215), rgb(8, 98, 238))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 760px"
+     ],
+     "outlinedBoxes": 12,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 14,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 4,
+     "mediaRadius": 14,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1003
+      },
+      {
+       "count": 6,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1932
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "manrope"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 3215,
+    "margins": {
+     "left": 157,
+     "right": 160
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 101,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 207,
+      "n": 8
+     },
+     {
+      "x": 152,
+      "n": 5
+     },
+     {
+      "x": 172,
+      "n": 3
+     },
+     {
+      "x": 190,
+      "n": 1
+     },
+     {
+      "x": 750,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.25,
+    "voidBox": {
+     "x": 600,
+     "y": 120,
+     "w": 600,
+     "h": 540
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 155,
+     "right": 160
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 1.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 16,
+     "radii": [
+      [
+       14,
+       10
+      ],
+      [
+       16,
+       3
+      ],
+      [
+       0,
+       2
+      ],
+      [
+       22,
+       1
+      ]
+     ],
+     "heavyBorders": 11,
+     "borderSamples": [
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      52
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 101
+    },
+    "colourShare": 0.063
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 4,
+   "filled": [
+    0.99,
+    0.97,
+    0.99,
+    0.98
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 3297,
+     "screens": 3.2,
+     "words": 338,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 58,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 5,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial.jpg",
+      "cleaning.jpg",
+      "ac-care.jpg",
+      "beauty.jpg",
+      "moving.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 2.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 122,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help. A better day.",
+      "words": 7,
+      "chars": 36,
+      "lines": 3,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.19,
+      "top": 24,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.52,
+      "top": 347,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 3,
+     "over2Lines": 1,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 7,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      31
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.7
+     },
+     "measureChars": 98,
+     "max": {
+      "size": 30.7,
+      "vw": 4,
+      "font": "Manrope",
+      "text": "Need help today?"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.016,
+     "microSamples": [
+      "Life made easier",
+      "SERVICE STANDARDS"
+     ],
+     "upperShare": 0.02,
+     "centerShare": 0.15,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 312
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 2644
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 2712
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 2781
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 2850
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5ece1",
+       "top": 222,
+       "hsl": {
+        "h": 33,
+        "s": 0.5,
+        "l": 0.92
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2540,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#53546a",
+       "share": 0.31
+      },
+      {
+       "color": "#19172c",
+       "share": 0.28
+      },
+      {
+       "color": "#38364a",
+       "share": 0.25
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.07
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.04
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": [
+      {
+       "text": "A little help. A better day.",
+       "ratio": 2.3,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#53546a",
+       "bg": "#211736"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 2,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 2,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px",
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px"
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "section.refer-card → linear-gradient(135deg, rgb(95, 22, 215), rgb(8, 98, 238))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 760px"
+     ],
+     "outlinedBoxes": 12,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 14,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1043
+      },
+      {
+       "count": 6,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1983
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "manrope"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 3297,
+    "margins": {
+     "left": 37,
+     "right": 40
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 122,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 87,
+      "n": 8
+     },
+     {
+      "x": 32,
+      "n": 5
+     },
+     {
+      "x": 52,
+      "n": 3
+     },
+     {
+      "x": 70,
+      "n": 1
+     },
+     {
+      "x": 414,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 32,
+     "right": 40
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 2.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 122,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 1,
+     "ragged": [
+      {
+       "diff": 524,
+       "top": 1864
+      }
+     ],
+     "voids": [
+      {
+       "gap": 63,
+       "at": 478,
+       "panel": "Need help today?"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 14,
+     "radii": [
+      [
+       14,
+       10
+      ],
+      [
+       16,
+       3
+      ],
+      [
+       22,
+       1
+      ]
+     ],
+     "heavyBorders": 11,
+     "borderSamples": [
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      31
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 122
+    },
+    "colourShare": 0.075
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 5,
+   "filled": [
+    0.98,
+    0.95,
+    0.9,
+    0.91,
+    0.99
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 4119,
+     "screens": 4.9,
+     "words": 338,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 58,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 1,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 4.6,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help. A better day.",
+      "words": 7,
+      "chars": 36,
+      "lines": 2,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.4,
+      "top": 24,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 2,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.46,
+      "top": 356,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "What's on your to-do list?",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.64,
+      "top": 658,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Small fixes. Big relief.",
+      "words": 4,
+      "chars": 24,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.53,
+      "top": 1138,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Professionals near you",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.79,
+      "top": 1917,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "More services",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.58,
+      "top": 2531,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 6,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28
+     ],
+     "sizeCount": 9,
+     "notLoaded": [],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.7
+     },
+     "measureChars": 44,
+     "max": {
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "text": "eazily"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 2,
+     "microLabelShare": 0.016,
+     "microSamples": [
+      "Life made easier",
+      "SERVICE STANDARDS"
+     ],
+     "upperShare": 0.02,
+     "centerShare": 0.15,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 296
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 3256
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 3348
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 3463
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 3555
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5ece1",
+       "top": 269,
+       "hsl": {
+        "h": 33,
+        "s": 0.5,
+        "l": 0.92
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2485,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#53546a",
+       "share": 0.31
+      },
+      {
+       "color": "#19172c",
+       "share": 0.28
+      },
+      {
+       "color": "#38364a",
+       "share": 0.25
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.07
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.04
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": [
+      {
+       "text": "A little help. A better day.",
+       "ratio": 2.3,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#53546a",
+       "bg": "#211736"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 2,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 2,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px",
+      "button.btn.btn-white → rgba(17, 20, 61, 0.12) 0px 8px 20px 0px"
+     ],
+     "gradients": 1,
+     "scrims": 0,
+     "gradientSamples": [
+      "section.refer-card → linear-gradient(135deg, rgb(95, 22, 215), rgb(8, 98, 238))"
+     ],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 390px"
+     ],
+     "outlinedBoxes": 2,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 5,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 269
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "manrope"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 4119,
+    "margins": {
+     "left": 37,
+     "right": 37
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 101,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 40,
+      "n": 8
+     },
+     {
+      "x": 87,
+      "n": 8
+     },
+     {
+      "x": 20,
+      "n": 1
+     },
+     {
+      "x": 70,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 20,
+     "right": 6
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 4.6,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 15,
+     "radii": [
+      [
+       14,
+       10
+      ],
+      [
+       16,
+       3
+      ],
+      [
+       22,
+       1
+      ],
+      [
+       12,
+       1
+      ]
+     ],
+     "heavyBorders": 11,
+     "borderSamples": [
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 101
+    },
+    "colourShare": 0.07
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "micro-label",
+   "width": 1440,
+   "message": "2 tiny uppercase letter-spaced label(s): \"Life made easier\", \"SERVICE STANDARDS\"",
+   "fix": "Prefer sentence case at body size.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "gradient",
+   "width": 1440,
+   "message": "1 gradient fill(s): section.refer-card → linear-gradient(135deg, rgb(95, 22, 215), rgb(8, 98, 238))",
+   "fix": "Use a flat colour or a real image. The only gradient allowed by default is a neutral scrim over a photo for legibility.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "button-fx",
+   "width": 1440,
+   "message": "Buttons with shadow/glow.",
+   "fix": "Flat fill, one colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "palette-cream",
+   "width": 1440,
+   "message": "Yellow-cream background (section #f5ece1).",
+   "fix": "Use the drawn palette. If you want warmth, take a low-chroma stone or bone, not a yellow cream.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Unreadable text: \"A little help. A better day.\" 2.3:1 (#53546a on #211736)",
+   "fix": "Raise contrast to at least 4.5:1 for text, 3:1 for large display.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "dev-server",
+   "width": 1440,
+   "message": "This page is served by a development server (Vite, webpack or Next in dev mode).",
+   "fix": "Run the last gate on the production build too (vite build && vite preview, next build && next start, or the built index.html): minifiers and bundlers change the CSS a visitor receives.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "heavy-borders",
+   "width": 1440,
+   "message": "11 panel borders are dark against their ground: #8a8175 on #ffffff (3.83:1) | #8a8175 on #ffffff (3.83:1) | #8a8175 on #ffffff (3.83:1)",
+   "fix": "A panel border is a whisper: about 1.1–1.3:1 against its ground on a light screen (#e5e7eb–#ededed on white), and about 1.2–1.5:1 on a dark one (#1a1a1a on #000, #2e2e2e on #111). Darker lines turn the screen into a grid of boxes; keep the stronger line for controls.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "icon-chips",
+   "width": 1440,
+   "message": "18 icons sit in tinted squares or circles in 3 different colours.",
+   "fix": "This is the commonest tell of a generated dashboard. Drop the tinted square: a KPI is a label and a number; an icon, if it helps, is plain and in the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "headline-lines",
+   "width": 768,
+   "message": "1 headline(s) wrap past two lines at 768px: \"eazily. A little help. A better day.\" → 3 lines (7 words, 28px)",
+   "fix": "Cut words first (a headline is a title, not a sentence). Then give it a wider measure. Lower the size only as a last resort and never below the scale you chose. A real statement paragraph belongs in a <p> or <blockquote> at 32px or less."
+  },
+  {
+   "level": "WARN",
+   "id": "ragged-row",
+   "width": 768,
+   "message": "1 pair(s) of cards in one row end at different heights (by 524px).",
+   "fix": "Cards that share a row share a bottom edge: balance them by their content (the same number of rows, a block of similar height beside it), or stack them. In testing, ragged rows were marked down every time."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\desktop-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\tablet-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\mobile-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\customer-after\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

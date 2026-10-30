@@ -18,6 +18,7 @@ import DashboardHome, { DashboardTopBar, PartnerEarningsDashboard, PartnerGrowth
 import RewardsPanel from '../features/partners/RewardsPanel.jsx';
 import OrderDetail from '../features/partners/OrderDetail.jsx';
 import SupportForm from '../features/account/SupportForm.jsx';
+import PartnerSupport from '../features/partners/PartnerSupport.jsx';
 import ConsultantLegal from '../features/partners/legal/ConsultantLegal.jsx';
 import DemoGate from '../features/partners/demo/DemoGate.jsx';
 import { InfluencerLegalCenter, InfluencerTermsGate } from '../features/partners/legal/InfluencerLegal.jsx';
@@ -25,7 +26,7 @@ import { CONSULTANT_ASSESSMENT_TEST_SKIP_ENABLED } from '../features/partners/co
 import { useRealtime } from '../lib/realtime.jsx';
 import ChatWorkspace from '../features/chat/ChatWorkspace.jsx';
 import { IN_APP_BACK_EVENT, pushNavigationState, replaceNavigationState, requestInAppBack } from '../lib/nativeShell.js';
-const nav = [['home','home','Home'],['orders','briefcase','Jobs'],['growth','chart','Growth'],['earnings','rupee','Earnings'],['profile','person','Profile']];
+const nav = [['home','home','Home'],['orders','briefcase','Jobs'],['post','plus','Add'],['growth','chart','Growth'],['profile','person','Profile']];
 const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(Number(n || 0));
 const displayPartnerCategory = (role, category) => role === 'influencer' ? displayInfluencerCategory(category) : role === 'consultant' ? displayConsultantCategory(category) : category;
 export default function PartnerApp(props) {
@@ -161,7 +162,7 @@ function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEdi
       :sheet.order?<OrderDetail order={data.orders.find(o=>o.id===sheet.order.id)||sheet.order} notify={notify} onChange={load}/>
       :sheet==='Subscription'?<SubscriptionPanel application={application} notify={notify} onSupport={()=>setSheet('Help & Support')}/>
       :sheet==='Trial expired'?<section><h2>{t('Your 60-day trial has ended')}</h2><p>{t('Compare available plans and review their renewal prices.')}</p><button className="btn btn-primary" onClick={()=>setSheet('Subscription')}>{t('Compare Plans')}</button><button className="btn btn-outline" onClick={()=>setSheet(null)}>{t('Remind Me Later')}</button></section>
-      :sheet==='Help & Support'?<SupportForm notify={notify}/>
+       :sheet==='Help & Support'?<PartnerSupport notify={notify}/>
       :sheet==='Settings'?<section><h2>{t('Settings')}</h2><p>Interface language: English.</p><button className="btn btn-outline" onClick={logout}>{t('Logout')}</button></section>
       :sheet==='My Business'?<section><h2>{name}</h2><p>{profile.city} · {displayPartnerCategory(role, profile.category)}</p><p>{(profile.services||[]).join(', ')}</p>{role==='influencer' && Boolean(profile.relatedNiches?.length) && <p>{[...new Set(profile.relatedNiches.map(displayInfluencerCategory))].join(', ')}</p>}{role==='consultant' && Boolean(profile.consultationFields?.length>1) && <p>{profile.consultationFields.filter(item=>item.category!==profile.category).map(item=>displayConsultantCategory(item.category)).join(', ')}</p>}<p>{profile.specialisation} · {profile.experience}</p><button className="btn btn-outline" onClick={onEditRegistration}>{t('Review registration')}</button></section>
       :sheet==='Documents'?<section><h2>{t('Documents')}</h2><p>{t(application.status)}</p><p>{application.review_notes||t('Documents remain private. Review or correct them in your registration.')}</p><button className="btn btn-outline" onClick={onEditRegistration}>{t('Review registration')}</button></section>

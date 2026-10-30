@@ -5,14 +5,17 @@ revoke all on schema eazily_private from public,anon,authenticated;
 create table public.seller_pricing_rules (
  id uuid primary key default gen_random_uuid(), role text not null check(role in('professional','influencer','consultant')),
  version integer not null check(version>0), enabled boolean not null default false,
- lower_markup_bps integer not null default 2500, upper_markup_bps integer not null default 1200,
+  lower_markup_bps integer not null default 2500, upper_markup_bps integer not null default 1200,
+  upper_threshold_paise bigint not null default 100000 check(upper_threshold_paise>0),
+  minimum_markup_paise bigint check(minimum_markup_paise>=0), maximum_markup_paise bigint check(maximum_markup_paise>=0),
  below_100_bps integer, consultant_share_bps integer not null default 5000,
  seller_tax_bps integer check(seller_tax_bps between 0 and 10000), customer_tax_bps integer check(customer_tax_bps between 0 and 10000),
  fee_tax_bps integer check(fee_tax_bps between 0 and 10000), separate_fee_paise bigint check(separate_fee_paise>=0),
  include_visiting boolean, include_additional boolean,
  rounding text not null default 'half_up' check(rounding='half_up'),
  unique(role,version), check(lower_markup_bps between 0 and 10000), check(upper_markup_bps between 0 and 10000),
- check(below_100_bps between 0 and 10000), check(consultant_share_bps between 0 and 10000)
+  check(below_100_bps between 0 and 10000), check(consultant_share_bps between 0 and 10000),
+  check(minimum_markup_paise is null or maximum_markup_paise is null or minimum_markup_paise<=maximum_markup_paise)
 );
 insert into seller_pricing_rules(role,version) values('professional',1),('influencer',1),('consultant',1);
 alter table seller_pricing_rules enable row level security;
@@ -38,11 +41,13 @@ begin
  base:=service+visit+extra;
  eligible:=service+case when r.include_visiting then visit else 0 end+case when r.include_additional then extra else 0 end;
  if p_role='professional' then
-  rate:=case when eligible<10000 then r.below_100_bps when eligible<=100000 then r.lower_markup_bps else r.upper_markup_bps end;
+   rate:=case when eligible<10000 then coalesce(r.below_100_bps,r.lower_markup_bps) when eligible<r.upper_threshold_paise then r.lower_markup_bps else r.upper_markup_bps end;
   if rate is null then raise exception 'Below-100 pricing configuration required'; end if;
- elsif p_role='influencer' then rate:=r.lower_markup_bps;
- else rate:=0; end if;
- markup:=round(eligible::numeric*rate/10000);
+  elsif p_role='influencer' then rate:=case when eligible<r.upper_threshold_paise then r.lower_markup_bps else r.upper_markup_bps end;
+  else rate:=case when eligible<r.upper_threshold_paise then r.lower_markup_bps else r.upper_markup_bps end; end if;
+  markup:=round(eligible::numeric*rate/10000);
+  if r.minimum_markup_paise is not null then markup:=greatest(markup,r.minimum_markup_paise); end if;
+  if r.maximum_markup_paise is not null then markup:=least(markup,r.maximum_markup_paise); end if;
  seller_tax:=round(base::numeric*r.seller_tax_bps/10000);
  tax:=round((base+markup)::numeric*r.customer_tax_bps/10000);
  fee_tax:=round(r.separate_fee_paise::numeric*r.fee_tax_bps/10000);

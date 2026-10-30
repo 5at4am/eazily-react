@@ -114,7 +114,7 @@ export default function ChatWorkspace({ role = null, initialConversationId = nul
     if (!supabase) { setRows([]); setLoading(false); return; }
     setError(''); try { const result = await listChatConversations(role); setRows(result); updateSelected(current => current ? result.find(item => item.id === current.id) || current : current); }
     catch (reason) { setError(reason.message); } finally { setLoading(false); }
-  }, [role]);
+  }, [role, updateSelected]);
   useEffect(() => { load(); }, [load, revision]);
   useEffect(() => {
     if (!supabase || (!initialConversationId && !initialOrderId)) return;
@@ -129,7 +129,7 @@ export default function ChatWorkspace({ role = null, initialConversationId = nul
       } catch (reason) { if (active) notify?.(reason.message); }
       finally { onConversationHandled?.(); }
     })(); return () => { active = false; };
-  }, [initialConversationId, initialOrderId, role, notify, onConversationHandled]);
+  }, [initialConversationId, initialOrderId, role, notify, onConversationHandled, setSelected]);
   const loadMore = async () => { try { const more = await listChatConversations(role, rows.at(-1)?.last_activity_at); setRows(current => [...current, ...more]); } catch (reason) { notify?.(reason.message); } };
   return <div className={`chat-workspace ${embedded ? 'chat-embedded' : ''}`}>
     <ConversationList rows={rows} selectedId={selected?.id} search={search} setSearch={setSearch} onOpen={setSelected} loading={loading} error={error} onRetry={load} onMore={loadMore} />

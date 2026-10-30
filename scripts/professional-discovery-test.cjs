@@ -4,6 +4,10 @@ const { readFileSync } = require('node:fs');
 (async () => {
   const { mergeServicePool, nextServiceStart, serviceWindow } = await import('../src/features/home/moreServiceRotation.js');
   const { isCustomerEligibleProfessional } = await import('../src/services/customerProfessionalEligibility.js');
+  const { readDirectorySources } = await import('../src/services/directoryRead.js');
+  assert.deepEqual(await readDirectorySources(async () => [{ id: 'modern' }], async () => { throw new Error('legacy unavailable'); }), [[{ id: 'modern' }], []], 'One healthy source remains usable if its fallback fails');
+  assert.deepEqual(await readDirectorySources(async () => [], async () => []), [[], []], 'Two successful empty reads remain a real empty state');
+  await assert.rejects(readDirectorySources(async () => { throw new Error('RLS denied'); }, async () => { throw new Error('network unavailable'); }), /Professional listings could not be loaded/, 'Two failed sources surface a retryable backend error');
   const preferred = Array.from({ length: 6 }, (_, index) => ({ id: `p${index}`, name: `Service ${index}`, requestName: `Service ${index}` }));
   const catalogue = [...preferred, ...Array.from({ length: 7 }, (_, index) => ({ id: `c${index}`, name: `Extra ${index}`, requestName: `Extra ${index}` }))];
   const pool = mergeServicePool(preferred, catalogue);

@@ -71,7 +71,7 @@ export default function UserApp({
     history.scrollRestoration = 'manual';
     window.scrollTo({ top: page.scrollY || 0, behavior: 'instant' });
     return () => { history.scrollRestoration = previous; };
-  }, [page.revision]);
+  }, [page.revision, page.scrollY]);
   useEffect(() => {
     const back = event => {
       if (event.detail.handled) return;

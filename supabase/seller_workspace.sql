@@ -81,7 +81,7 @@ begin
  if not seller_can_receive_booking(a.id) then raise exception 'This seller is not accepting new bookings'; end if;
  if p_slot is null or p_slot<=now() then raise exception 'Choose a future appointment'; end if;
  insert into partner_orders(partner_id,customer_id,role,title,status,details,deadline,post_id,request_key)
- values(a.id,auth.uid(),a.role,p.details->>'title','requested',eazily_private.pick(p.details,array['title','service','category','description','caption','mode','duration','deliverables','deliverableCount','packagePrice','timeline','revisions','usageRights','advertisingPermissions','packageSnapshot']),p_slot,p.id,p_key) on conflict(request_key) do nothing;
+  values(a.id,auth.uid(),a.role,p.details->>'title','requested',eazily_private.pick(p.details,array['title','service','category','description','caption','mode','duration','deliverables','deliverableCount','packagePrice','timeline','revisions','usageRights','advertisingPermissions','packageSnapshot'])||eazily_private.post_price(p),p_slot,p.id,p_key) on conflict(request_key) do nothing;
  select * into result from partner_orders where request_key=p_key and customer_id=auth.uid() and post_id=p_post;
  if result.id is null then raise exception 'Booking reference mismatch'; end if;
  insert into seller_leads(partner_id,order_id) values(a.id,result.id) on conflict(order_id) do nothing;

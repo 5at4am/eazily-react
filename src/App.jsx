@@ -24,10 +24,18 @@ const PartnerApp = lazy(() => import('./pages/PartnerApp.jsx'));
 const PartnerOnboarding = lazy(() => import('./features/partners/PartnerOnboarding.jsx'));
 const AdminApp = lazy(() => import('./pages/AdminApp.jsx'));
 function Loading() { return <main className="splash"><Brand/><p role="status">Loading...</p></main>; }
+const WELCOME_COMPLETED_KEY = 'eazily-welcome-completed';
+function hasCompletedWelcome() {
+  try { return localStorage.getItem(WELCOME_COMPLETED_KEY) === 'true'; } catch { return false; }
+}
+function completeWelcome() {
+  try { localStorage.setItem(WELCOME_COMPLETED_KEY, 'true'); } catch { /* Keep navigation working when storage is unavailable. */ }
+}
 function initialView() {
   if (location.pathname === '/user/home') return { stage: 'customer', role: 'customer' };
   const role = Object.entries(workspacePaths).find(([, path]) => path === location.pathname)?.[0];
-  return role ? { stage: 'workspace', role } : { stage: 'welcome', role: 'customer' };
+  if (role) return { stage: 'workspace', role };
+  return hasCompletedWelcome() ? { stage: 'customer', role: 'customer' } : { stage: 'welcome', role: 'customer' };
 }
 export default function App() {
   const auth = useAuth();
@@ -39,8 +47,8 @@ export default function App() {
   const timer = useRef();
   const notify = useCallback((message, duration = 6000) => { clearTimeout(timer.current); setToast(message); timer.current = setTimeout(() => setToast(''), duration); }, []);
   useEffect(() => () => clearTimeout(timer.current), []);
-  const enterCustomer = useCallback(() => { replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: 'customer' }, workspacePaths.customer); setView({ stage: 'customer', role: 'customer' }); }, []);
-  const enterPartner = useCallback(role => { if (!workspacePaths[role]) return; replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: role }, workspacePaths[role]); setView({ stage: 'workspace', role }); }, []);
+  const enterCustomer = useCallback(() => { completeWelcome(); replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: 'customer' }, workspacePaths.customer); setView({ stage: 'customer', role: 'customer' }); }, []);
+  const enterPartner = useCallback(role => { if (!workspacePaths[role]) return; completeWelcome(); replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: role }, workspacePaths[role]); setView({ stage: 'workspace', role }); }, []);
   const enterWelcome = useCallback(() => { replaceNavigationState({ eazilyDepth: 0 }, '/'); setView({ stage: 'welcome', role: 'customer' }); }, []);
   const leaveSignIn = () => { if (view.stage === 'auth') setView(authReturnView.current); else enterWelcome(); };
   useEffect(() => {
@@ -63,6 +71,9 @@ export default function App() {
   useEffect(() => {
     if (view.stage === 'auth' && account.user && ['authenticated', 'profile_required'].includes(auth.status)) enterPartner(view.role);
   }, [view.stage, view.role, account.user, auth.status, enterPartner]);
+  useEffect(() => {
+    if (account.user && ['authenticated', 'profile_required'].includes(auth.status) && view.stage === 'welcome') enterCustomer();
+  }, [account.user, auth.status, view.stage, enterCustomer]);
   // A recovery link is only good for setting a password, so it overrides every view
   // until the controller reports the recovery session as spent.
   useEffect(() => {

@@ -30,7 +30,6 @@ begin
  if exists(select 1 from jsonb_object_keys(p_details) k where k<>all(allowed)) then raise exception 'Post contains unsupported or protected fields'; end if;
  if p_details ? 'category' and nullif(p_details->>'category','') is not null and p_details->>'category' is distinct from app.details->>'category' then raise exception 'Choose a registered category'; end if;
  if p_role='professional' and nullif(p_details->>'service','') is not null and not coalesce(app.details->'services','[]') ? (p_details->>'service') then raise exception 'Choose a registered service'; end if;
- if p_role='consultant' and p_details ?| array['serviceCharge','visitingCharge','packagePrice'] then raise exception 'Consultant prices are platform managed'; end if;
  if p_details ? 'linkedPostId' and nullif(p_details->>'linkedPostId','') is not null and not exists(select 1 from partner_posts where id=(p_details->>'linkedPostId')::uuid and partner_id=app.id and status='published' and coalesce(details->>'postType','offering')='offering') then raise exception 'Choose your own published offering'; end if;
  if jsonb_typeof(coalesce(p_details->'media','[]'))<>'array' or jsonb_array_length(coalesce(p_details->'media','[]'))>10 then raise exception 'Maximum ten media items'; end if;
  if exists(select 1 from jsonb_array_elements(coalesce(p_details->'media','[]')) m where coalesce(m->>'path','') not like auth.uid()::text||'/'||p_role||'/%') then raise exception 'Media must belong to this workspace'; end if;
@@ -47,10 +46,7 @@ begin
     if coalesce((select max((x->>'count')::bigint) from jsonb_array_elements(coalesce(app.details->'platforms','[]')) x),0)<(select influencer_threshold from partner_config) then raise exception 'Correct and verify your qualifying platform audience first'; end if;
     if coalesce((p_details->>'packagePrice')::numeric,0)<=0 or coalesce(p_details->>'deliverables','')='' or coalesce(p_details->>'usageRights','')='' then raise exception 'Paid package, deliverables and usage rights are required'; end if;
    end if;
-   if p_role='consultant' then
-    select * into assigned from consultant_rates where active and category=p_details->>'category' and duration=(p_details->>'duration')::integer and (partner_id=app.id or partner_id is null) order by partner_id nulls last limit 1;
-    if assigned.id is null then raise exception 'Eazily must assign a rate before submission'; end if;
-   end if;
+   if p_role='consultant' and coalesce((p_details->>'packagePrice')::numeric,0)<=0 then raise exception 'Enter your consultation price'; end if;
   end if;
  end if;
  next_status:=case when p_action='submit' then 'pending_review' else 'draft' end;
@@ -66,20 +62,30 @@ create function eazily_private.post_price(p partner_posts) returns jsonb languag
 declare amount numeric; input jsonb; calc jsonb;
 begin
  if coalesce(p.details->>'postType','offering')<>'offering' then return '{}'::jsonb; end if;
- if p.role='consultant' then select price into amount from consultant_rates where active and category=p.details->>'category' and duration=(p.details->>'duration')::integer and (partner_id=p.partner_id or partner_id is null) order by partner_id nulls last limit 1;
- else amount:=case when p.role='professional' then (p.details->>'serviceCharge')::numeric else (p.details->>'packagePrice')::numeric end; end if;
+  amount:=case when p.role='professional' then (p.details->>'serviceCharge')::numeric else (p.details->>'packagePrice')::numeric end;
  if amount is null then return '{}'::jsonb; end if;
  input:=jsonb_build_object('servicePaise',round(amount*100),'quantity',coalesce((p.details->>'quantity')::integer,1),'visitingPaise',case when p.role='professional' and p.details->>'visitTreatment'='Additional' then round(coalesce((p.details->>'visitingCharge')::numeric,0)*100) else 0 end,'additionalPaise',0,'taxInclusive',coalesce((p.details->>'taxInclusive')::boolean,false));
  calc:=eazily_private.calculate(p.role,input);
- return eazily_private.pick(calc,array['servicePaise','feePaise','taxPaise','totalPaise']);
+  return eazily_private.pick(calc,array['ruleId','version','sellerBasePaise','markupPaise','markupBps','servicePaise','feePaise','taxPaise','totalPaise']);
 exception when others then return '{}'::jsonb;
 end $$;
+create function public.get_published_post_price(p_post uuid) returns jsonb language plpgsql security definer set search_path=public,eazily_private as $$
+declare post public.partner_posts; price jsonb;
+begin
+ select * into post from public.partner_posts where id=p_post and status='published' and coalesce(details->>'postType','offering')='offering';
+ if post.id is null then raise exception 'Published offering required'; end if;
+ price:=eazily_private.post_price(post);
+ if not price ? 'totalPaise' then raise exception 'Pricing configuration is incomplete'; end if;
+ return price;
+end $$;
+revoke all on function public.get_published_post_price(uuid) from public,anon,authenticated;
+grant execute on function public.get_published_post_price(uuid) to service_role;
 revoke all on function eazily_private.post_price(partner_posts) from public,anon,authenticated;
 -- View expressions require EXECUTE, but the private schema is not exposed to API callers.
 grant execute on function eazily_private.pick(jsonb,text[]),eazily_private.post_price(partner_posts) to anon,authenticated;
 create or replace view public.partner_directory as
 select p.id,p.partner_id,p.role as partner_role,
- eazily_private.pick(p.details,array['postType','title','description','category','service','caption','area','availability','hashtags','linkedPostId','packageId','packageSnapshot','deliverables','deliverableCount','timeline','revisions','usageRights','advertisingPermissions','audience','mode','duration','offerBenefit','offerStarts','offerEnds','offerTerms']) || eazily_private.post_price(p) as details,
+ eazily_private.pick(p.details,array['postType','title','description','category','service','caption','area','availability','hashtags','linkedPostId','packageId','packageSnapshot','deliverables','deliverableCount','timeline','revisions','usageRights','advertisingPermissions','audience','mode','duration','offerBenefit','offerStarts','offerEnds','offerTerms']) || eazily_private.pick(eazily_private.post_price(p),array['servicePaise','feePaise','taxPaise','totalPaise']) as details,
  eazily_private.pick(a.details,array['creatorName','name','businessName','city','category','services','specialisation','experience','qualificationName','language']) as profile_details,
  coalesce(a.details->>'creatorName',a.details->>'name') as display_name,
  coalesce(a.details->>'businessName',a.details->>'creatorName',a.details->>'name') as business_name,

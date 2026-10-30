@@ -217,9 +217,7 @@ export default function RequestSheet({
         <Field label="Purpose of loan" value={values.purpose ?? ""} onChange={set("purpose")} />
         <Field label="Preferred tenure" value={values.tenure ?? ""} onChange={set("tenure")} />
       </FormGrid>, <div key="documents">
-        <div className="document-list">
-          {translate(["PAN / KYC", "Income proof", "Bank statements", "Employment or business proof", "Address proof"].map(label => <label key={label}>{translate(label)}<input type="file" /></label>))}
-        </div>
+        <div className="privacy-note" role="note">{translate("Document upload is not available in this form. Do not select or send sensitive documents here.")}</div>
         <label className="consent"><input type="checkbox" checked={values.consent} onChange={set("consent")} />{translate(" I consent to a secure credit check and data processing for this loan request.")}</label>
         <div className="privacy-note">{translate("Approval, interest rate and final terms are decided by the relevant regulated lender. Eazily is not a bank or lender.")}</div>
       </div>];

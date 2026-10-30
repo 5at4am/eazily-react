@@ -70,9 +70,13 @@ export function Sheet({
 }) {
   const dialog = useRef(null);
   const close = useRef(onClose);
+  const managesHistory = useRef(manageHistory);
   useEffect(() => {
     close.current = onClose;
   });
+  useEffect(() => {
+    managesHistory.current = manageHistory;
+  }, [manageHistory]);
   useEffect(() => {
     const previous = document.activeElement;
     const overflow = document.body.style.overflow;
@@ -81,14 +85,14 @@ export function Sheet({
     let active = true;
     openSheets.push(marker);
     queueMicrotask(() => {
-      if (active && manageHistory) history.pushState({
+       if (active && managesHistory.current) history.pushState({
         ...history.state,
         sheet: marker
       }, '');
     });
     dialog.current?.querySelector('button')?.focus();
     const pop = () => {
-      if (manageHistory && openSheets.at(-1) === marker && history.state?.sheet !== marker) close.current();
+      if (managesHistory.current && openSheets.at(-1) === marker && history.state?.sheet !== marker) close.current();
     };
     const key = event => {
       const sheets = document.querySelectorAll('[role="dialog"]');
@@ -121,7 +125,7 @@ export function Sheet({
       previous?.focus?.({
         preventScroll: true
       });
-      if (manageHistory && history.state?.sheet === marker) history.back();
+      if (managesHistory.current && history.state?.sheet === marker) history.back();
     };
   }, []);
   return <div className="sheet-overlay" onMouseDown={event => event.target === event.currentTarget && onClose()}>

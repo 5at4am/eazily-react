@@ -56,7 +56,7 @@ const manifest = require('../supabase/migration-manifest.json');
     await db.query('insert into consultant_rates(partner_id,category,duration,price) values($1,$2,30,500)',[application.id,category]);
     await db.exec("update seller_pricing_rules set enabled=true,seller_tax_bps=0,customer_tax_bps=0,fee_tax_bps=0,separate_fee_paise=0,include_visiting=true,include_additional=true where role='consultant'");
     await user(consultant);
-    const post = await one("select to_jsonb(save_partner_post('consultant',$1,'submit',$2))",[{postType:'offering',category,title:'Career guidance session',description:'Discuss next career steps',duration:30,mode:'Online'},randomUUID()]);
+    const post = await one("select to_jsonb(save_partner_post('consultant',$1,'submit',$2))",[{postType:'offering',category,title:'Career guidance session',description:'Discuss next career steps',duration:30,mode:'Online',packagePrice:'400'},randomUUID()]);
     assert.equal(post.status,'pending_review');
     await user(customer);
     assert.equal(Number(await one("select count(*) from partner_directory where partner_role='consultant'")),0);

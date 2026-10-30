@@ -90,7 +90,7 @@ let browser, socket;
   assert.equal(await evaluate(`document.documentElement.lang`), 'en', 'The document language is English');
   assert.equal(await evaluate(`document.querySelectorAll('img[src*="eazily-logo"], .splash-symbol').length`), 0);
   assert.ok(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), 'No mobile horizontal overflow');
-  await evaluate(`localStorage.setItem('eazily-language','English'); location.href='/'`); await pause(1500);
+  await evaluate(`localStorage.setItem('eazily-language','English'); localStorage.removeItem('eazily-welcome-completed'); location.href='/'`); await pause(1500);
   await click('Join as a Partner', '.welcome-tabs button span');
   await click('Service Professional', '.welcome-choice b');
   await waitFor(`document.querySelector('#auth-email')`, 'lazy-loaded authentication screen');

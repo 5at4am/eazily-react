@@ -10,6 +10,7 @@ import './product-polish.css';
 import './design-system.css';
 import './features/home/marketplace-home.css';
 import './responsive.css';
+import './app-redesign.css';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

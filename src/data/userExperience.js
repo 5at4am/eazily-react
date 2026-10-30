@@ -1,8 +1,8 @@
 export const heroSlides = [
-  { id: "today", serviceName: "Plumber", eyebrow: "HELP, RIGHT WHEN YOU NEED IT", title: "Need help today?", text: "Trusted local professionals, ready when you need them.", action: "Book now", categoryId: "manpower" },
-  { id: "home-care", serviceName: "Deep Cleaning", eyebrow: "LOCAL & RELIABLE", title: "Home care made simple", text: "Find verified professionals near your location.", action: "Explore services", categoryId: "manpower" },
-  { id: "confidence", serviceName: "Electrician", eyebrow: "CLEAR FROM THE START", title: "Book with confidence", text: "Transparent pricing and secure Eazily payments.", action: "Book now", categoryId: "manpower" },
-  { id: "moving", serviceName: "Packers & Movers", eyebrow: "SUPPORT FOR BUSY DAYS", title: "Moving or urgent repair?", text: "Get reliable support without searching everywhere.", action: "Find help", categoryId: "transportation" },
+  { id: "today", serviceName: "Plumber", eyebrow: "Help, right when you need it", title: "Need help today?", text: "Trusted local professionals, ready when you need them.", action: "Book now", categoryId: "manpower" },
+  { id: "home-care", serviceName: "Deep Cleaning", eyebrow: "Local and reliable", title: "Home care made simple", text: "Find verified professionals near your location.", action: "Explore services", categoryId: "manpower" },
+  { id: "confidence", serviceName: "Electrician", eyebrow: "Clear from the start", title: "Book with confidence", text: "Transparent pricing and secure Eazily payments.", action: "Book now", categoryId: "manpower" },
+  { id: "moving", serviceName: "Packers & Movers", eyebrow: "Support for busy days", title: "Moving or urgent repair?", text: "Get reliable support without searching everywhere.", action: "Find help", categoryId: "transportation" },
 ];
 
 export const topServices = [

@@ -72,8 +72,23 @@ const manifest = require('../supabase/migration-manifest.json');
     await asUser(admin);
     assert.equal(Number(await one('select count(*) from storage.objects where name=$1', [screenshot])), 1, 'Admin reads linked screenshot');
     assert.equal(Number(await one('select count(*) from support_ticket_replies where ticket_id=$1', [ticket])), 3);
+    await db.exec('reset role');
+    assert.equal(Number(await one("select count(*) from realtime_events where entity_type='support_ticket_replies' and entity_id=$1 and audience_kind='account' and audience_key=$2", [ticket,customer])), 3, 'Replies invalidate the customer view');
+    assert.equal(Number(await one("select count(*) from realtime_events where entity_type='support_ticket_replies' and entity_id=$1 and audience_kind='admin' and audience_key='admin'", [ticket])), 3, 'Replies invalidate the support view');
     assert.deepEqual(await one('select jsonb_build_object(\'status\',status,\'priority\',priority) from support_tickets where id=$1', [ticket]),
       { status: 'open', priority: 'normal' }, 'Replies do not change ticket workflow fields');
+    await db.query("update support_tickets set status='resolved' where id=$1", [ticket]);
+    await asUser(customer);
+    await assert.rejects(db.query("insert into support_ticket_replies(ticket_id,author_id,body) values($1,$2,'Reply after resolution')", [ticket,customer]), /row-level security|permission denied/i);
+    await db.exec('reset role');
+    await db.query("update support_tickets set status='closed' where id=$1", [ticket]);
+    await asUser(staff);
+    await assert.rejects(db.query("insert into support_ticket_replies(ticket_id,author_id,body) values($1,$2,'Reply after closure')", [ticket,staff]), /row-level security|permission denied/i);
+    await asUser(customer);
+    await assert.rejects(db.query('select public.admin_enable_confirmed_seller_pricing()'), /Admin access required/);
+    await asUser(admin);
+    await db.query('select public.admin_enable_confirmed_seller_pricing()');
+    assert.equal(Number(await one("select count(distinct role) from seller_pricing_rules where version=2 and enabled and lower_markup_bps=2500 and upper_markup_bps=1200 and upper_threshold_paise=100000 and seller_tax_bps=0 and customer_tax_bps=0 and fee_tax_bps=0 and separate_fee_paise=0")), 3, 'Admin pricing action applies all role versions atomically');
     console.log('PASS: private screenshot owner/staff access, unrelated/forged-path denial, replies and workflow preservation');
   } finally {
     await db.close();

@@ -1,0 +1,1767 @@
+{
+ "url": "http://127.0.0.1:4173/user/home",
+ "at": "2026-10-30T13:32:11.367Z",
+ "allow": [
+  "palette-purple"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 4,
+   "filled": [
+    0.65,
+    0.99,
+    0.95,
+    0.88
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 3157,
+     "screens": 3.5,
+     "words": 321,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 57,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 5,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial-DYYjcHH6.jpg",
+      "cleaning-C5W0NUJJ.jpg",
+      "ac-care-CaSDPPAy.jpg",
+      "beauty-B9xAQPpx.jpg",
+      "moving-BtxA4S7D.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 1.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help, every day.",
+      "words": 6,
+      "chars": 33,
+      "lines": 2,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.1,
+      "top": 25,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 52,
+      "vw": 3.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.31,
+      "top": 315,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 6,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      52
+     ],
+     "sizeCount": 10,
+     "notLoaded": [
+      "Manrope"
+     ],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.4,
+      "weight": 600,
+      "tracking": 0,
+      "contrast": 10.6
+     },
+     "measureChars": 160,
+     "max": {
+      "size": 52,
+      "vw": 3.6,
+      "font": "Manrope",
+      "text": "Need help today?"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0.09,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 281
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 2502
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 2570
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 2639
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 2708
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5f3fb",
+       "top": 201,
+       "hsl": {
+        "h": 255,
+        "s": 0.5,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2398,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#19172c",
+       "share": 0.33
+      },
+      {
+       "color": "#53546a",
+       "share": 0.3
+      },
+      {
+       "color": "#38364a",
+       "share": 0.26
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.06
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 1,
+     "shadowOverlay": 1,
+     "shadowSamples": [
+      "article.vendor-card.user-skeleton-card → rgba(28, 25, 23, 0.05) 0px 1px 2px 0px"
+     ],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 760px"
+     ],
+     "outlinedBoxes": 14,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 16,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 4,
+     "mediaRadius": 14,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1003
+      },
+      {
+       "count": 6,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1872
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 900,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 3157,
+    "margins": {
+     "left": 152,
+     "right": 160
+    },
+    "sections": [],
+    "gaps": [
+     {
+      "top": 1484,
+      "height": 284
+     }
+    ],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 101,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 207,
+      "n": 8
+     },
+     {
+      "x": 152,
+      "n": 5
+     },
+     {
+      "x": 172,
+      "n": 3
+     },
+     {
+      "x": 190,
+      "n": 1
+     },
+     {
+      "x": 750,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.25,
+    "voidBox": {
+     "x": 600,
+     "y": 120,
+     "w": 600,
+     "h": 540
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 152,
+     "right": 160
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 1.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 1,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 16,
+     "radii": [
+      [
+       14,
+       11
+      ],
+      [
+       0,
+       2
+      ],
+      [
+       16,
+       2
+      ],
+      [
+       22,
+       1
+      ]
+     ],
+     "heavyBorders": 7,
+     "borderSamples": [
+      "#8a8175 on #f5f3fb (3.49:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      52
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 101
+    },
+    "colourShare": 0.051
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 4,
+   "filled": [
+    0.69,
+    0.98,
+    0.93,
+    0.88
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 3251,
+     "screens": 3.2,
+     "words": 337,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 58,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 5,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial-DYYjcHH6.jpg",
+      "cleaning-C5W0NUJJ.jpg",
+      "ac-care-CaSDPPAy.jpg",
+      "beauty-B9xAQPpx.jpg",
+      "moving-BtxA4S7D.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 2.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help, every day.",
+      "words": 6,
+      "chars": 33,
+      "lines": 2,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.18,
+      "top": 25,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 30.7,
+      "vw": 4,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.52,
+      "top": 326,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 2,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 6,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      31
+     ],
+     "sizeCount": 10,
+     "notLoaded": [
+      "Manrope"
+     ],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.7
+     },
+     "measureChars": 98,
+     "max": {
+      "size": 30.7,
+      "vw": 4,
+      "font": "Manrope",
+      "text": "Need help today?"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0.15,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 293
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 2595
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 2664
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 2733
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 2801
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5f3fb",
+       "top": 201,
+       "hsl": {
+        "h": 255,
+        "s": 0.5,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2492,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#19172c",
+       "share": 0.33
+      },
+      {
+       "color": "#53546a",
+       "share": 0.32
+      },
+      {
+       "color": "#38364a",
+       "share": 0.25
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.05
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 1,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 760px"
+     ],
+     "outlinedBoxes": 13,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 15,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 4,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1022
+      },
+      {
+       "count": 6,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 1939
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 1024,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 3251,
+    "margins": {
+     "left": 37,
+     "right": 40
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 101,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 87,
+      "n": 8
+     },
+     {
+      "x": 32,
+      "n": 5
+     },
+     {
+      "x": 52,
+      "n": 3
+     },
+     {
+      "x": 70,
+      "n": 1
+     },
+     {
+      "x": 414,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 32,
+     "right": 40
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 2.3,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 0,
+     "ragged": [
+      {
+       "diff": 520,
+       "top": 1820
+      }
+     ],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 14,
+     "radii": [
+      [
+       14,
+       11
+      ],
+      [
+       16,
+       2
+      ],
+      [
+       22,
+       1
+      ]
+     ],
+     "heavyBorders": 7,
+     "borderSamples": [
+      "#8a8175 on #f5f3fb (3.49:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28,
+      31
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 101
+    },
+    "colourShare": 0.063
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 5,
+   "filled": [
+    0.73,
+    1,
+    0.96,
+    0.93,
+    0.86
+   ],
+   "motion": {
+    "elements": 11,
+    "css": 4,
+    "transitions": 7,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 4075,
+     "screens": 4.8,
+     "words": 337,
+     "img": 19,
+     "video": 0,
+     "canvas": 0,
+     "svg": 58,
+     "sections": 13,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 1,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "eazily-home-editorial-DYYjcHH6.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 4.6,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Good Evening",
+     "words": 2,
+     "lines": 1,
+     "size": 18,
+     "font": "Manrope"
+    },
+    "headings": [
+     {
+      "text": "eazily. A little help, every day.",
+      "words": 6,
+      "chars": 33,
+      "lines": 2,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "weight": 800,
+      "tracking": -0.06,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.36,
+      "top": 25,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Need help today?",
+      "words": 3,
+      "chars": 16,
+      "lines": 2,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.045,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.46,
+      "top": 356,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "What's on your to-do list?",
+      "words": 5,
+      "chars": 26,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.63,
+      "top": 658,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Small fixes. Big relief.",
+      "words": 4,
+      "chars": 24,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.52,
+      "top": 1138,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Professionals near you",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 1917,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "More services",
+      "words": 2,
+      "chars": 13,
+      "lines": 1,
+      "size": 22,
+      "vw": 5.6,
+      "font": "Manrope",
+      "weight": 700,
+      "tracking": -0.035,
+      "leading": 1.3,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.56,
+      "top": 2508,
+      "tag": "h2",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 6,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Manrope",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28
+     ],
+     "sizeCount": 9,
+     "notLoaded": [
+      "Manrope"
+     ],
+     "body": {
+      "font": "Manrope",
+      "size": 14,
+      "leading": 1.55,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.7
+     },
+     "measureChars": 44,
+     "max": {
+      "size": 28,
+      "vw": 7.2,
+      "font": "Manrope",
+      "text": "eazily"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.01,
+     "centerShare": 0.15,
+     "smallText": 0
+    },
+    "eyebrows": [
+     {
+      "text": "Help, right when you need it",
+      "above": "Need help today?",
+      "upper": false,
+      "tracked": true,
+      "mono": false,
+      "pill": false,
+      "size": 14,
+      "top": 297
+     }
+    ],
+    "numbered": [
+     {
+      "text": "01",
+      "size": 9,
+      "top": 3233
+     },
+     {
+      "text": "02",
+      "size": 9,
+      "top": 3325
+     },
+     {
+      "text": "03",
+      "size": 9,
+      "top": 3417
+     },
+     {
+      "text": "04",
+      "size": 9,
+      "top": 3508
+     }
+    ],
+    "color": {
+     "bodyBg": "#f5f3fb",
+     "bodyBgHsl": {
+      "h": 255,
+      "s": 0.5,
+      "l": 0.97
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f7f7fb",
+       "top": 0,
+       "hsl": {
+        "h": 240,
+        "s": 0.33,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#f4f2fb",
+       "top": 0,
+       "hsl": {
+        "h": 253,
+        "s": 0.53,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#f5f3fb",
+       "top": 269,
+       "hsl": {
+        "h": 255,
+        "s": 0.5,
+        "l": 0.97
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2462,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#19172c",
+       "share": 0.33
+      },
+      {
+       "color": "#53546a",
+       "share": 0.32
+      },
+      {
+       "color": "#38364a",
+       "share": 0.25
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.05
+      },
+      {
+       "color": "#6d28d9",
+       "share": 0.05
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#6d28d9"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 10,
+     "height": 44,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Book now"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 1,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "nav.bottom-nav.customer-nav 390px"
+     ],
+     "outlinedBoxes": 3,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 6,
+     "boxRadius": 16,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": [
+      {
+       "count": 5,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 269
+      }
+     ]
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 844,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": []
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 4075,
+    "margins": {
+     "left": 37,
+     "right": 37
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Good Evening",
+      "size": 18,
+      "top": 101,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 40,
+      "n": 8
+     },
+     {
+      "x": 87,
+      "n": 8
+     },
+     {
+      "x": 20,
+      "n": 1
+     },
+     {
+      "x": 70,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 18,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#f5f3fb",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 20,
+     "right": 6
+    },
+    "hero": {
+     "text": "Good Evening",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 18,
+     "vw": 4.6,
+     "font": "Manrope",
+     "weight": 700,
+     "tracking": -0.02,
+     "leading": 1.6,
+     "top": 101,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 8,
+     "firstScreen": 0,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 15,
+     "radii": [
+      [
+       14,
+       11
+      ],
+      [
+       16,
+       2
+      ],
+      [
+       22,
+       1
+      ],
+      [
+       12,
+       1
+      ]
+     ],
+     "heavyBorders": 7,
+     "borderSamples": [
+      "#8a8175 on #f5f3fb (3.49:1)",
+      "#8a8175 on #ffffff (3.83:1)",
+      "#8a8175 on #ffffff (3.83:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 18,
+     "hues": 3,
+     "samples": [
+      {
+       "hue": 0,
+       "size": 44,
+       "radius": "50%"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      },
+      {
+       "hue": 255,
+       "size": 34,
+       "radius": "10px"
+      }
+     ]
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 4,
+     "tabularShare": 0,
+     "kpiMax": 9
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.02,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      9,
+      12,
+      13,
+      14,
+      16,
+      18,
+      21,
+      22,
+      28
+     ]
+    },
+    "title": {
+     "text": "Good Evening",
+     "size": 18,
+     "top": 101
+    },
+    "colourShare": 0.054
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "font-fallback",
+   "width": 1440,
+   "message": "Typeface(s) declared but not loaded, so a fallback is rendering: Manrope",
+   "fix": "Fix the font URL / family name, or the screenshots you are judging are not the design.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "heavy-borders",
+   "width": 1440,
+   "message": "7 panel borders are dark against their ground: #8a8175 on #f5f3fb (3.49:1) | #8a8175 on #ffffff (3.83:1) | #8a8175 on #ffffff (3.83:1)",
+   "fix": "A panel border is a whisper: about 1.1–1.3:1 against its ground on a light screen (#e5e7eb–#ededed on white), and about 1.2–1.5:1 on a dark one (#1a1a1a on #000, #2e2e2e on #111). Darker lines turn the screen into a grid of boxes; keep the stronger line for controls.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "FAIL",
+   "id": "icon-chips",
+   "width": 1440,
+   "message": "18 icons sit in tinted squares or circles in 3 different colours.",
+   "fix": "This is the commonest tell of a generated dashboard. Drop the tinted square: a KPI is a label and a number; an icon, if it helps, is plain and in the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "ragged-row",
+   "width": 768,
+   "message": "1 pair(s) of cards in one row end at different heights (by 520px).",
+   "fix": "Cards that share a row share a bottom edge: balance them by their content (the same number of rows, a block of similar height beside it), or stack them. In testing, ragged rows were marked down every time."
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\desktop-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\tablet-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\mobile-fold.jpg",
+   "pages": [
+    "E:\\Satyam\\New folder\\eazily-react\\.taste-skill\\production-review-after\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

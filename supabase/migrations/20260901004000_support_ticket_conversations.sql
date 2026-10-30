@@ -27,5 +27,3 @@ create policy "Ticket participants send replies" on public.support_ticket_replie
     )
   );
 grant insert on public.support_ticket_replies to authenticated;
-
-

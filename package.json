@@ -41,6 +41,7 @@
     "staging:preflight": "node scripts/staging-preflight.cjs",
     "test:smoke": "node scripts/smoke.cjs",
     "test:catalog": "node scripts/catalog-service-test.cjs",
+    "test:request-form": "node scripts/request-form-contract-test.cjs",
     "test:mobile-prototype": "node scripts/mobile-prototype-test.cjs",
     "test:responsive:browser": "node scripts/responsive-browser-test.cjs",
     "test:partner-navigation:browser": "node scripts/partner-navigation-browser-test.cjs",
