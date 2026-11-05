@@ -164,7 +164,7 @@ export default function CustomerAccount({
   }
   const link = code ? `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(code)}` : '';
   function content() {
-    if (panel === 'My Bookings') return <CustomerPartnerBookings notify={notify} />;
+    if (panel === 'My Bookings') return <CustomerPartnerBookings notify={notify} onBrowse={() => { closePanel(); onNavigate('categories'); }} />;
     if (panel === 'Security & Login') return <AccountSecurity auth={auth} account={account} notify={notify} onSignedOut={logout} />;
     if (profileSections.some(([, name]) => name === panel) || panel === 'Help & Support') return <ProfileDetails section={panel} profile={profile} accountId={account?.user?.id} notify={notify} onProfile={setProfile} onOpenBookings={() => open('My Bookings')} />;
     if (panel === 'Logout') return <><p>{translate("Log out of your Eazily account?")}</p><button className="btn btn-primary full" onClick={logout}>{translate("Confirm Logout")}</button><button className="btn btn-outline full" onClick={() => setPanel(null)}>{translate("Cancel")}</button></>;

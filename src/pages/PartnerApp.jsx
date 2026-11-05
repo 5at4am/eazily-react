@@ -19,14 +19,30 @@ import RewardsPanel from '../features/partners/RewardsPanel.jsx';
 import OrderDetail from '../features/partners/OrderDetail.jsx';
 import SupportForm from '../features/account/SupportForm.jsx';
 import PartnerSupport from '../features/partners/PartnerSupport.jsx';
+import PartnerPageHeader from '../features/partners/PartnerPageHeader.jsx';
+import PartnerSectionHeader from '../features/partners/PartnerSectionHeader.jsx';
 import ConsultantLegal from '../features/partners/legal/ConsultantLegal.jsx';
 import DemoGate from '../features/partners/demo/DemoGate.jsx';
+import { Button } from '../components/ui/button.jsx';
+import { Card } from '../components/ui/card.jsx';
+import { Badge } from '../components/ui/badge.jsx';
+import { Input } from '../components/ui/input.jsx';
 import { InfluencerLegalCenter, InfluencerTermsGate } from '../features/partners/legal/InfluencerLegal.jsx';
 import { CONSULTANT_ASSESSMENT_TEST_SKIP_ENABLED } from '../features/partners/consultantAssessmentConfig.js';
 import { useRealtime } from '../lib/realtime.jsx';
 import ChatWorkspace from '../features/chat/ChatWorkspace.jsx';
 import { IN_APP_BACK_EVENT, pushNavigationState, replaceNavigationState, requestInAppBack } from '../lib/nativeShell.js';
 const nav = [['home','home','Home'],['orders','briefcase','Jobs'],['post','plus','Add'],['growth','chart','Growth'],['profile','person','Profile']];
+const orderStatusOptions = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'requested', label: 'New requests' },
+  { value: 'accepted', label: 'Accepted' },
+  { value: 'active', label: 'In progress' },
+  { value: 'awaiting_acceptance', label: 'Awaiting response' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'disputed', label: 'Needs attention' },
+];
 const money = n => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(Number(n || 0));
 const displayPartnerCategory = (role, category) => role === 'influencer' ? displayInfluencerCategory(category) : role === 'consultant' ? displayConsultantCategory(category) : category;
 export default function PartnerApp(props) {
@@ -35,7 +51,7 @@ export default function PartnerApp(props) {
     ? <InfluencerTermsGate application={application} notify={props.notify}><ActualPartnerApp {...props} onEnterDemo={onEnterDemo} /></InfluencerTermsGate>
     : <ActualPartnerApp {...props} onEnterDemo={onEnterDemo} />}</DemoGate>;
 }
-function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEditRegistration, onEnterDemo }) {
+function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEditRegistration, onEditProfile, onEnterDemo }) {
   const {logout}=useAccount();
   const {revision: realtimeRevision}=useRealtime();
   const application = account.applications.find(a=>a.role===role), profile=application?.details||{}, info=partnerRoles[role];
@@ -123,7 +139,7 @@ function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEdi
     if(!supabase){const posts=data.posts.map(p=>p.id===post.id?{...p,status:action==='archive'?'archived':'paused'}:p);sessionStorage.setItem(cache,JSON.stringify(posts));}
     else await savePartnerPost(role,post.details,action,post.id);
   }
-  const rawEarningsTotal=state=>data.earnings.filter(e=>e.state===state).reduce((s,e)=>s+Number(e.amount),0);
+   const rawEarningsTotal=state=>data.earnings.filter(e=>e.state===state).reduce((s,e)=>s+Number(e.amount),0);
   const total=state=>{
     if(role!=='professional')return rawEarningsTotal(state);
     const reversed=rawEarningsTotal('reversed');
@@ -135,11 +151,12 @@ function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEdi
   const hour=Number(new Intl.DateTimeFormat('en-IN',{hour:'numeric',hour12:false,timeZone:'Asia/Kolkata'}).format(new Date()));
   const greeting=hour<12?'Good Morning':hour<17?'Good Afternoon':'Good Evening';
   const filteredOrders=data.orders.filter(o=>(filter==='all'||o.status===filter)&&[o.title,o.id,o.details?.service].join(' ').toLowerCase().includes(search.toLowerCase()));
-   const genericPosts=<><div className="section-head"><h2>{t('My Posts')}</h2><button className="btn btn-primary" onClick={()=>setSheet('post')}>{t('Create Post')}</button></div>{!data.posts.length&&<EmptyState title="No posts yet" text="Create an offering or share useful content." actionLabel="Create Post" onAction={()=>setSheet('post')} />}{data.posts.map(p=><article className="partner-list-card post-list-item" key={p.id}>{p.details.media?.[0]&&<img src={p.details.media[0].path} alt="" /> }<h3>{role==='influencer' ? (p.details.caption || p.details.title || info.post).slice(0, 90) : (p.details.title||info.post)}</h3><p>{role==='influencer' && p.details.packageSnapshot ? `${p.details.packageSnapshot.deliverableCount || 1} ${p.details.packageSnapshot.deliverables} · ₹${p.details.packageSnapshot.packagePrice || '—'} · ${p.details.packageSnapshot.timeline || '—'} days` : t(p.details.postType||'offering')} · {t(p.status)} · {p.updated_at&&new Date(p.updated_at).toLocaleDateString('en-IN')}</p>{p.review_notes&&<p>{p.review_notes}</p>}<div className="post-actions"><button className="btn btn-outline" onClick={()=>setSheet(p)}>{t('Edit')}</button><button className="btn btn-outline" onClick={()=>setSheet({...p,id:undefined,details:{...p.details,caption:p.details.caption || '',title:'',description:''}})}>{t('Duplicate')}</button>{p.status==='published'&&<button className="btn btn-outline" disabled={busy} onClick={()=>act(()=>postAction(p,'pause'))}>{t('Pause')}</button>}{p.status!=='archived'&&<button className="btn btn-outline" disabled={busy} onClick={()=>act(()=>postAction(p,'archive'))}>{t('Archive')}</button>}</div></article>)}</>;
+    const genericPosts=<><PartnerSectionHeader title="My Posts" action={<Button type="button" onClick={()=>setSheet('post')}>{t('Create Post')}</Button>} />{!data.posts.length&&<EmptyState title="No posts yet" text="Create an offering or share useful content." actionLabel="Create Post" onAction={()=>setSheet('post')} />}{data.posts.map(p=><Card className="partner-list-card post-list-item gap-3 p-4" key={p.id}>{p.details.media?.[0]&&<img src={p.details.media[0].path} alt="" /> }<h3>{role==='influencer' ? (p.details.caption || p.details.title || info.post).slice(0, 90) : (p.details.title||info.post)}</h3><p>{role==='influencer' && p.details.packageSnapshot ? `${p.details.packageSnapshot.deliverableCount || 1} ${p.details.packageSnapshot.deliverables} · ₹${p.details.packageSnapshot.packagePrice || '—'} · ${p.details.packageSnapshot.timeline || '—'} days` : t(p.details.postType||'offering')} · {p.updated_at&&new Date(p.updated_at).toLocaleDateString('en-IN')}</p><Badge variant={p.status==='published'?'default':'secondary'}>{t(p.status)}</Badge>{p.review_notes&&<p>{p.review_notes}</p>}<div className="post-actions"><Button type="button" variant="outline" onClick={()=>setSheet(p)}>{t('Edit')}</Button><Button type="button" variant="outline" onClick={()=>setSheet({...p,id:undefined,details:{...p.details,caption:p.details.caption || '',title:'',description:''}})}>{t('Duplicate')}</Button>{p.status==='published'&&<Button type="button" variant="outline" disabled={busy} onClick={()=>act(()=>postAction(p,'pause'))}>{t('Pause')}</Button>}{p.status!=='archived'&&<Button type="button" variant="outline" disabled={busy} onClick={()=>act(()=>postAction(p,'archive'))}>{t('Archive')}</Button>}</div></Card>)}</>;
   const listPosts=role==='professional'?<ServicePostList posts={data.posts} busy={busy} onAdd={()=>setSheet('post')} onEdit={setSheet} onAction={(post,action)=>act(()=>postAction(post,action))}/>:genericPosts;
-   const dashboardRoute=['home','growth','earnings'].includes(route);
-   return <div className={'partner-workspace role-'+role+(dashboardRoute ? ' partner-dashboard-home-view' : '')} style={{'--role':info.colour,'--role-bg':info.background}}><main className="screen partner-screen">
-     {dashboardRoute ? <DashboardTopBar role={role} profile={profile} name={name} approved={approved} view={route} greeting={greeting} notifications={data.notifications.filter(item => !item.read_at).length} setRoute={setRoute} setSheet={setSheet} /> : <header className="topbar partner-header dashboard-header"><div className="dashboard-header-top"><button type="button" className="icon-btn" aria-label="Go back" onClick={() => requestInAppBack()}><Icon name="arrowLeft" /></button><div className="dashboard-role"><span className="dashboard-avatar">{(name || info.label).charAt(0).toUpperCase()}</span><small>{t(info.label)}</small></div><div className="dashboard-header-actions"><button className="icon-btn notification-button" aria-label={t('Notifications')} onClick={()=>setSheet('Notifications')}><Icon name="bell" size={19} />{data.notifications.filter(item=>!item.read_at).length>0&&<b>{data.notifications.filter(item=>!item.read_at).length}</b>}</button><button className="workspace-button" onClick={()=>setSheet('workspace')}>{t('Switch')}</button></div></div><div className="dashboard-header-greeting"><h1>{t(route==='orders'?'Jobs':route==='profile'?'My Profile':route==='post'?(role==='professional'?'My Services':'My Posts'):'Messages')}</h1></div></header>}
+    const influencerPrimaryRoute=role==='influencer'&&['home','orders','growth','profile'].includes(route);
+    const dashboardRoute=['home','growth','earnings'].includes(route)||influencerPrimaryRoute;
+    return <div className={'partner-workspace role-'+role+(dashboardRoute ? ' partner-dashboard-home-view' : '')+(influencerPrimaryRoute ? ' influencer-primary-view' : '')} style={{'--role':info.colour,'--role-bg':info.background}}><main className="screen partner-screen">
+      <PartnerPageHeader role={role} profile={profile} name={name} approved={approved} view={route} route={route} greeting={greeting} notifications={data.notifications.filter(item => !item.read_at).length} setRoute={setRoute} setSheet={setSheet} onBack={requestInAppBack} variant={dashboardRoute ? 'dashboard' : 'page'} />
     {route === 'home' && approved && <PartnerBannerCarousel role={role} banners={banners} trial={trial} application={application} setRoute={setRoute} setSheet={setSheet} />}
     <div className="seller-content">
       {role === 'consultant' && route === 'home' && <ConsultantLegal onEligibilityChange={setConsultantLegalReady} application={application} />}
@@ -152,10 +169,10 @@ function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEdi
        {route==='growth'&&approved&&<PartnerGrowthDashboard role={role} profile={profile} data={data} setRoute={setRoute} setSheet={setSheet} onEditRegistration={onEditRegistration} />}
        {route==='earnings'&&approved&&<PartnerEarningsDashboard role={role} data={data} total={total} money={money} setSheet={setSheet} />}
       {route==='post'&&listPosts}
-       {route==='orders'&&<><Field label={t('Search orders')} value={search} onChange={e=>setSearch(e.target.value)}/><Field label={t('Status')} as="select" value={filter} onChange={e=>setFilter(e.target.value)} options={['all','requested','accepted','active','awaiting_acceptance','completed','cancelled','disputed']}/>{filteredOrders.map(o=><button className="choice" key={o.id} onClick={()=>setSheet({order:o})}><b>{o.title}</b><small>{t(o.status)} · EAZ-{o.id.slice(0,8).toUpperCase()}</small></button>)}{!filteredOrders.length&&<EmptyState title="No matching orders" text="Your workspace orders will appear here." actionLabel="Clear filters" onAction={()=>{setSearch('');setFilter('all');}}/>}</>}
+          {route==='orders'&&<section className={role==='influencer'?'creator-jobs-page':'partner-jobs-page'} aria-label={t(role==='influencer'?'Collaboration jobs':'Partner jobs')}><div className="creator-jobs-filters"><label className="field-wrap"><span className="form-label">{t(role==='influencer'?'Search collaborations':'Search orders')}</span><Input type="search" className="field h-12 rounded-md bg-white" placeholder={t('Search by name or request')} value={search} onChange={e=>setSearch(e.target.value)}/></label><Field label={t('Status')} as="select" value={filter} onChange={e=>setFilter(e.target.value)} options={orderStatusOptions}/></div><div className="creator-job-list">{filteredOrders.map(o=><button className="choice" key={o.id} onClick={()=>setSheet({order:o})}><b>{o.title}</b><small>{t(o.status)} · EAZ-{o.id.slice(0,8).toUpperCase()}</small></button>)}{!filteredOrders.length&&<EmptyState title={data.orders.length ? 'No matching orders' : 'No work yet'} text={data.orders.length ? 'Try another search or status, or clear your filters.' : role === 'influencer' ? 'Brand collaboration enquiries will appear here when they arrive.' : role === 'consultant' ? 'Consultation enquiries will appear here when customers contact you.' : 'Customer job requests will appear here when they arrive.'} actionLabel={data.orders.length ? 'Clear filters' : 'Go to Home'} onAction={() => data.orders.length ? (setSearch(''),setFilter('all')) : setRoute('home')} />}</div></section>}
       {route==='messages'&&<ChatWorkspace role={role} notify={notify} />}
-      {route==='profile'&&<PartnerProfile role={role} profile={profile} application={application} approved={approved} data={data} onEditRegistration={onEditRegistration} setRoute={setRoute} setSheet={setSheet} onWorkspace={onWorkspace} onAddRole={onAddRole} />}
-    </div><BottomNav route={route} onChange={setRoute} items={visibleNav} chatRole={approved?role:null} onPost={()=>{if(approved){setRoute('post');setSheet('post');}}} />
+       {route==='profile'&&<PartnerProfile role={role} profile={profile} application={application} approved={approved} data={data} onEditRegistration={onEditRegistration} onEditProfile={onEditProfile} setRoute={setRoute} setSheet={setSheet} onWorkspace={onWorkspace} onAddRole={onAddRole} />}
+    </div><BottomNav seller route={route} onChange={setRoute} items={visibleNav} chatRole={approved?role:null} onPost={()=>{if(approved){setRoute('post');setSheet('post');}}} />
     </main>{sheet&&<Sheet className="partner-post-sheet" onClose={()=>setSheet(null)}>
       {sheet==='workspace'?<Workspace account={account} current={role} onWorkspace={w=>{setSheet(null);onWorkspace(w);}}/>
       :(typeof sheet==='string'&&sheet.startsWith('post'))||sheet.id?<PartnerPostForm key={sheet.id||sheet} role={role} application={application} accountId={account.user.id} post={sheet.id?sheet:null} offerings={data.posts.filter(p=>p.details.postType==='offering'&&(supabase ? p.status==='published' : p.status!=='archived'))} notify={notify} onDone={(result,options)=>{if(options?.editProfile){setSheet(null);onEditRegistration();return;}setRoute('post');load();setSheet(options?.addAnother?`post-${crypto.randomUUID()}`:null);}}/>
@@ -176,7 +193,7 @@ function ActualPartnerApp({ role, account, notify, onWorkspace, onAddRole, onEdi
     </Sheet>}</div>;
 }
 
-function PartnerProfile({ role, profile, application, approved, data, onEditRegistration, setRoute, setSheet, onWorkspace, onAddRole }) {
+function PartnerProfile({ role, profile, application, approved, data, onEditRegistration, onEditProfile, setRoute, setSheet, onWorkspace, onAddRole }) {
   const name = profile.businessName || profile.creatorName || profile.name || 'Partner profile';
   const accent = role === 'professional' ? '#059669' : role === 'influencer' ? '#7C3AED' : '#2563EB';
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'E';
@@ -192,8 +209,8 @@ function PartnerProfile({ role, profile, application, approved, data, onEditRegi
   if (role === 'influencer' || role === 'consultant') accountItems.splice(1, 0, ['Terms & Conditions', 'clipboard', () => setSheet('Legal')]);
   groups.push(['Account & Support', accountItems]);
   return <div className="partner-profile-page" style={{ '--profile-accent': accent }}>
-    <section className="partner-profile-hero"><div className="partner-profile-avatar">{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : initials}</div><div className="partner-profile-copy"><span>{t(role === 'professional' ? 'Service Partner' : role === 'influencer' ? 'Influencer' : 'Consultant')}</span><h2>{name}</h2><p>{[profile.city, displayPartnerCategory(role, profile.category) || profile.specialisation].filter(Boolean).join(' · ') || t('Profile details not provided')}</p></div><div className="partner-profile-status"><span className={`application-state ${approved ? 'approved' : 'pending'}`}>{t(approved ? 'Verified Partner' : application.status)}</span>{data.reviews.length > 0 && <small>{data.reviews.length} {t('Reviews')}</small>}</div><div className="partner-profile-actions"><button className="btn btn-primary" onClick={onEditRegistration}>{t('Edit Profile')}</button><button className="btn btn-outline" onClick={() => setRoute('profile')}>{t('View Profile')}</button></div></section>
-    {role === 'influencer' && <p className="profile-private-note">{(profile.platforms || []).filter(item => item.url).map(item => `${item.name} · ${item.band || t('Audience not provided')} · ${item.verified ? t('Verified') : t('Self-reported')}`).join(' | ') || t('Social accounts not provided')}</p>}
+      <section className="partner-profile-hero"><div className="partner-profile-avatar">{profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : initials}</div><div className="partner-profile-copy"><span>{t(role === 'professional' ? 'Service Partner' : role === 'influencer' ? 'Influencer' : 'Consultant')}</span><h2>{name}</h2><p>{[profile.city, displayPartnerCategory(role, profile.category) || profile.specialisation].filter(Boolean).join(' · ') || t('Profile details not provided')}</p></div><div className="partner-profile-status"><span className={`application-state ${approved ? 'approved' : 'pending'}`}>{t(approved ? 'Verified Partner' : application.status)}</span>{data.reviews.length > 0 && <small>{data.reviews.length} {t('Reviews')}</small>}</div><div className="partner-profile-actions"><button className="btn btn-primary" onClick={onEditProfile}>{t('Edit Profile')}</button></div></section>
+     {role === 'influencer' && <section className="profile-social-accounts" aria-label={t('Social accounts')}><h3>{t('Social accounts')}</h3>{(profile.platforms || []).filter(item => item.url).length ? <ul>{profile.platforms.filter(item => item.url).map((item, index) => <li key={`${item.name}-${index}`}><b>{t(item.name)}</b><span>{item.band || t('Audience not provided')}</span><span>{t(item.verified ? 'Verified' : 'Self-reported')}</span></li>)}</ul> : <p>{t('Social accounts not provided')}</p>}</section>}
     {groups.map(([title, items]) => <section className="profile-menu-group" key={title}><h3>{t(title)}</h3><div className="profile-menu-card">{items.map(([label, icon, action]) => <button className="profile-menu-row" key={label} onClick={action}><span className="profile-menu-icon"><Icon name={icon} size={19} /></span><span>{t(label)}</span><Icon name="chevronRight" size={18} /></button>)}</div></section>)}
     <section className="profile-account-actions"><button className="profile-menu-row" onClick={() => onWorkspace('customer')}><span className="profile-menu-icon"><Icon name="home" size={19} /></span><span>{t('Switch to Customer')}</span><Icon name="chevronRight" size={18} /></button><button className="profile-menu-row" onClick={onAddRole}><span className="profile-menu-icon"><Icon name="plus" size={19} /></span><span>{t('Add another partner role')}</span><Icon name="chevronRight" size={18} /></button></section>
   </div>;

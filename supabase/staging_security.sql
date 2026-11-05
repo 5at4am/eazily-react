@@ -38,7 +38,7 @@ do $$
 declare fn record; configured_path text;
 begin
   for fn in
-    select p.oid,n.nspname,p.proname,pg_get_function_identity_arguments(p.oid) args,
+    select p.oid,n.nspname,p.proname,p.pronargs,pg_get_function_identity_arguments(p.oid) args,
       p.prorettype,p.proconfig
     from pg_proc p join pg_namespace n on n.oid=p.pronamespace
     where p.prosecdef and n.nspname in ('public','eazily_private')
@@ -53,7 +53,10 @@ begin
   loop
     select substr(setting,length('search_path=')+1) into configured_path
       from unnest(fn.proconfig) setting where setting like 'search_path=%';
-    if configured_path is null or configured_path !~ '^(public|eazily_private)(, ?(public|eazily_private|storage))*(, ?pg_temp)?$' then
+    if fn.nspname='public' and fn.proname='rls_auto_enable' and fn.pronargs=0 then
+      raise exception 'Unreviewed definer search_path for %.%',fn.nspname,fn.proname;
+    end if;
+    if configured_path is null or configured_path !~ '^(pg_catalog, ?)?(public|eazily_private)(, ?(public|eazily_private|storage))*(, ?pg_temp)?$' then
       raise exception 'Unreviewed definer search_path for %.%',fn.nspname,fn.proname;
     end if;
     -- pg_temp must be explicit and last, otherwise temp relations precede public.

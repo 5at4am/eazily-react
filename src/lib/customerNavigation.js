@@ -1,4 +1,4 @@
-const routes = new Set(['home', 'categories', 'messages', 'videos', 'profile']);
+const routes = new Set(['home', 'categories', 'bookings', 'messages', 'videos', 'profile']);
 export const emptyCustomerPage = Object.freeze({ route: 'home', selectedMain: null, selectedGroup: null, service: null, vendor: null, bulkOrdersOrigin: null, scrollY: 0 });
 
 export function readCustomerPage(state, href) {

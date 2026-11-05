@@ -32,7 +32,7 @@ function stop(message) {
 function localCheck() {
   const linked = fs.readFileSync(path.join(ROOT, 'supabase/.temp/project-ref'), 'utf8').trim();
   if (linked !== REF || (process.env.SUPABASE_PROJECT_REF && process.env.SUPABASE_PROJECT_REF !== REF)) stop('Linked project reference differs from approved staging reference.');
-  if (manifest.length !== 48) stop('Manifest length changed; review before applying.');
+  if (manifest.length !== 50) stop('Manifest length changed; review before applying.');
   const seen = new Set();
   for (let i = 0; i < manifest.length; i++) {
     const m = manifest[i];

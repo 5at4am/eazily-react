@@ -180,12 +180,76 @@
 .profile-menu-row > svg { color:var(--muted); flex:0 0 auto; }
 .profile-menu-icon { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:color-mix(in srgb,var(--profile-accent) 9%,#fff); color:var(--profile-accent); flex:0 0 34px; }
 .profile-account-actions { display:grid; }
+
+/* Profile menu follows the supplied grouped-settings reference while retaining each live destination. */
+.partner-workspace:not(.partner-dashboard-home-view) .partner-screen:has(.partner-profile-page) { background:#f4f2fb; }
+.partner-profile-page { gap:20px; padding:4px 0 calc(24px + env(safe-area-inset-bottom)); }
+.partner-profile-hero { grid-template-columns:72px minmax(0,1fr) auto; gap:14px; padding:16px; border:0; border-radius:16px; background:#fff; box-shadow:0 2px 10px rgb(34 24 80 / 5%); }
+.partner-profile-avatar { width:72px; height:72px; border-radius:50%; background:#eee9ff; }
+.partner-profile-copy > span { display:none; }
+.partner-profile-copy h2 { margin:0; font-size:21px; }
+.partner-profile-copy p { margin-top:4px; font-size:14px; }
+.partner-profile-status { grid-column:2; grid-row:2; gap:6px; color:#15723e; font-size:13px; }
+.partner-profile-status .application-state { padding:4px 9px; border-radius:999px; background:#e7f7ec; color:#15723e; }
+.partner-profile-status small { font-size:13px; }
+.partner-profile-actions { grid-column:3; grid-row:1 / span 2; display:flex; align-items:center; }
+.partner-profile-actions .btn { min-height:44px; padding:0 12px; border:1px solid var(--control-border); background:#fff; color:var(--brand-deep); }
+.profile-private-note { padding:0 4px; font-size:14px; }
+.profile-menu-group { gap:8px; }
+.profile-menu-group h3 { padding:0 4px; color:var(--ink-muted); font-size:14px; letter-spacing:.01em; text-transform:uppercase; }
+.profile-menu-card,.profile-account-actions { border:0; border-radius:16px; box-shadow:none; }
+.profile-menu-row { min-height:64px; gap:14px; padding:10px 14px; font-size:16px; }
+.profile-menu-row + .profile-menu-row { border-top:1px solid #eeedf3; }
+.profile-menu-icon { width:42px; height:42px; flex-basis:42px; border-radius:12px; background:#f2effb; color:var(--ink); }
+.profile-menu-row > svg { width:19px; height:19px; }
+.profile-account-actions .profile-menu-row { color:#b42318; }
+.profile-account-actions .profile-menu-row .profile-menu-icon { color:#b42318; background:#fff0ef; }
+@media (max-width:359px) {
+  .partner-profile-hero { grid-template-columns:56px minmax(0,1fr) auto; gap:10px; padding:12px; }
+  .partner-profile-avatar { width:56px; height:56px; }
+  .partner-profile-copy h2 { font-size:18px; }
+  .profile-menu-row { gap:10px; padding-inline:10px; font-size:15px; }
+}
 .partner-workspace .dashboard-header { min-height:0; display:block; padding:20px; background:#fff; border-bottom:1px solid var(--line); overflow:hidden; }
 .dashboard-header-top,.dashboard-role,.dashboard-header-actions { display:flex; align-items:center; gap:10px; min-width:0; }
 .dashboard-header-top { justify-content:space-between; }
 .dashboard-role small { color:var(--muted); font-size:11px; line-height:1.2; }
 .dashboard-header-greeting { width:100%; min-width:0; margin-top:16px; }
 .dashboard-header-greeting h1 { margin:0; overflow-wrap:anywhere; font-size:24px; line-height:1.22; font-weight:700; text-align:left; }
+
+/* Influencer Home, Jobs, Growth and Profile share one page rhythm; each keeps its own workflow. */
+.influencer-primary-view .seller-content {
+  display:grid;
+  align-content:start;
+  gap:16px;
+}
+.influencer-primary-view .pd-dashboard,
+.influencer-primary-view .partner-profile-page,
+.influencer-primary-view .creator-jobs-page {
+  gap:16px;
+}
+.influencer-primary-view .partner-profile-page { padding-top:0; }
+.influencer-primary-view .creator-jobs-page { display:grid; min-width:0; }
+.influencer-primary-view .creator-jobs-filters { display:grid; gap:12px; min-width:0; }
+.influencer-primary-view .creator-job-list { display:grid; align-content:start; gap:8px; min-width:0; }
+.influencer-primary-view .creator-job-list > .choice {
+  min-width:0;
+  min-height:64px;
+  padding:12px 14px;
+  border:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  background:var(--surface);
+  color:var(--ink);
+}
+.influencer-primary-view .creator-job-list > .choice small { color:var(--ink-muted); }
+@media (min-width:600px) {
+  .influencer-primary-view .seller-content { gap:20px; }
+  .influencer-primary-view .pd-dashboard,
+  .influencer-primary-view .partner-profile-page,
+  .influencer-primary-view .creator-jobs-page { gap:20px; }
+  .influencer-primary-view .creator-jobs-filters { grid-template-columns:minmax(0,2fr) minmax(180px,1fr); align-items:end; }
+}
+
 .dashboard-avatar { width:40px; height:40px; flex:0 0 40px; display:grid; place-items:center; border-radius:13px; background:color-mix(in srgb,var(--role) 13%,#fff); color:var(--role); font-size:17px; font-weight:800; }
 .dashboard-header-actions { gap:6px; }
 .notification-button { width:42px; height:42px; position:relative; border-radius:12px; }
@@ -287,7 +351,7 @@
 
 /* Influencer registration typography stays local to this flow. */
 .partner-onboarding.role-influencer {
-  --registration-font: Manrope, "Segoe UI", system-ui, sans-serif;
+  --registration-font: var(--font-sans, "DM Sans", "Segoe UI", system-ui, sans-serif);
   --registration-devanagari: "Noto Sans Devanagari", "Nirmala UI", Mangal, sans-serif;
   font-family: var(--registration-font);
   font-size: 16px;
@@ -477,6 +541,70 @@ html, body, #root { min-height:100%; background:#f7f7fb; }
   height:auto !important;
   padding-bottom:calc(7px + var(--eazily-safe-bottom)) !important;
 }
+/* Shared partner navigation: keep every tab, including Jobs and Profile, on the
+   same accessible grid and explicitly restore contrast for the central action. */
+.phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > .bottom-nav.partner-nav {
+  z-index:30;
+  display:grid;
+  grid-template-columns:repeat(var(--nav-item-count, 5), minmax(0, 1fr));
+  align-items:stretch;
+  gap:0;
+  height:auto !important;
+  min-height:79px !important;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  border:0;
+  border-top:1px solid var(--divider);
+  border-radius:0;
+  background:var(--surface);
+  box-shadow:0 -2px 12px rgb(25 23 44 / 7%);
+}
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item {
+  display:flex;
+  min-width:0;
+  min-height:58px;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:4px 2px;
+  color:var(--ink-muted);
+  font-size:12px;
+  font-weight:600;
+  line-height:1.2;
+  text-align:center;
+  white-space:nowrap;
+  touch-action:manipulation;
+}
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-icon {
+  position:relative;
+  display:grid;
+  width:36px;
+  height:32px;
+  flex:0 0 auto;
+  place-items:center;
+  border-radius:10px;
+  background:transparent;
+  color:currentColor;
+  box-shadow:none;
+  transform:none;
+}
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item.active { color:var(--brand-deep); font-weight:700; }
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item.active .nav-icon { background:var(--brand-soft); color:var(--brand-deep); }
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item.post-nav .nav-icon {
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:var(--brand-fill) !important;
+  color:var(--on-brand) !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item.post-nav svg { display:block; color:var(--on-brand) !important; }
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item:focus-visible { position:relative; z-index:1; outline:3px solid var(--brand); outline-offset:-3px; }
+.phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item:active { transform:scale(.97); }
+@media (prefers-reduced-motion:reduce) {
+  .phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item { transition:none; }
+  .phone-shell.peazily-ui:has(> .partner-workspace) .bottom-nav.partner-nav .nav-item:active { transform:none; }
+}
 .phone-shell .screen { padding-bottom:calc(94px + var(--eazily-safe-bottom)) !important; }
 .phone-shell .toast { bottom:calc(94px + var(--eazily-safe-bottom)); }
 .phone-shell .registration-actions { padding-bottom:calc(12px + var(--eazily-safe-bottom)) !important; }
@@ -495,3 +623,55 @@ html, body, #root { min-height:100%; background:#f7f7fb; }
 .partner-post-sheet .chip-grid button.selected { background:var(--role-bg); border-color:var(--role); }
 .partner-post-sheet form { min-width:0; }
 .seller-content h1,.seller-content h2,.partner-header h1 { overflow-wrap:anywhere; }
+
+.partner-profile-editor { min-height:100vh; padding:16px 16px calc(32px + env(safe-area-inset-bottom)); background:var(--bg); color:var(--navy); }
+.partner-profile-editor-head { display:flex; align-items:center; justify-content:space-between; gap:12px; width:min(100%,720px); margin:0 auto 24px; }
+.partner-profile-editor-head > span { color:var(--muted); font-size:14px; font-weight:700; }
+.partner-profile-editor-form { display:grid; gap:24px; width:min(100%,720px); margin:0 auto; }
+.partner-profile-editor-eyebrow { margin:0 0 6px; color:var(--purple); font-size:13px; font-weight:750; }
+.partner-profile-editor-form h1 { margin:0; font-size:24px; line-height:1.25; }
+.partner-profile-editor-intro { max-width:60ch; margin:8px 0 0; color:var(--muted); font-size:14px; line-height:1.5; }
+.partner-profile-editor-fields { display:grid; gap:16px; padding:16px; border:1px solid var(--line); border-radius:14px; background:#fff; }
+.partner-profile-editor-fields textarea { min-height:120px; resize:vertical; }
+.partner-profile-editor-actions { display:flex; justify-content:flex-end; gap:12px; }
+.partner-profile-editor-actions button,.partner-profile-editor-head button { min-height:48px; }
+@media (min-width:600px) { .partner-profile-editor { padding:24px 24px 40px; } .partner-profile-editor-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } .partner-profile-editor-fields > :last-child:nth-child(odd) { grid-column:1/-1; } }
+
+/* Make creator information, empty work states, and media actions easier to scan. */
+.profile-social-accounts { display:grid; gap:8px; }
+.profile-social-accounts h3 { color:var(--ink); font-size:14px; font-weight:700; }
+.profile-social-accounts ul { display:grid; gap:8px; margin:0; padding:0; list-style:none; }
+.profile-social-accounts li { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:3px 12px; padding:10px 12px; border:1px solid var(--divider); border-radius:var(--radius-control); background:var(--surface); }
+.profile-social-accounts li b { color:var(--ink); font-size:14px; }
+.profile-social-accounts li span { color:var(--ink-muted); font-size:14px; }
+.profile-social-accounts li span:last-child { grid-column:2; grid-row:1; color:var(--success); font-size:12px; font-weight:600; }
+.profile-social-accounts > p { color:var(--ink-muted); font-size:14px; line-height:1.5; }
+
+.partner-dashboard-home-view .pd-growth-dashboard .pd-growth-metrics article { display:grid; grid-template-columns:minmax(0,1fr); align-content:start; justify-items:start; gap:8px; min-height:112px; }
+.partner-dashboard-home-view .pd-growth-dashboard .pd-growth-metrics .pd-growth-icon { width:36px; height:36px; flex-basis:36px; }
+.partner-dashboard-home-view .pd-growth-dashboard .pd-growth-metrics article > div { display:grid; min-width:0; gap:2px; }
+.partner-dashboard-home-view .pd-growth-dashboard .pd-growth-metrics small { font-size:14px; line-height:1.3; text-wrap:balance; }
+.partner-dashboard-home-view .pd-growth-dashboard .pd-growth-metrics b { font-size:20px; line-height:1.2; }
+
+.partner-post-sheet .influencer-composer .media-upload { display:grid; gap:12px; margin:0; }
+.partner-post-sheet .influencer-composer .upload-picker { display:grid; gap:6px; min-width:0; }
+.partner-post-sheet .influencer-composer .upload-picker .form-label,
+.partner-post-sheet .influencer-composer .camera-picker > span:not(.form-label) { margin:0; color:var(--ink); font-size:14px; font-weight:600; }
+.partner-post-sheet .influencer-composer .upload-picker > small { color:var(--ink-muted); font-size:14px; line-height:1.5; }
+.partner-post-sheet .influencer-composer .upload-picker input[type="file"] { width:100%; min-width:0; min-height:52px; padding:7px; border:1px solid var(--control-border); border-radius:var(--radius-control); background:var(--surface); color:var(--ink-muted); font:inherit; font-size:14px; }
+.partner-post-sheet .influencer-composer .upload-picker input[type="file"]::file-selector-button { min-height:36px; margin-right:10px; padding:6px 12px; border:1px solid var(--divider); border-radius:8px; background:var(--brand-soft); color:var(--brand-deep); font:inherit; font-weight:600; cursor:pointer; }
+.partner-post-sheet .influencer-composer .upload-picker input[type="file"]:focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+.partner-post-sheet .influencer-composer .post-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:12px 0 calc(14px + var(--eazily-safe-bottom)); border-top:1px solid var(--divider); background:var(--surface); }
+.partner-post-sheet .influencer-composer .post-actions button { width:100%; min-width:0; min-height:48px; padding:8px 10px; line-height:1.25; }
+.partner-post-sheet .influencer-composer .post-actions button:last-child { grid-column:1/-1; }
+.partner-section-heading-copy { min-width:0; }
+.partner-section-heading-copy h2 { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.partner-section-heading-copy h2 svg { flex:0 0 auto; }
+.partner-section-heading-action { flex:0 0 auto; }
+.partner-section-heading .pd-count { flex:0 0 auto; }
+.partner-workspace .service-post-list .section-head .partner-section-heading-copy { display:grid; gap:4px; min-width:0; }
+.partner-workspace .service-post-list .section-head .partner-section-heading-copy p { color:var(--role); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
+@media (max-width:359px) {
+  .profile-social-accounts li { grid-template-columns:minmax(0,1fr); }
+  .profile-social-accounts li span:last-child { grid-column:1; grid-row:auto; }
+}

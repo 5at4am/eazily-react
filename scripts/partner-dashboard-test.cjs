@@ -55,7 +55,7 @@ let browser, socket, server;
   await pause(1800);
   assert.equal(await evaluate('location.origin'),'http://127.0.0.1:5173','Browser reached the local app');
   const roles=[['professional','service','#15803D'],['influencer','influencer','#C2410C'],['consultant','consultant','#2563EB']];
-  const account={user:{id:'local-dashboard-review',testing:true},profile:{name:'Local test'},roles:roles.map(r=>r[0]),applications:roles.map(([role])=>({id:'local-'+role,role,status:'draft',details:{name:'Local test',city:'Bhopal',category:'Home & Property',services:['Electrician'],stage:5,registrationComplete:true}}))};
+   const account={user:{id:'10000000-0000-4000-8000-000000000010',testing:true},profile:{name:'Local test'},roles:roles.map(r=>r[0]),applications:roles.map(([role],index)=>({id:`10000000-0000-4000-8000-00000000001${index+1}`,role,status:'draft',details:{name:'Local test',city:'Bhopal',category:'Home & Property',services:['Electrician'],stage:5,registrationComplete:true}}))};
   await evaluate(`sessionStorage.setItem('eazily-testing-account',${JSON.stringify(JSON.stringify(account))});localStorage.setItem('eazily-language','English');`);
   for(const [role,path,colour] of roles){
     await send('Page.navigate',{url:'http://127.0.0.1:5173/seller/'+path+'/dashboard'});await pause(1400);

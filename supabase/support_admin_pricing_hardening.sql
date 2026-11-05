@@ -13,7 +13,7 @@ create policy "Ticket participants send replies" on public.support_ticket_replie
   );
 
 create or replace function public.emit_realtime_support_reply_event() returns trigger
-language plpgsql security definer set search_path=public,pg_temp as $$
+language plpgsql security definer set search_path=pg_catalog,public,pg_temp as $$
 declare ticket public.support_tickets;
 begin
   select * into ticket from public.support_tickets where id=new.ticket_id;
@@ -23,6 +23,7 @@ begin
   end if;
   return new;
 end $$;
+revoke all on function public.emit_realtime_support_reply_event() from public,anon,authenticated;
 create trigger realtime_support_ticket_replies after insert on public.support_ticket_replies
   for each row execute function public.emit_realtime_support_reply_event();
 

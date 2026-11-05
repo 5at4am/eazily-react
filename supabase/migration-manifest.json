@@ -186,7 +186,7 @@
       "cleanDatabase": "PASS in full clean local PGlite fixture; hosted Supabase compatibility pending",
       "existingDatabase": "Only if missing; inspect history, drift and data, back up first; never replay",
       "manualConfiguration": "Reviewed price/tax configuration required before publication; private schema not API-exposed",
-      "sha256": "aa0fba01f5c2b01ce5a78adad2b6bc79e34b5f096742d4e54cee4215bce82bc9"
+      "sha256": "c5f5134f4924d1b9ea3c958c4c743fff5a38be22bb5c8b36c004aec613a88a09"
     },
     {
       "sequence": 9,
@@ -207,7 +207,7 @@
       "cleanDatabase": "PASS in full clean local PGlite fixture; hosted Supabase compatibility pending",
       "existingDatabase": "Only if missing; inspect history, drift and data, back up first; never replay",
       "manualConfiguration": "Verify sanitized directory; owner/moderation gates",
-      "sha256": "c7f39ddbafa35d646d5a409ee26246481dd8b35215530cd3e66c14e56513e3db"
+      "sha256": "efba802941165e0c5043d693daddcfe937f3f5305e2058b5e52038fbeb9b7fa6"
     },
     {
       "sequence": 10,
@@ -234,7 +234,7 @@
       "cleanDatabase": "PASS in full clean local PGlite fixture; hosted Supabase compatibility pending",
       "existingDatabase": "Only if missing; inspect history, drift and data, back up first; never replay",
       "manualConfiguration": "Authenticated order/message workflows",
-      "sha256": "7a8fb87bbd014f080e5c22538137ecd7fa21fd9a434695a79b34edeba75e67a0"
+      "sha256": "c7a10b166a4d62cabd31d7f89e44ab9a2ff1e381a75b43956263888291d747b5"
     },
     {
       "sequence": 11,
@@ -745,7 +745,7 @@
       "cleanDatabase": "PASS in full clean local PGlite fixture; hosted Supabase compatibility pending",
       "existingDatabase": "Forward security patch only after all predecessors; review backup and drift; do not replay earlier SQL",
       "manualConfiguration": "Retest all role RPCs and catalog grants; unreviewed definer paths fail closed except the exact-fingerprint Supabase public.rls_auto_enable() event-trigger helper",
-      "sha256": "6e4098837015641c0b97f674d400a95ca2561638ca5d68dde5499637dbbb4930"
+      "sha256": "5983c058db61b14ea44bff982f5a23e6700df0503ed1b36da0b0a58ea4fed740"
     },
     {
       "sequence": 27,
@@ -1203,7 +1203,7 @@
       "cleanDatabase": "PASS in focused local PGlite fixture; hosted Supabase compatibility pending",
       "existingDatabase": "Append once after verified migration history; existing profiles, posts and orders are unchanged",
       "manualConfiguration": "No payment provider or worker enabled",
-      "sha256": "4cd5a5aa1b1bbc3facb1212b4592fdc2fbe75b4c991ada701360b7b7491cd093"
+      "sha256": "bcd33cdf97d9ca87b85821e6229bd7041a495ef7707403f9b0b9e4d3ab5ea6bd"
     },
     {
       "sequence": 37,
@@ -1815,7 +1815,7 @@
       "cleanDatabase": "PASS in focused local PGlite anonymous, authenticated, publication and private-field checks; hosted verification pending",
       "existingDatabase": "Append after verified #46; public view shapes and underlying records are preserved",
       "manualConfiguration": "Verify seven Advisor findings clear and public discovery remains available on staging",
-      "sha256": "d67186b17336dde03b77c0aab24105735a17be12d58ddb957afb7401f0793b9c"
+      "sha256": "55b9d288cc56890d6b77a1b3facce0f5d6522c68219619dadb366886e2021623"
     },
     {
       "sequence": 48,
@@ -1881,7 +1881,7 @@
       "cleanDatabase": "PASS in focused local PGlite view/permission test and isolated PostgREST HTTP boundary test; hosted verification pending",
       "existingDatabase": "Append once after verified #47; no tables or records rewritten",
       "manualConfiguration": "Keep eazily_public_read_internal absent from Supabase Data API exposed schemas; after staging apply verify public views work and /rpc/read_* remains unavailable",
-      "sha256": "58e105c00c8e053e38266a1403b9ad1b134a3ac94dfe5c041153d18a47746387"
+      "sha256": "e04d96898ac820a9533c6637b8d431b37cae653af82b7a430f8fcdf466b505c6"
     },
     {
       "sequence": 49,
@@ -1916,7 +1916,7 @@
       "cleanDatabase": "PASS in local PGlite tests for discovery pricing, closed-ticket denial, reply realtime invalidation and atomic Admin pricing; hosted verification pending",
       "existingDatabase": "Append after verified migration 49; does not rewrite existing tickets, replies, or pricing history",
       "manualConfiguration": "Apply only through reviewed staging rollout; Admin RPC is limited to platform admins",
-      "sha256": "149bdc36e78a1db628548d2a84a8605d1aa5a4b51dc519f5373ee565bdc76a14"
+      "sha256": "2d66bbd13749ee84ce4ae122935aa2b50e516eaaa17aa8a99e181f5202e9a3c8"
     }
   ],
   "dependencyPolicy": "Conservative cumulative predecessor set: install every listed predecessor; later replacement functions must not be overwritten by replaying earlier scripts."

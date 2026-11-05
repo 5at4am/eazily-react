@@ -60,6 +60,10 @@ Android sync rebuilds and copies the web assets. APK creation also needs the And
 
 ## Current status
 
+The supervisor Service catalog workspace is backed by migration `20260901005000_admin_service_catalog_workflow.sql`. It seeds the current Services groups/items, makes customer browsing and partner registration read the approved database catalogue, validates new selections against active approved entries, and queues staff proposals for main-admin approval with an audit reason. Apply after the preceding migrations (including the separate assessment review migration `20260901004900_consultant_assessment_admin_review.sql`) before testing it against Supabase. Existing application, post, and booking records are not rewritten.
+
+The one-page partner profile editor uses `20260901005100_partner_profile_editor.sql`. This authenticated RPC updates only role-specific public profile fields and preserves the application status; it does not edit consent, documents, bank fields, or consultant assessments. Reconcile and apply it under the staging migration runbook before expecting profile edits to persist in a hosted workspace.
+
 Google and email OTP sign-in are enabled. Mobile authentication and mobile verification are removed. Real OTP/session and data-isolation tests passed with disposable accounts. See [the current report](docs/EMAIL-AUTH-TEST-REPORT-2026-10-23.md) for validation and remaining delivery/device checks.
 
 Do not replay existing SQL or remove tables during frontend cleanup. Both source SQL and timestamped migration history are retained; follow [the staging runbook](docs/staging/RUNBOOK.md) before any deployment.

@@ -132,6 +132,7 @@ let browser, socket;
 
   await send('Page.navigate', { url: 'http://127.0.0.1:5173/scripts/admin-responsive-fixture.html' });
   await waitFor("document.querySelector('.admin-screen')", 'staff console');
+  assert.equal(await evaluate(`(()=>{const input=document.querySelector('.admin-search input');window.dispatchEvent(new KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true,cancelable:true}));return document.activeElement===input})()`), true, 'Ctrl+K focuses staff search');
   for (const width of widths) {
     await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844), width >= 700 ? 5000 : 1200);
     const navState = await evaluate(`(()=>{const screen=document.querySelector('.admin-screen'),sidebar=document.querySelector('.admin-sidebar'),s=getComputedStyle(screen),n=sidebar.getBoundingClientRect();return {display:s.display,columns:s.gridTemplateColumns,sidebarWidth:n.width,navScroll:sidebar.scrollWidth,navClient:sidebar.clientWidth}})()`);
@@ -141,7 +142,7 @@ let browser, socket;
     } else {
       assert.equal(navState.display, 'block', `Staff navigation collapses to the compact mobile pattern at ${width}px`);
       assert.ok(navState.navClient > 0, `Staff navigation is available at ${width}px`);
-      assert.ok(await evaluate(`[...document.querySelectorAll('.admin-sidebar > button')].every(button=>getComputedStyle(button.querySelector('span')||button).display!=='none')`), `Staff mobile navigation labels remain visible at ${width}px`);
+      assert.ok(await evaluate(`[...document.querySelectorAll('.admin-nav-item > button')].every(button=>getComputedStyle(button.querySelector('span')||button).display!=='none')`), `Staff mobile navigation labels remain visible at ${width}px`);
     }
     if ([640, 1440].includes(width)) await capture(`staff-${width}`);
     console.log(`PASS staff console ${width}px`);

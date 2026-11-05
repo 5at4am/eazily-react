@@ -159,8 +159,8 @@ export function catalogServiceNames(name) {
     .map(([legacy]) => legacy)];
 }
 
-export function createSearchIndex() {
-  return catalog.flatMap((main) => {
+export function createSearchIndex(sourceCatalog = catalog) {
+  return sourceCatalog.flatMap((main) => {
     const root = [{ name: main.label, path: main.label, mainId: main.id }];
     const grouped = (main.groups ?? []).flatMap((group) => [
       { name: group.label, path: `${main.label} → ${group.label}`, mainId: main.id, groupId: group.id },

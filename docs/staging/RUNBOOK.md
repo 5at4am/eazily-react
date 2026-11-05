@@ -6,7 +6,7 @@ Read-only hosted checks completed during this review: 89 public application tabl
 
 ## Canonical migration path
 
-[`supabase/migration-manifest.json`](../../supabase/migration-manifest.json) contains 48 canonical application SQL files used by local regression tests. `supabase/migrations/` also contains timestamped copies, compatibility changes, and diagnostic migrations. These are different execution paths. Inspect hosted CLI history and compare definitions before choosing which missing migrations to apply. Do not replay the manifest against a database already installed through CLI migrations. All 48 manifest files pass the local fixture test; this does not prove hosted compatibility.
+[`supabase/migration-manifest.json`](../../supabase/migration-manifest.json) contains 50 canonical application SQL files used by local regression tests. `supabase/migrations/` also contains timestamped copies, compatibility changes, and diagnostic migrations. These are different execution paths. Inspect hosted CLI history and compare definitions before choosing which missing migrations to apply. Do not replay the manifest against a database already installed through CLI migrations. All 50 manifest files pass the local fixture test; this does not prove hosted compatibility.
 
 Do **not** run `supabase db push` or either manual migration runner until the hosted history has been reconciled with both local paths. Both manual runners still target the earlier project `ahwbgmnfmzsaiwjglbkb`; they intentionally reject the current link. Do not change that reference simply to bypass the check. Timestamped diagnostic migrations and database-wide timeout settings also need review before a new deployment. Do not invent migration history or use migration repair to hide differences.
 

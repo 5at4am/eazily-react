@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Icon from './Icon.jsx';
 import { translate } from '../lib/translate.js';
-import { catalog } from '../data/catalog.js';
+import { useCatalog } from '../data/useCatalog.js';
 import { useAccount, requestSignIn } from '../lib/account.js';
 import './customer-drawer.css';
 
@@ -28,6 +28,7 @@ export default function CustomerDrawer({
   onAddRole,
   onWorkspace
 }) {
+  const catalog = useCatalog();
   const drawer = useRef(null);
   const closeButton = useRef(null);
   const restoreFocus = useRef(null);

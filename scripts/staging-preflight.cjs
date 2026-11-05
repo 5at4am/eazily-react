@@ -49,7 +49,7 @@ const timestampedFiles=fs.existsSync(timestampedDir)?fs.readdirSync(timestampedD
 const hasTimestampedCopy=file=>timestampedFiles.some(name=>/^\d{14}_/.test(name)&&name.endsWith(`_${file}`));
 const supplementalSafe=file=>testOnlySeeds.includes(file)||hasTimestampedCopy(file);
 const manifestFilesPresent=filenames.every(file=>fs.existsSync(path.join('supabase',file)));
-record('Canonical SQL inventory',new Set(filenames).size===filenames.length&&manifestFilesPresent&&rootSql.every(f=>filenames.includes(f)||excludedDrafts.includes(f)||supplementalSafe(f)),'48 manifest files; legal test seeds are excluded and the email-identity source is represented in timestamped history');
+record('Canonical SQL inventory',new Set(filenames).size===filenames.length&&manifestFilesPresent&&rootSql.every(f=>filenames.includes(f)||excludedDrafts.includes(f)||supplementalSafe(f)),'50 manifest files; legal test seeds are excluded and the email-identity source is represented in timestamped history');
 record('Migration execution path reconciled',!fs.existsSync('supabase/migrations')||fs.readdirSync('supabase/migrations').length===0,'timestamped migrations coexist with the manifest; inspect hosted history before choosing an execution path');
 const migrations=manifest.migrations.map(m=>({sequence:m.sequence,file:m.file,sha256:createHash('sha256').update(fs.readFileSync(path.join('supabase',m.file))).digest('hex'),status:'blocked'}));
 record('Manifest checksums',migrations.every((m,i)=>m.sha256===manifest.migrations[i].sha256),'local file hashes must match reviewed manifest; this is not remote migration history');

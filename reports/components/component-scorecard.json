@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-05",
+  "scale": {
+    "range": "0-10",
+    "dimensions": {
+      "visual_consistency": 15,
+      "structure_and_architecture": 15,
+      "layout_and_alignment": 10,
+      "readability": 15,
+      "functionality": 15,
+      "accessibility": 10,
+      "responsiveness": 10,
+      "maintainability": 10
+    }
+  },
+  "inventory_source": "reports/components/component-inventory.json",
+  "policy": "Do not award a numeric score to an unverified dimension. Route-level browser success does not score every component on that route. No whole-application numeric score is calculated because the available evidence does not support it.",
+  "coverage": {
+    "components_in_inventory": 221,
+    "components_with_full_dimension_scores": 0,
+    "components_with_partial_dimension_scores": 0,
+    "components_not_individually_scored": 221,
+    "overall_score": "NOT_CALCULATED",
+    "confidence": "LOW for application-wide quality; moderate for source inventory completeness",
+    "tested_component_states": "Selective journey-level browser testing only; no exhaustive component-state coverage"
+  },
+  "components": [],
+  "note": "Per-component records are intentionally not fabricated. All 221 inventory records carry NOT_TESTED visual, functional, and accessibility statuses. Add score records only after independent evidence is collected for each dimension; use NOT_TESTED for all other dimensions."
+}

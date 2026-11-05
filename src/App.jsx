@@ -7,6 +7,7 @@ import { AccountContext } from './lib/account.js';
 import { RealtimeProvider, useRealtimeController } from './lib/realtime.jsx';
 import { ConsumerPolicyPage } from './features/legal/ConsumerLegal.jsx';
 import { catalog } from './data/catalog.js';
+import { CatalogProvider } from './data/catalogContext.jsx';
 import { artworkFor, assetById } from './features/user-art/artwork.js';
 import { replaceNavigationState, useNativeShellBack } from './lib/nativeShell.js';
 import { workspacePaths } from './lib/workspace.js';
@@ -88,9 +89,10 @@ export default function App() {
   const context = { ...account, requestAuth: beginSignIn, refresh: auth.controller.refresh, logout };
   const realtime = useRealtimeController({ user: account.user, workspace: view.role, onAuthoritativeRefresh: auth.controller.refresh });
   const access = routeAccess(account, view.role);
-  const privateWorkspace = view.role !== 'customer' && ['workspace', 'registration'].includes(view.stage);
+  const privateWorkspace = view.role !== 'customer' && ['workspace', 'registration', 'profile-edit'].includes(view.stage);
   const addRole = () => setView({ stage: 'partner-choice', role: view.role });
   const editRegistration = () => setView({ stage: 'registration', role: view.role });
+  const editProfile = () => setView({ stage: 'profile-edit', role: view.role });
   const enterDemo = PARTNER_DEMO_ENABLED ? () => setView({ stage: 'demo', role: view.role }) : undefined;
   let content;
   if (auth.recovery) content = <PasswordRecoveryScreen auth={auth} onDone={() => enterCustomer()} />;
@@ -104,11 +106,12 @@ export default function App() {
   else if (account.user && auth.status === 'profile_required') content = <ProfileSetup account={account} onSaved={auth.controller.refresh} notify={notify} logout={logout} />;
   else if (account.user && ['blocked', 'suspended'].includes(auth.status)) content = <main className="setup"><h1>Account access restricted</h1><p>Contact support to review your account status.</p><button className="btn btn-outline" onClick={logout}>Sign out</button></main>;
   else if (privateWorkspace && view.role === 'admin' && access === 'allowed') content = <AdminApp notify={notify} account={account} logout={logout} />;
+  else if (privateWorkspace && view.stage === 'profile-edit' && ['allowed', 'assessment_required'].includes(access)) content = <PartnerProfileEditor key={view.role} role={view.role} application={account.applications.find(item => item.role === view.role)} notify={notify} onDone={async () => { await auth.controller.refresh(); enterPartner(view.role); }} onBack={() => enterPartner(view.role)} />;
   else if (privateWorkspace && (['registration', 'assessment_required'].includes(access) || view.stage === 'registration' && access === 'allowed')) content = <PartnerOnboarding key={view.role} role={view.role} account={account} existing={account.applications.find(item => item.role === view.role)} notify={notify} onDone={async () => { await auth.controller.refresh(); enterPartner(view.role); }} onBack={enterCustomer} onPreview={enterDemo} />;
-  else if (privateWorkspace && access === 'allowed') content = <PartnerApp key={view.role} role={view.role} account={account} notify={notify} onWorkspace={enterPartner} onAddRole={addRole} onEditRegistration={editRegistration} />;
+  else if (privateWorkspace && access === 'allowed') content = <PartnerApp key={view.role} role={view.role} account={account} notify={notify} onWorkspace={enterPartner} onAddRole={addRole} onEditRegistration={editRegistration} onEditProfile={editProfile} />;
   else if (privateWorkspace) content = <main className="setup"><h1>Workspace unavailable</h1><p>{access === 'denied' ? 'Your account does not have access to this workspace.' : `Application status: ${access.replaceAll('_', ' ')}.`}</p><button className="btn btn-outline" onClick={enterCustomer}>Customer home</button><button className="link" onClick={logout}>Sign out</button></main>;
   else content = <UserApp key={account.user?.id || 'guest'} notify={notify} account={account} onWorkspace={enterPartner} onAddRole={addRole} />;
-  return <AccountContext.Provider value={context}><RealtimeProvider value={realtime}><div className={'phone-shell peazily-ui' + (view.role === 'customer' && ['customer', 'workspace'].includes(view.stage) ? ' customer-workspace' : '')}><ConnectionNotice accountError={account.user && auth.error ? auth.error : ''} onRefresh={auth.controller.refresh}/><Suspense fallback={<Loading/>}>{content}</Suspense><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider>;
+  return <CatalogProvider><AccountContext.Provider value={context}><RealtimeProvider value={realtime}><div className={'phone-shell peazily-ui' + (view.role === 'customer' && ['customer', 'workspace'].includes(view.stage) ? ' customer-workspace' : '')}><ConnectionNotice accountError={account.user && auth.error ? auth.error : ''} onRefresh={auth.controller.refresh}/><Suspense fallback={<Loading/>}>{content}</Suspense><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider></CatalogProvider>;
 }
 function ProfileSetup({ account, onSaved, notify, logout }) {
   // Google supplies a name; only ask for what the provider did not give us.

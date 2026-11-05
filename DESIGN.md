@@ -19,27 +19,27 @@ colors:
   on-primary: "#FFFFFF"
 typography:
   page-title:
-    fontFamily: Manrope
+    fontFamily: Poppins
     fontSize: 21px
     fontWeight: 800
     lineHeight: 1.25
   section-title:
-    fontFamily: Manrope
+    fontFamily: Poppins
     fontSize: 17px
     fontWeight: 800
     lineHeight: 1.35
   body:
-    fontFamily: Manrope
+    fontFamily: DM Sans
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.5
   micro:
-    fontFamily: Manrope
+    fontFamily: DM Sans
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
   supporting:
-    fontFamily: Manrope
+    fontFamily: DM Sans
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.5
@@ -90,7 +90,7 @@ components:
 
 ## Overview
 
-Eazily connects Indian customers with vetted local service professionals and other independent partners. Customers discover and book services; partners handle enquiries, bookings, profiles, and earnings; staff manage marketplace operations. Most sessions are mobile-first and may run on mid-range Android devices. The system uses bright working surfaces, strong ink, and deliberate brand/role colors. Partner Home takes its lilac accent from the supplied “Daily work / Business growth” reference. Manrope is bundled with the app and supports the product's Latin-script UI; retain the system fallback for other scripts.
+Eazily connects Indian customers with vetted local service professionals and other independent partners. Customers discover and book services; partners handle enquiries, bookings, profiles, and earnings; staff manage marketplace operations. Most sessions are mobile-first and may run on mid-range Android devices. The system uses bright working surfaces, strong ink, and deliberate brand/role colors. Partner Home takes its lilac accent from the supplied “Daily work / Business growth” reference. Poppins is used for headings and DM Sans for body text and controls. Both are self-hosted under the SIL Open Font License. Poppins includes a Devanagari subset; DM Sans falls back to the system Devanagari font for non-Latin text.
 
 ## Colors
 
@@ -100,7 +100,7 @@ Contrast checks use WCAG relative luminance: `#19172C` on white is 17.3:1; `#535
 
 ## Typography
 
-Use the bundled Manrope variable font. Use 21–24px page headings, 17–18px section headings, and 14–16px body, form-label, and supporting text. Reserve 12px for genuinely secondary metadata and navigation labels; never use smaller text for essential content. Values and status must remain understandable at 200% zoom and with Hindi translations.
+Use Poppins for headings and DM Sans for body text, controls, and navigation. Use 21–24px page headings, 17–18px section headings, and 14–16px body, form-label, and supporting text. Reserve 12px for genuinely secondary metadata and navigation labels; never use smaller text for essential content. Values and status must remain understandable at 200% zoom and with Hindi translations.
 
 ## Layout
 

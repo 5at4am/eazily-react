@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import Icon from '../../components/Icon.jsx';
 import { Field } from '../../components/Ui.jsx';
-import { canonicalCatalogService, catalog } from '../../data/catalog.js';
+import { canonicalCatalogService } from '../../data/catalog.js';
+import { useCatalog } from '../../data/useCatalog.js';
 import { supabase } from '../../lib/supabase.js';
 import { saveServicePartnerPost } from '../../services/partners.js';
 import ServiceIllustration from '../user-art/ServiceIllustration.jsx';
@@ -13,8 +14,7 @@ const PRICING = ['Fixed Price', 'Starting Price', 'Inspection-Based Quote'];
 const travelsToCustomer = place => ['At the customer’s location', 'Both'].includes(place);
 const money = value => value === '' || value == null ? '—' : `₹${Number(value).toLocaleString('en-IN')}`;
 
-function registeredServices(profile) {
-  const groups = catalog.find(item => item.id === 'manpower').groups;
+function registeredServices(profile, groups) {
   const current = item => {
     const serviceName = canonicalCatalogService(item.serviceName || item.serviceId);
     const group = groups.find(entry => entry.items.includes(serviceName));
@@ -50,6 +50,8 @@ function startingValues(post, profile, cached) {
 }
 
 export default function ServicePostForm({ post, application, accountId, notify, onDone }) {
+  const catalog = useCatalog();
+  const groups = catalog.find(item => item.id === 'manpower').groups;
   const profile = application?.details || {};
   const idRef = useRef(post?.id || crypto.randomUUID());
   const lock = useRef(false);
@@ -62,7 +64,7 @@ export default function ServicePostForm({ post, application, accountId, notify, 
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState('');
   const [success, setSuccess] = useState(null);
-  const services = registeredServices(profile);
+  const services = registeredServices(profile, groups);
   const canVisit = travelsToCustomer(profile.servicePlace);
 
   function update(change) {

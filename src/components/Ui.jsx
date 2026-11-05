@@ -8,7 +8,7 @@ const openSheets = [];
 export function Brand() {
   return <span className="eazily-name">{translate("Eazily")}</span>;
 }
-const userNav = [["home", "home", "Home"], ["categories", "compass", "Explore"], ["messages", "messageCircle", "Messages"], ["videos", "clapperboard", "Videos"], ["profile", "person", "Profile"]];
+const userNav = [["home", "home", "Home"], ["categories", "compass", "Services"], ["bookings", "clipboard", "Bookings"], ["messages", "messageCircle", "Messages"], ["profile", "person", "Profile"]];
 export function BottomNav({
   route,
   onChange,
@@ -45,8 +45,8 @@ export function BottomNav({
   }, []);
   const items = customItems ?? (seller ? [["home", "home", "Home"], ["messages", "message", "Messages"], ["post", "plus", "Post"], ["orders", "clipboard", "Orders"], ["profile", "person", "Profile"]] : userNav);
   const customerNav = !seller && !customItems;
-  return <nav aria-label={seller ? "Partner navigation" : "Main navigation"} className={`bottom-nav ${seller ? "seller-nav" : ""} ${customerNav ? "customer-nav" : ""}`}>
-      {translate(items.map(([id, icon, label]) => <button type="button" key={id} aria-current={route === id ? "page" : undefined} className={`nav-item ${route === id ? "active" : ""} ${id === "post" ? "post-nav" : ""}`} onClick={() => id === "post" ? onPost?.() : onChange(id)}>
+  return <nav aria-label={seller ? "Partner navigation" : "Main navigation"} style={{ '--nav-item-count': items.length }} className={`bottom-nav ${seller ? "seller-nav partner-nav" : ""} ${customerNav ? "customer-nav" : ""}`}>
+      {translate(items.map(([id, icon, label]) => <button type="button" key={id} aria-label={id === 'post' ? translate('Create a post') : undefined} aria-current={route === id ? "page" : undefined} className={`nav-item ${route === id ? "active" : ""} ${id === "post" ? "post-nav" : ""}`} onClick={() => id === "post" ? onPost?.() : onChange(id)}>
           <span className="nav-icon"><Icon name={icon} size={customerNav ? 22 : id === "post" ? 26 : 19} />{id === 'messages' && unread > 0 && <b className="nav-unread" aria-label={`${unread} unread messages`}>{unread > 99 ? '99+' : unread}</b>}</span>
           {translate(label)}
         </button>))}
@@ -147,10 +147,11 @@ export function Field({
   const id = useId();
   const describedBy = [props['aria-describedby'], hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined;
   const fieldProps = { ...props, id: props.id || id, 'aria-describedby': describedBy, 'aria-invalid': error ? true : props['aria-invalid'] };
+  const selectOptions = options.map(option => typeof option === 'string' ? { value: option, label: option } : option);
   const Element = as;
   return <label className="field-wrap">
       <span className="form-label">{translate(label)}</span>
-      {translate(as === "select" ? <select className="field" {...fieldProps}>{props.value === '' && !options.includes('') && <option value="" disabled>{translate('Select an option')}</option>}{translate(options.map(option => <option key={option} value={option}>{translate(option)}</option>))}</select> : as === "textarea" ? <textarea className="field area" {...fieldProps} /> : <Element className="field" {...fieldProps} />)}
+       {translate(as === "select" ? <select className="field" {...fieldProps}>{props.value === '' && !selectOptions.some(option => option.value === '') && <option value="" disabled>{translate('Select an option')}</option>}{translate(selectOptions.map(option => <option key={option.value} value={option.value}>{translate(option.label)}</option>))}</select> : as === "textarea" ? <textarea className="field area" {...fieldProps} /> : <Element className="field" {...fieldProps} />)}
       {hint && <span className="field-hint" id={`${id}-hint`}>{translate(hint)}</span>}
       {error && <span className="field-error" id={`${id}-error`} aria-live="polite">{translate(error)}</span>}
     </label>;

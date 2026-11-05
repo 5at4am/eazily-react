@@ -2,7 +2,8 @@ import { translate } from "../lib/translate.js";
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Icon from "../components/Icon.jsx";
 import { BottomNav, EmptyState, SearchBox } from "../components/Ui.jsx";
-import { catalog, createSearchIndex } from "../data/catalog.js";
+import { createSearchIndex } from "../data/catalog.js";
+import { useCatalog } from '../data/useCatalog.js';
 import { displayInfluencerCategory } from "../data/influencerCategories.js";
 import { displayConsultantCategory } from "../data/consultantCategories.js";
 import RequestSheet from "../features/requests/RequestSheet.jsx";
@@ -26,11 +27,13 @@ import CustomerDrawer from '../components/CustomerDrawer.jsx';
 import { getCustomerProfessionalById } from '../services/marketplace.js';
 import BulkOrders from '../features/bulk-orders/BulkOrders.jsx';
 import CustomerVideos from '../features/videos/CustomerVideos.jsx';
+import { CustomerPartnerBookings } from '../features/services/PartnerOfferings.jsx';
 import { PARTNER_DEMO_ENABLED } from '../features/partners/demo/config.js';
 import { isSupabaseConfigured } from '../lib/supabase.js';
 export default function UserApp({
   notify, account, onWorkspace, onAddRole
 }) {
+  const catalog = useCatalog();
   const isolatedDemo = PARTNER_DEMO_ENABLED && !isSupabaseConfigured && !account?.user;
   const { revision: realtimeRevision } = useRealtime();
   const [navigation] = useState(() => createCustomerNavigator(window, { owner: account?.user?.id || 'guest' }));
@@ -109,7 +112,7 @@ export default function UserApp({
     if (origin) navigation.go({ bulkOrdersOrigin: origin, service: null, vendor: null });
     else navigation.back();
   }
-  const searchIndex = useMemo(createSearchIndex, []);
+  const searchIndex = useMemo(() => createSearchIndex(catalog), [catalog]);
   const results = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return [];
@@ -193,9 +196,13 @@ export default function UserApp({
   function Messages() {
     return <main className="screen"><header className="topbar"><h1 className="greeting">{translate("Messages")}</h1></header><ChatWorkspace initialConversationId={chatTarget} onConversationHandled={() => setChatTarget(null)} notify={notify} /><BottomNav route={route} onChange={navigate} /></main>;
   }
+  function Bookings() {
+    return <main className="screen customer-bookings-page"><header className="topbar"><h1 className="greeting">{translate('My Bookings')}</h1><p>{translate('Check replies, prices and booking progress here.')}</p></header><CustomerPartnerBookings notify={notify} onBrowse={() => navigate('categories')} /><BottomNav route={route} onChange={navigate} /></main>;
+  }
   const pages = {
     home: Home(),
     categories: Categories(),
+    bookings: Bookings(),
     messages: Messages(),
     videos: <CustomerVideos route={route} onNavigate={navigate} notify={notify} />,
     profile: <CustomerAccount initialPanel={profileSheet} onInitialHandled={setProfileSheet} notify={notify} onVendor={openVendor} onNavigate={navigate} account={account} onWorkspace={onWorkspace} onAddRole={onAddRole} />
@@ -207,7 +214,7 @@ export default function UserApp({
   const activePage = bulkOrdersOrigin ? <BulkOrders profile={account?.profile} accountId={account?.user?.id} onBack={() => setBulkOrdersOrigin(null)} /> : servicePage || pages[route] || pages.home;
   const main = catalog.find(category => category.id === selectedMain);
   const group = main?.groups?.find(item => item.id === selectedGroup);
-  const title = bulkOrdersOrigin ? 'Bulk orders' : service ? (vendor ? 'Professional profile' : service.serviceName) : route === 'categories' ? (group?.label || main?.label || 'Explore services') : ({ home: 'Home', messages: 'Messages', videos: 'Videos', profile: 'My profile' }[route] || 'Home');
+  const title = bulkOrdersOrigin ? 'Bulk orders' : service ? (vendor ? 'Professional profile' : service.serviceName) : route === 'categories' ? (group?.label || main?.label || 'Services') : ({ home: 'Home', bookings: 'My Bookings', messages: 'Messages', videos: 'Videos', profile: 'My profile' }[route] || 'Home');
   const drilledIn = Boolean(service || bulkOrdersOrigin || selectedMain || selectedGroup || vendor);
   const showAppBar = route !== 'home' || drilledIn;
   useEffect(() => {

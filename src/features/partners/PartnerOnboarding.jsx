@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Field } from '../../components/Ui.jsx';
 import Icon from '../../components/Icon.jsx';
-import { catalog } from '../../data/catalog.js';
+import { useCatalog } from '../../data/useCatalog.js';
 import { influencerCategories, displayInfluencerCategory } from '../../data/influencerCategories.js';
 import { consultantCategories, displayConsultantCategory } from '../../data/consultantCategories.js';
 import { partnerRoles } from '../../data/partners.js';
@@ -223,6 +223,7 @@ function Step({ role, stage, values, setValues, notify, onEdit, openLegal, conse
 }
 
 function ServiceSelection({ values, setValues }) {
+  const catalog = useCatalog();
   const groups = catalog.find(item => item.id === 'manpower').groups;
   const selected = groups.find(item => item.label === values.category);
   return <>{<Field label="Primary service category" as="select" options={['', ...groups.map(item => item.label)]} value={values.category || ''} onChange={event => setValues(current => ({ ...current, category: event.target.value, services: [] }))} required />}<div className="chip-grid">{(selected?.items || []).map(service => <label className={values.services?.includes(service) ? 'selected' : ''} key={service}><input type="checkbox" checked={values.services?.includes(service) || false} onChange={event => setValues(current => ({ ...current, services: event.target.checked ? [...(current.services || []), service] : current.services.filter(item => item !== service) }))} />{service}</label>)}</div></>;

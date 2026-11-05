@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Field, Sheet } from '../../components/Ui.jsx';
 import Icon from '../../components/Icon.jsx';
-import { canonicalCatalogService, catalog } from '../../data/catalog.js';
+import { canonicalCatalogService } from '../../data/catalog.js';
+import { useCatalog } from '../../data/useCatalog.js';
 import { partnerRoles } from '../../data/partners.js';
 import { isSupabaseConfigured } from '../../lib/supabase.js';
 import { getServicePartnerLegalDocuments, saveApplication, submitServicePartnerApplication } from '../../services/partners.js';
@@ -16,14 +17,13 @@ import { LookupHint, PresetChips } from './RegistrationAssist.jsx';
 import { confirmedEmail } from '../../auth/policy.js';
 
 const VERSION = 'service-registration-2026-09-14';
-const groups = catalog.find(item => item.id === 'manpower').groups;
 const titles = ['Aapki Jaankari / Your Details', 'Aapki Dukaan / Shop Details', 'Aap Kya Kaam Karte Hain? / Your Services', 'Kaam Ki Preferences / Work Preferences', 'Payment Details / Bank Details', 'Documents & Final Submit / Documents Aur Jama Karein'];
 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const referrals = ['', 'Referral', 'Instagram', 'WhatsApp', 'YouTube', 'Facebook', 'Google', 'Eazily Team', 'Friend', 'Other'];
 const today = new Date().toISOString().slice(0, 10);
 const isTestPolicy = row => Boolean(row) && (/^test-only-/i.test(String(row.version || '')) || /^TEST ONLY/i.test(String(row.title || '')));
 
-function normalize(existing, account) {
+function normalize(existing, account, groups) {
   const saved = existing?.details || {};
   let selections = Array.isArray(saved.serviceSelections) ? saved.serviceSelections : [];
   if (!selections.length && saved.services?.length) {
@@ -81,9 +81,11 @@ function payload(values, legal, submit = false) {
 }
 
 export default function ServicePartnerOnboarding({ existing, account, notify, onDone, onBack, onPreview }) {
-  const [values, setValues] = useState(() => normalize(existing, account));
+  const catalog = useCatalog();
+  const groups = catalog.find(item => item.id === 'manpower').groups;
+  const [values, setValues] = useState(() => normalize(existing, account, groups));
   const [application, setApplication] = useState(existing || null);
-  const [stage, setStage] = useState(() => normalize(existing, account).stage);
+  const [stage, setStage] = useState(() => normalize(existing, account, groups).stage);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [legalRows, setLegalRows] = useState([]);
@@ -199,7 +201,7 @@ export default function ServicePartnerOnboarding({ existing, account, notify, on
     <section className="partner-form-card">{application?.review_notes && <div className="safety-card"><b>Changes requested</b><p>{application.review_notes}</p></div>}
       {!isSupabaseConfigured && <p className="testing-notice" role="status">Local testing only. Drafts stay in this browser session and are lost on refresh. Complete registration cannot submit without live email verification and the backend. Demo Mode, when enabled, uses isolated sample data.</p>}
       <form onSubmit={submit} noValidate>
-        <ServiceStep stage={stage} values={values} update={update} setValues={setValues} errors={errors} notify={notify} legal={legal} legalLoading={legalLoading} legalError={legalError} reloadLegal={reloadLegal} openLegal={setOpenDocument} onEdit={setStage} />
+        <ServiceStep stage={stage} groups={groups} values={values} update={update} setValues={setValues} errors={errors} notify={notify} legal={legal} legalLoading={legalLoading} legalError={legalError} reloadLegal={reloadLegal} openLegal={setOpenDocument} onEdit={setStage} />
         {SERVICE_REGISTRATION_TEST_SKIP_ENABLED && !isSupabaseConfigured && <div className="service-registration-test-skip"><small>Testing only</small><button type="button" className="btn btn-outline" disabled={busy} onClick={skipForTesting}>{stage === 5 && onPreview ? 'Open Demo dashboard' : 'Skip for now'}</button></div>}
         <div className="registration-actions"><button type="button" className="link" disabled={busy} onClick={() => persist(stage, true)}>Save &amp; Exit</button>{stage > 0 && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setStage(stage - 1)}>Back</button>}{stage < 5 ? <button type="button" className="btn btn-primary" disabled={busy} onClick={continueStep}>Continue</button> : <button className="btn btn-primary" disabled={busy}>{busy ? 'Submitting…' : 'Complete registration'}</button>}</div>
       </form>
@@ -208,11 +210,11 @@ export default function ServicePartnerOnboarding({ existing, account, notify, on
   </main>;
 }
 
-function ServiceStep({ stage, values, update, setValues, errors, notify, legal, legalLoading, legalError, reloadLegal, openLegal, onEdit }) {
+function ServiceStep({ stage, groups, values, update, setValues, errors, notify, legal, legalLoading, legalError, reloadLegal, openLegal, onEdit }) {
   const field = (name, label, props = {}) => <div key={name}><Field label={label} value={values[name] ?? ''} aria-invalid={Boolean(errors[name])} aria-describedby={errors[name] ? `${name}-error` : undefined} onChange={event => update(name, event.target.value)} {...props} />{errors[name] && <p id={`${name}-error`} className="inline-error" role="alert">{errors[name]}</p>}</div>;
   if (stage === 0) return <ServiceDetails values={values} update={update} field={field} errors={errors} notify={notify} />;
   if (stage === 1) return <ShopDetails values={values} update={update} field={field} errors={errors} />;
-  if (stage === 2) return <ServiceSelection values={values} setValues={setValues} update={update} field={field} errors={errors} />;
+  if (stage === 2) return <ServiceSelection groups={groups} values={values} setValues={setValues} update={update} field={field} errors={errors} />;
   if (stage === 3) return <WorkPreferences values={values} update={update} field={field} errors={errors} />;
   if (stage === 4) return <BankDetails values={values} update={update} field={field} errors={errors} />;
   return <DocumentsAndReview values={values} setValues={setValues} update={update} errors={errors} legal={legal} legalLoading={legalLoading} legalError={legalError} reloadLegal={reloadLegal} openLegal={openLegal} onEdit={onEdit} />;
@@ -244,7 +246,7 @@ function ShopDetails({ values, update, field, errors }) {
   return <><p className="step-intro">Apni dukaan aur address ki jaankari dein. Suggested details can always be corrected.</p>{field('businessName', 'Shop or business name', { required: true })}{field('shopOwnership', 'Shop ownership', { as: 'select', options: ['', 'Owned', 'Rented'], required: true })}<section className="registration-subcard"><h3>Shop address</h3><div><Field label="PIN code" value={values.pinCode} inputMode="numeric" autoComplete="postal-code" maxLength={6} required aria-invalid={Boolean(errors.pinCode)} aria-describedby={errors.pinCode ? 'pinCode-error' : 'pinCode-lookup'} onChange={event => update('pinCode', event.target.value.replace(/\D/g, '').slice(0, 6))} />{errors.pinCode && <p id="pinCode-error" className="inline-error" role="alert">{errors.pinCode}</p>}<LookupHint id="pinCode-lookup" state={pin} idle="Enter your 6-digit PIN first — city and state fill automatically." found={result => `${result.city}, ${result.state} — city and state filled. You can edit them.`} notFound="PIN not found. Enter city and state manually." /></div>{field('address', 'Address', { required: true, autoComplete: 'street-address' })}{field('locality', 'Area / locality', { required: true, list: pin.result?.localities?.length ? 'service-pin-localities' : undefined })}{pin.result?.localities?.length > 0 && <datalist id="service-pin-localities">{pin.result.localities.map(name => <option key={name} value={name} />)}</datalist>}{field('city', 'City', { required: true })}{field('state', 'State', { required: true })}{field('landmark', 'Landmark — Optional')}</section>{field('referralSource', 'How did you hear about Eazily? — Optional', { as: 'select', options: referrals })}{values.referralSource === 'Other' && field('referralOther', 'Please specify — Optional')}</>;
 }
 
-function ServiceSelection({ values, setValues, update, field, errors }) {
+function ServiceSelection({ groups, values, setValues, update, field, errors }) {
   const [active, setActive] = useState(values.serviceSelections[0]?.categoryId || groups[0].id);
   const [search, setSearch] = useState('');
   const group = groups.find(item => item.id === active) || groups[0];

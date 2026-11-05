@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Field, Sheet } from '../../components/Ui.jsx';
+import { EmptyState, Field, Sheet } from '../../components/Ui.jsx';
 import { readRows, rpc } from '../../services/experience.js';
 import { useAccount, requestSignIn } from '../../lib/account.js';
 import { translate as t } from '../../lib/translate.js';
@@ -25,7 +25,7 @@ export default function PartnerOfferings({ notify, role, service, city, onMessag
     </Sheet>}
   </section>;
 }
-export function CustomerPartnerBookings({notify}) {
+export function CustomerPartnerBookings({notify, onBrowse}) {
   const rebookKey = useRef(crypto.randomUUID());
   const rebooking = useRef(false);
   const {revision}=useRealtime();
@@ -52,7 +52,7 @@ export function CustomerPartnerBookings({notify}) {
         <small>{t(status)} · {new Date(record.created_at).toLocaleString('en-IN')}{type==='partner'&&record.deadline&&' · '+t('Preferred')+' '+new Date(record.deadline).toLocaleString('en-IN')}</small>
       </button>;
     })}
-    {!loading&&!error&&!merged.length&&<p>{t('No bookings yet')}</p>}
+     {!loading&&!error&&!merged.length&&<EmptyState title={t('No bookings yet')} text={t('When you send a request, its updates will appear here.')} actionLabel={t('Browse services')} onAction={onBrowse} />}
     {currentRequest&&<Sheet onClose={()=>setSelectedRequest(null)}>
       <GeneralRequestDetail key={currentRequest.id} request={currentRequest} vendorName={vendorNames[currentRequest.assigned_vendor_id]} notify={notify} onChange={load}/>
     </Sheet>}

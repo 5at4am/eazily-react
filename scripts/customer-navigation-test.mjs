@@ -56,6 +56,9 @@ assert.equal(nav.getSnapshot().canForward, false, 'New navigation after Back tru
 nav.back();
 assert.equal(nav.getSnapshot().service.serviceName, 'Plumber');
 nav.forward(); assert.equal(nav.getSnapshot().route, 'profile');
+nav.go({ ...emptyCustomerPage, route: 'bookings' });
+assert.equal(nav.getSnapshot().route, 'bookings', 'Bookings is a supported customer destination.');
+nav.back(); assert.equal(nav.getSnapshot().route, 'profile', 'Back returns from Bookings to the previous customer screen.');
 
 // Simulate a Sheet-owned history entry, then opening a provider from Saved Vendors.
 browser.history.pushState({ ...browser.history.state, sheet: 'saved-vendors' }, '');

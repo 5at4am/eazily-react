@@ -1,0 +1,37 @@
+/* Tailwind utilities are scoped to the partner workspace; keep the app's existing
+   reset and customer/admin styles in control of the other workspaces. */
+@import "tailwindcss/theme.css" layer(theme) source(none);
+/* Legacy app CSS is intentionally unlayered. Important utilities let partner
+   screens adopt Tailwind without changing those existing customer/admin rules. */
+@import "tailwindcss/utilities.css" layer(utilities) source(none) important;
+@source "./pages/PartnerApp.jsx";
+@source "./features/partners/ServicePostList.jsx";
+@source "./components/ui/button.jsx";
+@source "./components/ui/card.jsx";
+@source "./components/ui/badge.jsx";
+@source "./components/ui/input.jsx";
+
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--brand-fill);
+  --color-primary-foreground: var(--on-brand);
+  --color-secondary: var(--surface-soft);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--surface-soft);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent: var(--brand-tint);
+  --color-accent-foreground: var(--brand-deep);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: #fff;
+  --color-border: var(--divider);
+  --color-input: var(--control-border);
+  --color-ring: var(--brand);
+  --radius-sm: var(--radius-small);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-card);
+}

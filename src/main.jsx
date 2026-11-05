@@ -11,6 +11,7 @@ import './design-system.css';
 import './features/home/marketplace-home.css';
 import './responsive.css';
 import './app-redesign.css';
+import './tailwind.css';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

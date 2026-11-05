@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { translate } from '../../lib/translate.js';
-import { catalog } from '../../data/catalog.js';
+import { useCatalog } from '../../data/useCatalog.js';
 import { displayInfluencerCategory } from '../../data/influencerCategories.js';
 import { displayConsultantCategory } from '../../data/consultantCategories.js';
 import { EmptyState, Sheet } from '../../components/Ui.jsx';
@@ -54,6 +54,7 @@ function Reviews({ service, notify }) {
 }
 
 export function ServiceSections({ service, vendors, onService, onVendor, notify, policy }) {
+  const catalog = useCatalog();
   const group = catalog.find(category => category.id === service.categoryId)?.groups?.find(item => item.items.includes(service.serviceName));
   const related = service.serviceName === 'Plumber' ? ['Tap repair', 'Leakage repair', 'Basin installation', 'Drain cleaning'] : (group?.items || []).filter(name => name !== service.serviceName).slice(0, 6);
   const url = experienceLink(service);
@@ -71,6 +72,7 @@ export function ServiceSections({ service, vendors, onService, onVendor, notify,
 }
 
 export default function ServiceExperience({ service, vendor, setVendor, onService, onBook, onMessage, onBack, onCloseVendor, location, setLocation, notify, demoMode = false, managedNavigation = false }) {
+  const catalog = useCatalog();
   const { revision } = useRealtime();
   const [vendors, setVendors] = useState([]);
   const [policy, setPolicy] = useState(null);
