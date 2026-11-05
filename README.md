@@ -4,7 +4,7 @@ Eazily’s original HTML/CSS/JavaScript prototype converted into a modular React
 
 ## Requirements
 
-- Node.js 24 LTS
+- Node.js 24 LTS or newer
 - npm 11 or newer
 
 ## Run on Windows in VS Code
