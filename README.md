@@ -16,7 +16,7 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-Open the local URL shown in the terminal, normally `http://localhost:5173`.
+Open the local URL shown in the terminal (usually `http://localhost:5173`).
 
 Do not use Live Server for this React project. Vite is the development server.
 
