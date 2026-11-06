@@ -299,6 +299,10 @@
 .admin-screen .partner-admin-consent input { width: 20px; height: 20px; flex: 0 0 auto; accent-color: var(--admin-accent); }
 .admin-screen .partner-admin-view { min-width: 0; }
 .admin-screen .partner-admin-view .form-grid { gap: 12px; }
+.admin-screen .post-pricing-readiness { margin: 14px 0; padding: 12px 14px; border: 1px solid #9bc9ad; border-radius: 10px; background: #f0fdf4; color: #14532d; }
+.admin-screen .post-pricing-readiness.needs-attention { border-color: #e9bd86; background: #fff7ed; color: #7c2d12; }
+.admin-screen .post-pricing-readiness b { display: block; font-size: 14px; }
+.admin-screen .post-pricing-readiness p { margin: 5px 0 0; color: inherit; line-height: 1.5; }
 
 @media (max-width: 900px) {
   .admin-screen .admin-sidebar { width: 76px; padding-inline: 8px; }

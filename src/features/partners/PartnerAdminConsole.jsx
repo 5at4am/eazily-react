@@ -156,7 +156,7 @@ export default function PartnerAdminConsole({ notify, canManagePricing = false }
       </section>}
 
       {activeSection === 'posts' && <>
-        <ServicePostApprovalAdmin notify={notify} />
+        <ServicePostApprovalAdmin notify={notify} canManagePricing={canManagePricing} />
         <section className="admin-panel partner-admin-panel">
           <div className="partner-admin-panel-heading">
             <div><h3>Creator and consultant posts</h3><p>Publish or reject non-professional posts after review.</p></div>

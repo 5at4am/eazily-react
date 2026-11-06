@@ -1917,6 +1917,21 @@
       "existingDatabase": "Append after verified migration 49; does not rewrite existing tickets, replies, or pricing history",
       "manualConfiguration": "Apply only through reviewed staging rollout; Admin RPC is limited to platform admins",
       "sha256": "149bdc36e78a1db628548d2a84a8605d1aa5a4b51dc519f5373ee565bdc76a14"
+    },
+    {
+      "sequence": 51,
+      "file": "service_post_decision_reasons.sql",
+      "objects": [
+        "public.service_post_approval_decisions admin_changes_requested decision",
+        "public.admin_review_post distinct changes-requested audit status"
+      ],
+      "requiredPredecessors": [
+        "service_partner_fast_approval.sql"
+      ],
+      "cleanDatabase": "PASS in full ordered migration regression and focused Service Partner decision regression; hosted Supabase compatibility pending",
+      "existingDatabase": "Append once after verified migration history; preserves prior decisions and gives new changes requests a distinct audit label",
+      "manualConfiguration": "No configuration change; publishing remains guarded by server-side pricing and approval checks",
+      "sha256": "2214192811e9dbd5f59a040b937b9f022d2eb777a9b41ee368e05c3710db6429"
     }
   ],
   "dependencyPolicy": "Conservative cumulative predecessor set: install every listed predecessor; later replacement functions must not be overwritten by replaying earlier scripts."

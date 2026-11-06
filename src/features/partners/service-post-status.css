@@ -1,0 +1,18 @@
+.role-professional .service-status-changes_required {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.role-professional .service-status-rejected {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.role-professional .service-next-step {
+  padding: 10px 12px;
+  border-left: 3px solid var(--role);
+  border-radius: 4px;
+  background: var(--role-bg);
+  color: var(--navy) !important;
+  font-size: 13px !important;
+}
