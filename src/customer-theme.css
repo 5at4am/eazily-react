@@ -1,4 +1,4 @@
-/* Compatibility for customer selectors; palette values come from design-system.css. */
+/* Customer theme compatibility selectors consume the shared tokens in style.css. */
 html[data-customer-theme="dark"]:has(.customer-workspace) body { background:var(--paper); }
 html[data-customer-theme="dark"] .customer-workspace {
   --purple:var(--brand);

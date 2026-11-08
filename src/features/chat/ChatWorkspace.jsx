@@ -49,7 +49,7 @@ function Conversation({ conversation, notify, onBack, onChanged }) {
   const sendLock = useRef(false), uploadLock = useRef(false);
   const [loading, setLoading] = useState(true), [error, setError] = useState(''), [sending, setSending] = useState(false), [failed, setFailed] = useState(null);
   const [showSafety, setShowSafety] = useState(false), [reportReason, setReportReason] = useState('spam'), [reportDetails, setReportDetails] = useState('');
-  const [uploading, setUploading] = useState(false), [failedUpload, setFailedUpload] = useState(null), [hasOlder, setHasOlder] = useState(false), [archived, setArchived] = useState(conversation.archived); const end = useRef(null), history = useRef(null);
+  const [uploading, setUploading] = useState(false), [failedUpload, setFailedUpload] = useState(null), [hasOlder, setHasOlder] = useState(false), [archived, setArchived] = useState(conversation.archived); const end = useRef(null), history = useRef(null), composerRef = useRef(null);
   const load = useCallback(async () => {
     setError('');
     try {
@@ -62,6 +62,12 @@ function Conversation({ conversation, notify, onBack, onChanged }) {
   useEffect(() => { setLoading(true); load(); }, [load, revision]);
   useEffect(() => { try { sessionStorage.setItem(draftKey(user?.id, conversation.id), draft); } catch { /* Keep the draft in memory when device storage is unavailable. */ } }, [user?.id, conversation.id, draft]);
   useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 112)}px`;
+  }, [draft]);
+  useEffect(() => {
     const visible = () => { if (document.visibilityState === 'visible' && messages.at(-1)) markChatRead(conversation.id, messages.at(-1).id).catch(() => {}); };
     document.addEventListener('visibilitychange', visible); return () => document.removeEventListener('visibilitychange', visible);
   }, [conversation.id, messages]);
@@ -73,6 +79,7 @@ function Conversation({ conversation, notify, onBack, onChanged }) {
     try {
       await sendChatMessage({ conversationId: conversation.id, body, key: pending, ...options });
       setDraft(current => current === body ? '' : current); await load(); onChanged();
+      requestAnimationFrame(() => composerRef.current?.focus());
     } catch (reason) { setFailed({ body, options, key: pending }); notify?.(reason.message); } finally { sendLock.current = false; setSending(false); }
   };
   const upload = async (file, key = crypto.randomUUID()) => {
@@ -100,7 +107,7 @@ function Conversation({ conversation, notify, onBack, onChanged }) {
     {showSafety && <div className="chat-safety"><button onClick={() => changePreference({ muted: !conversation.muted })}>{conversation.muted ? 'Unmute' : 'Mute'} conversation</button><button onClick={() => changePreference({ archived: !archived })}>{archived ? 'Unarchive' : 'Archive'}</button><button onClick={block}>{conversation.blocked_by === user?.id ? 'Unblock' : 'Block'} participant</button><form onSubmit={report}><b>Report conversation</b><Field label="Reason" as="select" value={reportReason} onChange={event => setReportReason(event.target.value)} options={['spam','harassment','unsafe_request','payment_request','privacy','other']} /><Field label="Optional details" as="textarea" maxLength={2000} value={reportDetails} onChange={event => setReportDetails(event.target.value)} /><button className="btn btn-outline">Submit report</button></form></div>}
     <div className="chat-privacy"><Icon name="shield" size={15} /> Eazily payment protection applies only to payments made through Eazily’s official payment system or official QR. Do not pay through a partner’s personal QR code or cash.</div>
     <div className="chat-messages" ref={history} aria-live="polite">{loading && <p role="status">Loading messages…</p>}{error && <div role="alert"><p>{error}</p><button onClick={load}>Retry</button></div>}{hasOlder&&<button className="chat-more" onClick={loadOlder}>Load older messages</button>}{messages.map((message,index) => <Fragment key={message.id}>{(!messages[index-1] || new Date(messages[index-1].created_at).toDateString() !== new Date(message.created_at).toDateString())&&<p className="chat-date">{new Date(message.created_at).toLocaleDateString('en-IN',{dateStyle:'medium'})}</p>}{message.sender_kind === 'system' ? <p className="chat-system">{message.body}</p> : <article className={`chat-bubble ${message.sender_kind}`}><p>{message.moderation_status === 'removed' ? 'Message removed' : message.body}</p>{message.attachment && <Attachment value={message.attachment} />}<small>{time(message.created_at)}{message.sender_kind === 'you' ? message.read ? ' · Read' : ' · Sent' : ''}</small></article>}</Fragment>)}<div ref={end} /></div>
-    {blocked ? <p className="chat-closed" role="status">This conversation is blocked. Existing booking obligations remain visible in Orders; contact Support if help is required.</p> : <form className="chat-composer" onSubmit={event => { event.preventDefault(); submit(); }}><label className="chat-attach" aria-label="Attach image or PDF"><Icon name="plus" /><input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={attach} disabled={uploading || sending} /></label><textarea aria-label="Message" value={draft} onChange={event => setDraft(event.target.value)} maxLength={4000} rows={1} placeholder={connectionState === 'Offline' ? 'Draft saved while offline' : 'Write a message'} /><button className="chat-send" disabled={sending || uploading || !draft.trim()}>{uploading ? 'Uploading…' : sending ? 'Sending…' : 'Send'}</button></form>}
+    {blocked ? <p className="chat-closed" role="status">This conversation is blocked. Existing booking obligations remain visible in Orders; contact Support if help is required.</p> : <form className="chat-composer" onSubmit={event => { event.preventDefault(); submit(); }}><label className="chat-attach" aria-label="Attach image or PDF"><Icon name="plus" /><input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={attach} disabled={uploading || sending} /></label><textarea ref={composerRef} aria-label="Message" value={draft} onChange={event => setDraft(event.target.value)} maxLength={4000} rows={1} placeholder={connectionState === 'Offline' ? 'Draft saved while offline' : 'Write a message'} /><button className="chat-send" disabled={sending || uploading || !draft.trim()}>{uploading ? 'Uploading…' : sending ? 'Sending…' : 'Send'}</button></form>}
     {failed && <button className="chat-retry-send" onClick={() => submit(failed.body, { ...failed.options, key: failed.key })}>Message failed. Tap to retry safely.</button>}
     {failedUpload && <button className="chat-retry-send" onClick={() => upload(failedUpload.file, failedUpload.key)}>Attachment failed. Tap to retry the same upload.</button>}
   </section>;

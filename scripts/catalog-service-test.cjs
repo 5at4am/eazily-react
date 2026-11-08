@@ -43,7 +43,7 @@ const { createHash } = require('node:crypto');
   const manifest = JSON.parse(readFileSync('supabase/migration-manifest.json', 'utf8'));
   const migration = manifest.migrations.find(entry => entry.file === 'service_catalog_2026_09_20.sql');
   assert.equal(migration.file, 'service_catalog_2026_09_20.sql');
-  assert.equal(migration.sha256, createHash('sha256').update(readFileSync(`supabase/${migration.file}`)).digest('hex'));
+  assert.equal(migration.sha256, createHash('sha256').update(readFileSync(`supabase/${migration.file}`, 'utf8').replace(/\r\n/g, '\n')).digest('hex'));
   console.log(`PASS ${visible.length} customer services, aliases, homepage mappings, local artwork and append-only validator migration.`);
 })().catch(error => {
   console.error(error);

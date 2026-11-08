@@ -1,0 +1,476 @@
+/* ─── Vendor Dashboard ────────────────────────────────────────────────────────
+   Scoped entirely to .vd-* so it never bleeds into other partner views.
+   All colour values defer to the project design-system tokens where possible.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Root container ─────────────────────────────────────────────────────── */
+.vd-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--paper, #F4F2FB);
+  font-family: var(--font-sans, Manrope, system-ui, sans-serif);
+  color: var(--ink, #19172C);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.vd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  background: var(--surface, #fff);
+}
+
+.vd-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.vd-brand-name {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  /* matches Eazily brand purple */
+  background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.vd-brand-sub {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--ink-muted, #53546A);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.vd-brand-sub svg { color: var(--ink-muted, #53546A); }
+
+.vd-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--divider, #E1DEEC);
+  border-radius: var(--radius-control, 10px);
+  background: var(--surface, #fff);
+  color: var(--ink, #19172C);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.vd-bell:hover { background: var(--brand-soft, #F5F3FB); }
+.vd-bell:focus-visible { outline: 3px solid var(--brand, #6D28D9); outline-offset: 2px; }
+
+.vd-bell-dot {
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--surface, #fff);
+  border-radius: 50%;
+  background: #EF4444;
+}
+
+/* ── Scrollable body ────────────────────────────────────────────────────── */
+.vd-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px calc(100px + env(safe-area-inset-bottom));
+}
+
+/* ── Profile card ───────────────────────────────────────────────────────── */
+.vd-profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-card, 14px);
+  background: var(--surface, #fff);
+  box-shadow: var(--elevation-1, 0 1px 2px rgba(28,25,23,.05));
+}
+
+.vd-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.vd-avatar {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-tint, #EDE9FE);
+  color: var(--brand-deep, #4C1D95);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  border: 2.5px solid var(--brand-soft, #F5F3FB);
+}
+
+.vd-avatar-check {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--surface, #fff);
+  border-radius: 50%;
+  background: #16A34A;
+  color: #fff;
+}
+
+.vd-profile-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.vd-verified-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ink-muted, #53546A);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.vd-verified-label.is-approved {
+  color: #16A34A;
+}
+
+.vd-city,
+.vd-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: var(--ink-muted, #53546A);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.vd-city svg,
+.vd-rating svg { flex-shrink: 0; color: var(--ink-muted, #53546A); }
+
+.vd-star { color: #F59E0B; font-size: 15px; line-height: 1; }
+
+.vd-rating strong { color: var(--ink, #19172C); font-size: 14px; font-weight: 750; }
+
+.vd-rating-count { color: var(--ink-muted, #53546A); font-size: 13px; }
+
+/* ── Online / Offline toggle card ───────────────────────────────────────── */
+.vd-online-card {
+  display: grid;
+  grid-template-columns: 44px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--divider, #E1DEEC);
+  border-radius: var(--radius-card, 14px);
+  background: var(--surface, #fff);
+  box-shadow: var(--elevation-1, 0 1px 2px rgba(28,25,23,.05));
+  transition: border-color 200ms ease;
+}
+
+.vd-online-card.is-online {
+  border-color: color-mix(in srgb, #16A34A 35%, var(--divider, #E1DEEC));
+}
+
+.vd-online-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #16A34A 12%, #fff);
+  color: #16A34A;
+}
+
+.vd-online-card > .vd-online-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.vd-online-copy b {
+  font-size: 14.5px;
+  font-weight: 750;
+  line-height: 1.3;
+  color: var(--ink, #19172C);
+}
+
+.vd-online-state { color: #16A34A; }
+
+.vd-online-copy small {
+  font-size: 12.5px;
+  color: var(--ink-muted, #53546A);
+  line-height: 1.4;
+}
+
+/* Toggle switch */
+.vd-toggle {
+  position: relative;
+  display: block;
+  width: 54px;
+  height: 30px;
+  padding: 3px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--divider, #E1DEEC);
+  cursor: pointer;
+  transition: background-color 200ms ease;
+}
+
+.vd-toggle[aria-checked="true"] { background: #16A34A; }
+
+.vd-toggle:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.vd-toggle:focus-visible { outline: 3px solid var(--brand, #6D28D9); outline-offset: 2px; }
+
+.vd-toggle-thumb {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.18);
+  transition: transform 200ms var(--ease-interaction, cubic-bezier(.2,.7,.3,1));
+}
+
+.vd-toggle[aria-checked="true"] .vd-toggle-thumb {
+  transform: translateX(24px);
+}
+
+/* ── Overview ─────────────────────────────────────────────────────────── */
+.vd-overview { display: flex; flex-direction: column; gap: 10px; }
+
+.vd-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  color: var(--ink, #19172C);
+}
+
+.vd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.vd-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: var(--radius-card, 14px);
+  background: var(--vd-stat-bg, var(--brand-soft, #F5F3FB));
+  border: 1px solid color-mix(in srgb, var(--vd-stat-icon, #6D28D9) 12%, transparent);
+}
+
+.vd-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--vd-stat-icon, #6D28D9) 14%, #fff);
+  color: var(--vd-stat-icon, #6D28D9);
+}
+
+.vd-stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink, #19172C);
+}
+
+.vd-stat-label {
+  font-size: 13px;
+  color: var(--ink-muted, #53546A);
+  line-height: 1.35;
+}
+
+/* ── Confirmed Jobs ──────────────────────────────────────────────────── */
+.vd-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vd-jobs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vd-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--brand-deep, #4C1D95);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  min-height: 44px;
+}
+
+.vd-view-all:hover { text-decoration: underline; text-underline-offset: 3px; }
+.vd-view-all:focus-visible { outline: 3px solid var(--brand, #6D28D9); outline-offset: 2px; border-radius: 4px; }
+
+.vd-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: var(--radius-card, 14px);
+  background: var(--surface, #fff);
+  border: 1px solid var(--divider, #E1DEEC);
+  overflow: hidden;
+}
+
+.vd-job-row {
+  display: grid;
+  grid-template-columns: 46px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+  border-bottom: 1px solid var(--divider, #E1DEEC);
+}
+
+.vd-job-row:last-child { border-bottom: 0; }
+
+/* Customer initial chip */
+.vd-job-chip {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--vd-chip-bg, var(--brand-tint, #EDE9FE));
+  color: var(--vd-chip-fg, var(--brand-deep, #4C1D95));
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+.vd-job-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.vd-job-name {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: var(--ink, #19172C);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.vd-job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.vd-job-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--ink-muted, #53546A);
+  line-height: 1.4;
+}
+
+.vd-job-tag svg { flex-shrink: 0; }
+
+.vd-job-sep {
+  color: var(--divider, #E1DEEC);
+  font-size: 13px;
+  line-height: 1;
+  user-select: none;
+}
+
+.vd-job-time .vd-job-tag { font-size: 11.5px; }
+
+/* Chat button */
+.vd-job-chat {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brand-soft, #F5F3FB);
+  color: var(--brand-deep, #4C1D95);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.vd-job-chat:hover { background: var(--brand-tint, #EDE9FE); }
+.vd-job-chat:focus-visible { outline: 3px solid var(--brand, #6D28D9); outline-offset: 2px; }
+
+/* Empty state */
+.vd-jobs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 16px;
+  border-radius: var(--radius-card, 14px);
+  background: var(--surface, #fff);
+  border: 1px solid var(--divider, #E1DEEC);
+  color: var(--ink-muted, #53546A);
+  text-align: center;
+  font-size: 14px;
+}
+
+.vd-jobs-empty p { margin: 0; }
+
+/* ── Accessibility & Motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .vd-toggle,
+  .vd-toggle-thumb,
+  .vd-online-card,
+  .vd-job-chat,
+  .vd-bell { transition: none; }
+
+  .vd-toggle[aria-checked="true"] .vd-toggle-thumb { transform: translateX(24px); }
+}
+
+/* ── Small screens ──────────────────────────────────────────────────── */
+@media (max-width: 359px) {
+  .vd-body          { padding-inline: 12px; gap: 12px; }
+  .vd-header        { padding-inline: 14px; }
+  .vd-stats-grid    { gap: 8px; }
+  .vd-stat-card     { padding: 12px; }
+  .vd-stat-value    { font-size: 18px; }
+  .vd-brand-name    { font-size: 22px; }
+  .vd-job-row       { padding-inline: 12px; gap: 10px; }
+}

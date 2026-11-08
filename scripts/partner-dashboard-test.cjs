@@ -148,8 +148,9 @@ let browser, socket, server;
   await evaluate(`document.querySelector('.partner-banner-carousel').scrollIntoView()`);await pause(6300);
   assert.equal(await evaluate(`document.querySelector('h2').textContent`),'TEST ONLY 0','Visible carousel resumes');
   for (const [role] of roles) {
-    await evaluate('window.renderDashboard('+JSON.stringify(role)+')');await pause(150);
-    assert.equal(await evaluate(`document.querySelectorAll('.pd-work-item').length`),2,'Existing requested and active orders appear');
+     await evaluate('window.renderDashboard('+JSON.stringify(role)+')');await pause(150);
+     assert.ok(await evaluate(`!document.querySelector('.pd-dashboard').textContent.includes('4:30 PM')&&!document.querySelector('.pd-dashboard').textContent.includes('M. P. Nagar, Bhopal')&&!document.querySelector('.pd-dashboard').textContent.includes('₹650')`),'Missing booking details are not replaced with invented time, location, or price');
+     assert.equal(await evaluate(`document.querySelectorAll('.pd-work-item').length`),2,'Existing requested and active orders appear');
     assert.deepEqual(await evaluate(`[...document.querySelectorAll('.pd-metrics strong')].map(el=>el.textContent)`),['1','1','1','1200'],'Existing metric definitions retained');
     assert.equal(await evaluate(`document.querySelectorAll('.pd-preview-control,.pd-preview').length`),0,'Production dashboard has no preview controls');
     await click('View request');assert.equal(await evaluate('window.dashboardAction.sheet.order.id'),'fixture-request','Request opens existing order sheet');

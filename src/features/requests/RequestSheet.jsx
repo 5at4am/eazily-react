@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState, Field, Sheet } from "../../components/Ui.jsx";
 import Icon from "../../components/Icon.jsx";
 import { bookPartnerOffering, createServiceRequest, getServiceBookingEstimate, getServiceMatchCapabilities, requestProfessionalBooking } from "../../services/marketplace.js";
+import { requireBackend } from "../../services/experience.js";
 import WalletCheckout from '../account/WalletCheckout.jsx';
 import { UserBusyLabel } from '../user-motion/UserLoading.jsx';
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -20,20 +21,27 @@ function FormGrid({
 export default function RequestSheet({
   request,
   onClose,
+  onViewBookings,
   notify
 }) {
   const submissionKey = useRef(crypto.randomUUID());
   const submitting = useRef(false);
-  const [values, setValues] = useState({
-    transportMode: "Local",
-    occupation: "",
-    consent: false,
-    servicePackage: "standard",
-    shipmentSize: "1 BHK",
-    description: request.requirement || "",
-    address: request.address || "",
-    city: request.city || "",
-    backup: false
+  const [values, setValues] = useState(() => {
+    const tomorrow = new Date(Date.now() + 86400000);
+    const nextDay = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+    const acceptsDefaultDate = !['loans', 'transportation', 'blood-bank', 'influencers', 'consultancy'].includes(request.categoryId);
+    return {
+      transportMode: "Local",
+      occupation: "",
+      consent: false,
+      servicePackage: "standard",
+      shipmentSize: "1 BHK",
+      description: request.requirement || "",
+      address: request.address || "",
+      city: request.city || "",
+      backup: false,
+      date: request.date || (acceptsDefaultDate ? nextDay : "")
+    };
   });
   const [loanStep, setLoanStep] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -42,16 +50,53 @@ export default function RequestSheet({
   const [estimate, setEstimate] = useState(null);
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [backupAvailable, setBackupAvailable] = useState(false);
+  const [responseSeconds, setResponseSeconds] = useState(null);
+  const minDate = useMemo(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }, []);
+  const responseMinutes = responseSeconds ? Math.max(1, Math.round(responseSeconds / 60)) : 30;
+  const [selectedPackage, setSelectedPackage] = useState(() => request.packages?.length ? request.packages[0].name : '');
+  const [photos, setPhotos] = useState([]);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  async function addPhotos(event) {
+    const files = [...(event.target.files || [])];
+    event.target.value = '';
+    if (!files.length) return;
+    let db;
+    try { db = requireBackend(); } catch { notify('Sign in to attach photos.'); return; }
+    const { data: { user } } = await db.auth.getUser();
+    if (!user) { notify('Sign in to attach photos.'); return; }
+    setPhotoBusy(true);
+    try {
+      let next = [...photos];
+      for (const file of files) {
+        if (next.length >= 3) break;
+        if (!file.type.startsWith('image/')) { notify('Attach image files only.'); continue; }
+        const source = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const ext = ['jpg', 'jpeg', 'png', 'webp'].includes(source) ? source : 'jpg';
+        const path = `request/${submissionKey.current}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await db.storage.from('request-media').upload(path, file, { contentType: file.type, metadata: { key: String(submissionKey.current) } });
+        if (error) throw error;
+        const signed = await db.storage.from('request-media').createSignedUrl(path, 3600);
+        next.push({ path, url: signed.data?.signedUrl || null });
+      }
+      setPhotos(next.slice(0, 3));
+    } catch (error) { notify(error.message); }
+    finally { setPhotoBusy(false); }
+  }
+  function removePhoto(path) { setPhotos(current => current.filter(item => item.path !== path)); }
   useEffect(() => {
-    if (!request.partnerPostId || request.demo || ['influencers','consultancy'].includes(request.categoryId)) return undefined;
+    if (!request.partnerPostId || ['influencers','consultancy'].includes(request.categoryId)) return undefined;
     let active = true;
+    setResponseSeconds(null);
     setEstimateLoading(true);
-    getServiceBookingEstimate(request.partnerPostId).then(value => { if (active) setEstimate(value); })
+    getServiceBookingEstimate(request.partnerPostId, selectedPackage || null).then(value => { if (active) setEstimate(value); })
       .catch(() => { if (active) setEstimate({ available: false, reason: 'Server price breakdown is unavailable.' }); })
       .finally(() => { if (active) setEstimateLoading(false); });
-    getServiceMatchCapabilities().then(value => { if (active) setBackupAvailable(Boolean(value?.backupAvailable)); }).catch(() => {});
+    getServiceMatchCapabilities().then(value => { if (active) { setBackupAvailable(Boolean(value?.backupAvailable)); setResponseSeconds(Number(value?.responseSeconds) || null); } }).catch(() => {});
     return () => { active = false; };
-  }, [request.partnerPostId, request.demo, request.categoryId]);
+  }, [request.partnerPostId, request.categoryId, selectedPackage]);
   const set = key => event => setValues(current => ({
     ...current,
     [key]: event.target.type === "checkbox" ? event.target.checked : event.target.value
@@ -76,17 +121,19 @@ export default function RequestSheet({
     setSubmitError('');
     setBusy(true);
     try {
-      if (request.demo) {
-        setResult({ id: 'DEMO-PREVIEW', status: 'Demo only' });
-        return;
-      }
-      if (request.partnerPostId && !values.date) {
-        notify('Choose a preferred future date to book this professional.');
-        return;
+      if (request.partnerPostId) {
+        if (!values.date) {
+          notify('Choose a preferred future date to book this professional.');
+          return;
+        }
+        if (new Date(`${values.date}T23:59:59`).getTime() < Date.now()) {
+          notify('Choose a future date for this booking.');
+          return;
+        }
       }
       if (!request.partnerPostId && !request.vendorId && kind === 'service' && request.categoryId === 'manpower' &&
         (values.city?.trim().length < 2 || values.location?.trim().length < 5 || values.description?.trim().length < 5 ||
-          !values.date || new Date(`${values.date}T09:00:00`).getTime() <= Date.now())) {
+          !values.date || new Date(`${values.date}T23:59:59`).getTime() < Date.now())) {
         notify('Add a service city, work location, short requirement and a future preferred date.');
         return;
       }
@@ -101,7 +148,8 @@ export default function RequestSheet({
         backup: values.backup && backupAvailable,
         city: values.city,
         address: values.address.trim(),
-        requirement: values.description.trim()
+        requirement: [selectedPackage ? `Package: ${selectedPackage}` : null, values.description.trim()].filter(Boolean).join(' — '),
+        photos: photos.map(item => item.path),
       }) : bookPartnerOffering({
         partnerPostId: request.partnerPostId,
         slot: new Date(`${values.date}T09:00:00`).toISOString(),
@@ -133,20 +181,23 @@ export default function RequestSheet({
   }
   if (result) {
     const bookingId = result.id;
+    const reference = kind === 'service' && bookingId ? `EAZ-${String(bookingId).slice(0, 8).toUpperCase()}` : bookingId;
+    const canOpenBookings = kind === 'service' && typeof onViewBookings === 'function';
     return <Sheet onClose={onClose}>
         <div className="success">
           <span className="success-check"><Icon name="check" size={42} /></span>
-          <h2>{translate(request.demo ? "Demo booking preview" : "Request received")}</h2>
-          <p>{translate(request.demo ? "Preview complete. No account, booking, consent, payment, review, or analytics record was created." : request.partnerPostId ? "Requested. The professional must accept before this booking is confirmed. Agree on the final charge before work begins." : "Your request has been saved securely. Pricing and availability require confirmation.")}</p>
+          <h2>{translate(request.partnerPostId ? 'Booking request sent' : 'Request received')}</h2>
+          <p>{translate(request.partnerPostId ? `Requested. ${request.vendorName || 'The professional'} has about ${responseMinutes} minutes to accept. Your full address stays hidden until they accept.` : "Your request has been saved securely. Pricing and availability require confirmation.")}</p>
           <div className="summary">
-            <div className="summary-row"><span>{translate(kind === "service" ? "Booking ID" : "Request ID")}</span><b>{translate(bookingId)}</b></div>
+            <div className="summary-row"><span>{translate(kind === "service" ? "Booking reference" : "Request reference")}</span><b>{translate(reference || '—')}</b></div>
             {translate(kind === "service" ? <><div className="summary-row"><span>{translate("Professional")}</span><b>{translate(request.vendorName || "To be assigned")}</b></div><div className="summary-row"><span>{translate("Service")}</span><b>{translate(request.serviceName)}</b></div><div className="summary-row"><span>{translate("Preferred date")}</span><b>{translate(values.date || "To be confirmed")}</b></div></> : null)}
             <div className="summary-row"><span>{translate("Status")}</span><b>{translate(result.status === 'requested' ? 'Requested' : result.status)}</b></div>
           </div>
           {translate(["loan", "transportation"].includes(kind) && <p>{translate("Excel synchronisation is tracked separately. The workbook connection is pending configuration.")}</p>)}
           {translate(result.quoted_total != null && <WalletCheckout booking={result} notify={notify} />)}
-          {kind === 'service' && !request.demo && <div className="booking-next-step"><b>{translate('What happens next')}</b><p>{translate('Your professional needs to accept before the visit is confirmed. Follow updates in your bookings and review the final charges before work begins.')}</p></div>}
-          <button className="btn btn-primary full" onClick={onClose}>{translate("Done")}</button>
+          {kind === 'service' && <div className="booking-next-step"><b>{translate('What happens next')}</b><p>{translate(request.partnerPostId ? `Track acceptance in My Bookings. The request expires if there is no response in about ${responseMinutes} minutes. Agree the final charge before work begins.` : 'Your request stays open while we look for an eligible professional. Track updates in My Bookings and agree the final charge before work begins.')}</p>{request.partnerPostId && <p>{translate(request.backup ? 'If this professional declines, we may send a backup offer. Any changed price needs your approval first.' : 'Only this professional receives the request. No payment is collected now.')}</p>}</div>}
+          {canOpenBookings && <button className="btn btn-primary full" onClick={onViewBookings}>{translate("View my bookings")}</button>}
+          <button className={canOpenBookings ? "btn btn-outline full" : "btn btn-primary full"} onClick={onClose}>{translate("Done")}</button>
         </div>
       </Sheet>;
   }
@@ -154,7 +205,6 @@ export default function RequestSheet({
       <span className="eyebrow">{translate(kind)}{translate(" request")}</span>
       <h2 className="sheet-title">{translate(request.serviceName)}</h2>
       {submitError && <p className="inline-error" role="alert">{submitError}</p>}
-      {request.demo && <div className="privacy-note"><b>{translate('Demo profile')}</b><p>{translate('This is sample data. Continuing previews the booking result and creates no account, booking, consent, payment, review, or analytics record.')}</p></div>}
       {translate(renderForm())}
     </Sheet>;
   function renderForm() {
@@ -168,22 +218,15 @@ export default function RequestSheet({
   function ServiceForm() {
     return <form onSubmit={submit}>
       <section className="booking-review" aria-label={translate('Booking summary')}>
-        <h3>{translate('Your service request')}</h3><dl>
-          <div><dt>{translate('Service')}</dt><dd>{translate(request.serviceName)}</dd></div>
-          <div><dt>{translate('Professional')}</dt><dd>{translate(request.vendorName || 'Matched after your request')}</dd></div>
-          <div><dt>{translate('Preferred date')}</dt><dd>{translate(values.date || 'Choose a date')}</dd></div>
-          {request.fixedPrice != null ? <div><dt>{translate('Published price')}</dt><dd>₹{Number(request.fixedPrice).toLocaleString('en-IN')}</dd></div> : request.startingPrice != null && <div><dt>{translate('Starting price')}</dt><dd>₹{Number(request.startingPrice).toLocaleString('en-IN')}</dd></div>}
-          {request.visitingCharge != null && <div><dt>{translate('Visiting charge')}</dt><dd>₹{Number(request.visitingCharge).toLocaleString('en-IN')}</dd></div>}
-          <div><dt>{translate('Payment now')}</dt><dd>{translate('No payment collected')}</dd></div>
-        </dl>
-        <p>{translate('The professional confirms availability and the final scope. Approve additional work and charges before work begins.')}</p>
+        <h3>{translate('Your service request')}</h3>
+        <p>{translate(request.serviceName)}{request.vendorName ? ` · ${request.vendorName}` : ''}{request.fixedPrice != null ? ` · ₹${Number(request.fixedPrice).toLocaleString('en-IN')}` : request.startingPrice != null ? ` · From ₹${Number(request.startingPrice).toLocaleString('en-IN')}` : ''}{request.visitingCharge != null ? ` · Visiting ₹${Number(request.visitingCharge).toLocaleString('en-IN')}` : ''}{translate(' · No payment now')}</p>
       </section>
         {request.fixedPrice != null && <div className="summary"><b>Published service price: ₹{Number(request.fixedPrice).toLocaleString("en-IN")}</b><p>Review the service scope before confirming. No separate inspection is required for this fixed-price service.</p></div>}
-        {request.partnerPostId ? <><p className="sheet-sub">{translate(`Request ${request.vendorName || 'this professional'}. They receive the first offer. Your full address is shared only after the booking is accepted.`)}</p><Field label="Service city" value={values.city} onChange={set("city")} required /><Field label="Service address" value={values.address} onChange={set("address")} required maxLength={500} /><Field label="What work do you need?" as="textarea" value={values.description} onChange={set("description")} required maxLength={1000} /><Field label="Preferred date" type="date" value={values.date ?? ""} onChange={set("date")} required /><label className="consent"><input type="checkbox" checked={values.backup} disabled={!backupAvailable} onChange={set("backup")} />{translate('Agar ye vendor jawab na de, similar professional dhoondhein')}</label>{!backupAvailable&&<p className="policy-note">{translate('Only your selected professional receives this request. Backup matching is currently unavailable.')}</p>}<div className="summary"><b>{translate('Price before booking')}</b>{estimateLoading ? <p>{translate('Checking published price and platform charges…')}</p> : estimate?.available ? <>{[['servicePaise','Service price'],['visitingPaise','Visiting charge'],['platformPaise','Platform charges'],['taxPaise','Applicable tax'],['totalPaise','Estimated payable']].map(([key,label]) => <p key={key}>{translate(label)}: <b>₹{(Number(estimate[key] || 0)/100).toLocaleString('en-IN',{minimumFractionDigits:2})}</b></p>)}</> : <p>{translate(estimate?.reason || 'Final payable is not available before the professional quote.')}</p>}<p>{translate('A backup offer is sent only after this professional declines or times out. A changed backup price needs your approval before confirmation. No payment is collected now.')}</p></div></> : <><p className="sheet-sub">{request.categoryId === 'manpower' && !request.vendorId ? translate('Describe the work and location. We will look for an eligible professional; the request is not confirmed until one accepts.') : <>{translate("Describe your requirement for ")}{translate(request.vendorName || "your professional")}{translate(" . Review the scope and confirmed price before work begins.")}</>}</p><Field label="Service location" value={values.location ?? ""} onChange={set("location")} required /><Field label="What help do you need?" as="textarea" value={values.description ?? ""} onChange={set("description")} required />{request.categoryId === 'manpower' && !request.vendorId && <><Field label="Service city" value={values.city} onChange={set("city")} required /><Field label="Preferred date" type="date" value={values.date ?? ""} onChange={set("date")} required /></>}<details className="quote-details">
+        {request.partnerPostId ? <><p className="sheet-sub">{translate(`Request ${request.vendorName || 'this professional'} first. Your full address stays private until they accept.`)}</p>{request.packages?.length > 0 && <div className="field-wrap"><span>{translate('Choose a package')}</span><select className="field" value={selectedPackage} onChange={event => setSelectedPackage(event.target.value)}>{request.packages.map((pkg, index) => <option key={index} value={pkg.name}>{translate(pkg.name)} · ₹{Number(pkg.price || 0).toLocaleString('en-IN')}</option>)}</select></div>}<Field label="Service city" value={values.city} onChange={set("city")} required /><Field label="Service address" value={values.address} onChange={set("address")} required maxLength={500} /><Field label="What work do you need?" as="textarea" value={values.description} onChange={set("description")} required maxLength={1000} /><div className="request-photos"><span className="form-label">{translate('Add photos of the work (optional)')}</span><div className="photo-row">{photos.map(item => <span className="photo-thumb" key={item.path}><img src={item.url} alt="" /><button type="button" onClick={() => removePhoto(item.path)} aria-label={translate('Remove photo')}><Icon name="close" size={14} /></button></span>)}{photos.length < 3 && <label className="photo-add"><Icon name="plus" size={18} /><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={addPhotos} disabled={photoBusy} /></label>}</div>{photoBusy ? <small className="field-help">{translate('Uploading…')}</small> : <small className="field-help">{translate('Up to 3 photos. They stay private until the professional accepts.')}</small>}</div><Field label="Preferred date" type="date" min={minDate} value={values.date ?? ""} onChange={set("date")} required />{backupAvailable && <label className="consent"><input type="checkbox" checked={values.backup} onChange={set("backup")} />{translate('If this professional does not respond, find a similar one for me.')}</label>}<div className="summary"><b>{translate('Price before booking')}</b>{estimateLoading ? <p>{translate('Checking published price and platform charges…')}</p> : estimate?.available ? <>{[['servicePaise','Service price'],['visitingPaise','Visiting charge'],['platformPaise','Platform charges'],['taxPaise','Applicable tax'],['totalPaise','Estimated payable']].map(([key,label]) => <p key={key}>{translate(label)}: <b>₹{(Number(estimate[key] || 0)/100).toLocaleString('en-IN',{minimumFractionDigits:2})}</b></p>)}</> : <p>{translate(estimate?.reason || (request.fixedPrice != null ? `Final charges are confirmed after the professional quote. Published price ₹${Number(request.fixedPrice).toLocaleString('en-IN')}.` : request.startingPrice != null ? `Final charges are confirmed after the professional quote. Starting from ₹${Number(request.startingPrice).toLocaleString('en-IN')}.` : 'The professional confirms the final scope and charges before work begins.'))}</p>}<p>{translate('If this professional declines or times out, any replacement offer needs your approval first. No payment is collected now.')}</p></div></> : <><p className="sheet-sub">{request.categoryId === 'manpower' && !request.vendorId ? translate('Describe the work and location. We will look for an eligible professional; the request is not confirmed until one accepts.') : <>{translate("Describe your requirement for ")}{translate(request.vendorName || "your professional")}{translate(" . Review the scope and confirmed price before work begins.")}</>}</p><Field label="Service location" value={values.location ?? ""} onChange={set("location")} required /><Field label="What help do you need?" as="textarea" value={values.description ?? ""} onChange={set("description")} required />{request.categoryId === 'manpower' && !request.vendorId && <><Field label="Service city" value={values.city} onChange={set("city")} required /><Field label="Preferred date" type="date" min={minDate} value={values.date ?? ""} onChange={set("date")} required /></>}<details className="quote-details">
           <summary>{translate("Product, pricing & warranty details")}</summary>
           <FormGrid>
             <Field label="Expected budget" type="number" min="0" value={values.budget ?? ""} onChange={set("budget")} />
-            {(request.categoryId !== 'manpower' || request.vendorId) && <Field label="Preferred date" type="date" value={values.date ?? ""} onChange={set("date")} />}
+            {(request.categoryId !== 'manpower' || request.vendorId) && <Field label="Preferred date" type="date" min={minDate} value={values.date ?? ""} onChange={set("date")} />}
             <Field label="Product or spare-part name" value={values.product ?? ""} onChange={set("product")} />
             <Field label="Warranty required?" as="select" options={["Not sure", "Yes", "No"]} value={values.warranty ?? "Not sure"} onChange={set("warranty")} />
           </FormGrid>
@@ -250,7 +293,7 @@ export default function RequestSheet({
           <Field label="Address" value={values.address ?? ""} onChange={set("address")} required />
           <Field label="Pickup location" value={values.pickup ?? ""} onChange={set("pickup")} required />
           <Field label="Drop location" value={values.drop ?? ""} onChange={set("drop")} required />
-          <Field label="Pickup date" type="date" value={values.date ?? ""} onChange={set("date")} />
+          <Field label="Pickup date" type="date" min={minDate} value={values.date ?? ""} onChange={set("date")} />
           <Field label="Shipment size" as="select" options={["1 BHK", "2 BHK", "3 BHK", "4 BHK"]} value={values.shipmentSize ?? "1 BHK"} onChange={set("shipmentSize")} required />
           {translate(isPassenger ? <><Field label="Number of passengers" type="number" min="1" value={values.passengers ?? ""} onChange={set("passengers")} /><Field label="Vehicle preference" value={values.vehicle ?? ""} onChange={set("vehicle")} /></> : null)}
           {translate(isCourier ? <><Field label="Parcel type" value={values.parcelType ?? ""} onChange={set("parcelType")} /><Field label="Approximate weight" value={values.weight ?? ""} onChange={set("weight")} /></> : null)}

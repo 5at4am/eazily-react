@@ -82,7 +82,7 @@ Source functions exist for `youtube-feed`, `automation-worker`, `seller-create-p
 
 ## Migration rules
 
-The repository contains **48 ordered source SQL entries** in `migration-manifest.json` and **59 timestamped migration files**. These coexist; they are not two independent sets to replay. The linked database already records the timestamped versions.
+The repository contains **55 ordered source SQL entries** in `migration-manifest.json` and **59 timestamped migration files**. These coexist; they are not two independent sets to replay. The linked database already records the timestamped versions. Entries 54 and 55 are local-only: typed application-review notifications and Admin/staff capability retirement. Neither has been deployed or reconciled with hosted schema history. Applying entry 55 disables authenticated Admin/staff operations throughout the app; it must not be deployed without explicit hosted rollout review.
 
 Preserve applied SQL and its history. Do not rename, delete or normalise old migrations during file cleanup. For future changes, create a reviewed forward migration after checking hosted definitions and history. Do not run base schema SQL against an existing project.
 

@@ -54,7 +54,7 @@ export default function Icon({ name, size = 22, className = "", title }) {
   const iconPaths = paths[name] ?? paths.grid;
   return (
     <svg
-      className={className}
+      className={`ui-icon ${className}`.trim()}
       width={size}
       height={size}
       viewBox="0 0 24 24"

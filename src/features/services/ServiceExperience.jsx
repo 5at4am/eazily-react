@@ -8,9 +8,9 @@ import Icon from '../../components/Icon.jsx';
 import ServiceIllustration from '../user-art/ServiceIllustration.jsx';
 import { UserVendorSkeleton } from '../user-motion/UserLoading.jsx';
 import { experienceLink, readRows, requireBackend, serviceNamesForLookup, shareLink } from '../../services/experience.js';
+import { requestSignIn } from '../../lib/account.js';
 import { getCustomerProfessionals } from '../../services/marketplace.js';
 import { useRealtime } from '../../lib/realtime.jsx';
-import { getDemoCustomerProfessionals } from './customerProfessionalDemo.js';
 import ProfessionalProfile from './ProfessionalProfile.jsx';
 import './professional-profile.css';
 import './professional-profile-sticky.css';
@@ -70,7 +70,7 @@ export function ServiceSections({ service, vendors, onService, onVendor, notify,
   </>;
 }
 
-export default function ServiceExperience({ service, vendor, setVendor, onService, onBook, onMessage, onBack, onCloseVendor, location, setLocation, notify, demoMode = false, managedNavigation = false }) {
+export default function ServiceExperience({ service, vendor, setVendor, onService, onBook, onMessage, onBack, onCloseVendor, location, setLocation, notify, managedNavigation = false }) {
   const { revision } = useRealtime();
   const [vendors, setVendors] = useState([]);
   const [policy, setPolicy] = useState(null);
@@ -80,6 +80,9 @@ export default function ServiceExperience({ service, vendor, setVendor, onServic
   const [sort, setSort] = useState('rating');
   const [available, setAvailable] = useState(false);
   const [minRating, setMinRating] = useState('0');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [saved, setSaved] = useState(false);
   useEffect(() => {
@@ -87,17 +90,16 @@ export default function ServiceExperience({ service, vendor, setVendor, onServic
     setLoading(true);
     setError('');
     const serviceNames = serviceNamesForLookup(service.serviceName);
-    Promise.all([demoMode ? Promise.resolve([]) : getCustomerProfessionals(service.serviceName, location), getDemoCustomerProfessionals(service.serviceName, location, demoMode), demoMode ? Promise.resolve([]) : readRows('service_policies', query => query.in('service_name', serviceNames).limit(serviceNames.length))]).then(([professionals, samples, policies]) => {
+    Promise.all([getCustomerProfessionals(service.serviceName, location), readRows('service_policies', query => query.in('service_name', serviceNames).limit(serviceNames.length))]).then(([professionals, policies]) => {
       if (!active) return;
-      setVendors([...professionals, ...samples]);
+      setVendors(professionals);
       setPolicy(policies.find(item => item.service_name === service.serviceName) || policies[0] || null);
       setLoading(false);
     }).catch(nextError => { if (active) { setError(nextError.message); setLoading(false); } });
     return () => { active = false; };
-  }, [service.serviceName, location, revision, demoMode, retry]);
+  }, [service.serviceName, location, revision, retry]);
   useEffect(() => {
     if (!vendor) return undefined;
-    if (vendor.demo) { setSaved(false); return undefined; }
     let active = true;
     const table = vendor.partner_role ? 'saved_partner_profiles' : 'saved_vendors';
     const column = vendor.partner_role ? 'post_id' : 'vendor_id';
@@ -105,11 +107,10 @@ export default function ServiceExperience({ service, vendor, setVendor, onServic
     return () => { active = false; };
   }, [vendor, notify]);
   async function save() {
-    if (vendor.demo) { setSaved(value => !value); return; }
     try {
       const db = requireBackend();
       const { data: { user } } = await db.auth.getUser();
-      if (!user) throw new Error('Sign in to save professionals.');
+      if (!user) { requestSignIn(); return; }
       const table = vendor.partner_role ? 'saved_partner_profiles' : 'saved_vendors';
       const column = vendor.partner_role ? 'post_id' : 'vendor_id';
       const response = saved ? await db.from(table).delete().eq(column, vendor.id).eq('customer_id', user.id) : await db.from(table).insert({ [column]: vendor.id, customer_id: user.id });
@@ -119,7 +120,14 @@ export default function ServiceExperience({ service, vendor, setVendor, onServic
   }
   const main = catalog.find(category => category.id === service.categoryId);
   const group = main?.groups?.find(item => item.items.includes(service.serviceName));
-  const matches = vendors.filter(item => (!available || item.available_now) && Number(item.rating || 0) >= Number(minRating)).sort((a, b) => sort === 'price' ? (a.starting_price ?? Infinity) - (b.starting_price ?? Infinity) : Number(b.rating || 0) - Number(a.rating || 0));
+  const maxPriceValue = maxPrice === '' ? null : Number(maxPrice);
+  const matches = vendors.filter(item => (!available || item.available_now)
+    && Number(item.rating || 0) >= Number(minRating)
+    && (!maxPriceValue || !Number.isFinite(Number(item.starting_price)) || Number(item.starting_price) <= maxPriceValue)
+    && (!verifiedOnly || Boolean(item.document_verified_at))
+  ).sort((a, b) => sort === 'price' ? (a.starting_price ?? Infinity) - (b.starting_price ?? Infinity) : Number(b.rating || 0) - Number(a.rating || 0));
+  const activeFilterCount = Number(available) + Number(minRating !== '0') + Number(maxPriceValue != null) + Number(verifiedOnly);
+  const clearFilters = () => { setAvailable(false); setMinRating('0'); setMaxPrice(''); setVerifiedOnly(false); };
   const visibleMatches = showAll ? matches : matches.slice(0, 3);
-  return <main className="screen service-experience user-art-service"><header className="topbar"><button className="icon-btn" onClick={onBack} aria-label="Back to categories"><Icon name="arrowLeft" /></button><h1>{translate(service.serviceName)}</h1></header><div className="experience-body"><nav className="crumb" aria-label="Breadcrumb">{translate('Categories → ')}{translate(main?.label)} {group && translate(`→ ${group.label}`)}{translate(` → ${service.serviceName} → Available professionals`)}</nav><label className="field-wrap">{translate('Service city ')}<input className="field" value={location} onChange={event => setLocation(event.target.value)} placeholder="Enter city as listed by the professional" /></label><h2>{translate(`Available ${service.serviceName === 'Plumber' ? 'Plumbers' : 'Professionals'}`)}</h2>{service.requirement && <p>{translate(`Requirement: ${service.requirement}`)}</p>}<div className="vendor-filters"><label>{translate('Sort ')}<select value={sort} onChange={event => setSort(event.target.value)}><option value="rating">{translate('Highest rated')}</option><option value="price">{translate('Lowest starting price')}</option></select></label><label>{translate('Rating ')}<select value={minRating} onChange={event => setMinRating(event.target.value)}><option value="0">{translate('All ratings')}</option><option value="4">{translate('4+ stars')}</option><option value="4.5">{translate('4.5+ stars')}</option></select></label><label><input type="checkbox" checked={available} onChange={event => setAvailable(event.target.checked)} />{translate(' Available now')}</label></div>{loading ? <UserVendorSkeleton count={2} /> : error ? <div role="alert"><EmptyState title="Couldn’t load professionals" text="Check your connection, then try again." /><button className="btn btn-outline" onClick={() => setRetry(value => value + 1)}>{translate("Try again")}</button></div> : matches.length ? <><div className="vendor-list">{visibleMatches.map(item => <VendorCard key={item.id} vendor={item} onOpen={setVendor} />)}</div>{matches.length > 3 && <button className="btn btn-outline" onClick={() => setShowAll(value => !value)}>{translate(showAll ? 'Show fewer professionals' : `See all ${matches.length} professionals`)}</button>}</> : <><EmptyState title="No matching professionals yet" text="Try another city or clear your filters to see more professionals." /><button className="btn btn-outline" onClick={() => { setAvailable(false); setMinRating("0"); setSort("rating"); }}>{translate("Clear filters")}</button></>}<ServiceSections service={service} vendors={vendors} onService={onService} onVendor={setVendor} notify={notify} policy={policy} /></div>{vendor && <ProfessionalProfile manageHistory={!managedNavigation} vendor={vendor} service={service} vendors={matches} policy={policy} saved={saved} onSave={save} onMessage={onMessage} onVendor={setVendor} notify={notify} onClose={onCloseVendor || (() => setVendor(null))} onBook={() => onBook({ ...service, vendorId: vendor.partner_id ? null : vendor.id, partnerPostId: vendor.partner_id ? vendor.id : null, vendorName: vendor.display_name || vendor.business_name, fixedPrice: policy?.fixed_price ? vendor.prices?.[service.serviceName] : null, startingPrice: vendor.starting_price, visitingCharge: vendor.visiting_charge, demo: Boolean(vendor.demo) })} />}</main>;
+  return <main className="screen service-experience user-art-service"><header className="topbar"><button className="icon-btn" onClick={onBack} aria-label="Back to categories"><Icon name="arrowLeft" /></button><h1>{translate(service.serviceName)}</h1></header><div className="experience-body"><nav className="crumb" aria-label="Breadcrumb">{translate('Categories → ')}{translate(main?.label)} {group && translate(`→ ${group.label}`)}{translate(` → ${service.serviceName} → Available professionals`)}</nav><label className="field-wrap">{translate('Service city ')}<input className="field" value={location} onChange={event => setLocation(event.target.value)} placeholder="Enter city as listed by the professional" /></label><h2>{translate(`Available ${service.serviceName === 'Plumber' ? 'Plumbers' : 'Professionals'}`)}</h2>{service.requirement && <p>{translate(`Requirement: ${service.requirement}`)}</p>}<div className="vendor-filters"><label>{translate('Sort ')}<select value={sort} onChange={event => setSort(event.target.value)}><option value="rating">{translate('Highest rated')}</option><option value="price">{translate('Lowest starting price')}</option></select></label><button type="button" className="btn btn-outline filter-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(value => !value)}>{translate('Filters')}{activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}</button></div>{filtersOpen && <div className="filters-panel"><label>{translate('Minimum rating')}<select value={minRating} onChange={event => setMinRating(event.target.value)}><option value="0">{translate('All ratings')}</option><option value="4">{translate('4+ stars')}</option><option value="4.5">{translate('4.5+ stars')}</option></select></label><label>{translate('Maximum starting price (₹)')}<input type="number" min="0" inputMode="numeric" value={maxPrice} onChange={event => setMaxPrice(event.target.value)} placeholder="e.g. 2000" /></label><label className="filter-check"><input type="checkbox" checked={available} onChange={event => setAvailable(event.target.checked)} />{translate('Available now')}</label><label className="filter-check"><input type="checkbox" checked={verifiedOnly} onChange={event => setVerifiedOnly(event.target.checked)} />{translate('Identity verified')}</label>{activeFilterCount > 0 && <button type="button" className="link" onClick={clearFilters}>{translate('Clear all filters')}</button>}</div>}{activeFilterCount > 0 && <div className="filter-chips">{available && <button type="button" className="chip active" onClick={() => setAvailable(false)}>{translate('Available now')} ×</button>}{minRating !== '0' && <button type="button" className="chip active" onClick={() => setMinRating('0')}>{translate(`${minRating}+ stars`)} ×</button>}{maxPriceValue != null && <button type="button" className="chip active" onClick={() => setMaxPrice('')}>{translate(`Up to ₹${maxPriceValue}`)} ×</button>}{verifiedOnly && <button type="button" className="chip active" onClick={() => setVerifiedOnly(false)}>{translate('Identity verified')} ×</button>}<button type="button" className="chip clear" onClick={clearFilters}>{translate('Clear all')}</button></div>}{loading ? <UserVendorSkeleton count={2} /> : error ? <div role="alert"><EmptyState title="Couldn’t load professionals" text="Check your connection, then try again." /><button className="btn btn-outline" onClick={() => setRetry(value => value + 1)}>{translate("Try again")}</button></div> : matches.length ? <><div className="vendor-list">{visibleMatches.map(item => <VendorCard key={item.id} vendor={item} onOpen={setVendor} />)}</div>{matches.length > 3 && <button className="btn btn-outline" onClick={() => setShowAll(value => !value)}>{translate(showAll ? 'Show fewer professionals' : `See all ${matches.length} professionals`)}</button>}</> : <><EmptyState title="No matching professionals yet" text="Try another city or clear your filters to see more professionals." /><button className="btn btn-outline" onClick={() => { setAvailable(false); setMinRating("0"); setSort("rating"); }}>{translate("Clear filters")}</button></>}<ServiceSections service={service} vendors={vendors} onService={onService} onVendor={setVendor} notify={notify} policy={policy} /></div>{vendor && <ProfessionalProfile manageHistory={!managedNavigation} vendor={vendor} service={service} vendors={matches} policy={policy} saved={saved} onSave={save} onMessage={onMessage} onVendor={setVendor} notify={notify} onClose={onCloseVendor || (() => setVendor(null))} onBook={() => onBook({ ...service, vendorId: vendor.partner_id ? null : vendor.id, partnerPostId: vendor.partner_id ? vendor.id : null, vendorName: vendor.display_name || vendor.business_name, fixedPrice: policy?.fixed_price ? vendor.prices?.[service.serviceName] : null, startingPrice: vendor.starting_price, visitingCharge: vendor.visiting_charge, demo: Boolean(vendor.demo), packages: vendor.details?.packages || vendor.packages || [] })} />}</main>;
 }

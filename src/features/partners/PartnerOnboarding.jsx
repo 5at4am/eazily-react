@@ -17,9 +17,9 @@ import ConsultantAssessment from './ConsultantAssessment.jsx';
 import ServicePartnerOnboarding from './ServicePartnerOnboarding.jsx';
 import { CONSULTANT_ASSESSMENT_TEST_SKIP_ENABLED } from './consultantAssessmentConfig.js';
 import { IN_APP_BACK_EVENT } from '../../lib/nativeShell.js';
-import { PARTNER_DEMO_ENABLED } from './demo/config.js';
 import { lookupIfsc, lookupPincode, useLookup } from './registrationLookups.js';
 import { LookupHint } from './RegistrationAssist.jsx';
+import './partner-reference.css';
 
 const roleTitles = {
   professional: ['Your work', 'Your business', 'Experience and team', 'Documents', 'Receive your earnings', 'Review and agree'],
@@ -35,11 +35,11 @@ const today = new Date().toISOString().slice(0, 10);
 const isTestOnlyPolicy = row => Boolean(row) && (/^test-only-/i.test(String(row.version || '')) || /^TEST ONLY/i.test(String(row.title || '')));
 
 export default function PartnerOnboarding(props) {
-  if (props.role === 'professional') return <ServicePartnerOnboarding existing={props.existing} account={props.account} notify={props.notify} onDone={props.onDone} onBack={props.onBack} onPreview={props.onPreview} />;
+  if (props.role === 'professional') return <ServicePartnerOnboarding existing={props.existing} account={props.account} notify={props.notify} onDone={props.onDone} onBack={props.onBack} />;
   return <OtherPartnerOnboarding {...props} />;
 }
 
-function OtherPartnerOnboarding({ role, existing, account, notify, onDone, onBack, onPreview }) {
+function OtherPartnerOnboarding({ role, existing, account, notify, onDone, onBack }) {
   const info = partnerRoles[role], titles = roleTitles[role];
   const [values, setValues] = useState(() => prefillFromAccount(normalizeValues(role, existing?.details), account));
   const [savedApplication, setSavedApplication] = useState(existing || null);
@@ -51,7 +51,6 @@ function OtherPartnerOnboarding({ role, existing, account, notify, onDone, onBac
   const [influencerLegalState, setInfluencerLegalState] = useState({ loading: role === 'influencer' && isSupabaseConfigured, documents: [], error: '' });
   const formRef = useRef(null);
   const submitLock = useRef(false);
-  const canSkip = PARTNER_DEMO_ENABLED && !isSupabaseConfigured;
   const influencerTermsDoc = influencerLegalState.documents.find(row => row.document_key === influencerTerms.documentId);
   const influencerPrivacyDoc = influencerLegalState.documents.find(row => row.document_key === influencerPrivacy.documentId);
   const influencerPoliciesReady = Boolean(influencerTermsDoc && influencerPrivacyDoc);
@@ -98,8 +97,8 @@ function OtherPartnerOnboarding({ role, existing, account, notify, onDone, onBac
       return result;
     } catch (error) { notify(error.message); return null; } finally { setBusy(false); }
   }
-  async function next(skip = false) {
-    if (!(skip === true && canSkip) && !validateStep(role, stage, values)) {
+  async function next() {
+    if (!validateStep(role, stage, values)) {
       notify(role === 'influencer' && stage === 3 && !hasMinimumInfluencerAudience(values)
         ? 'Link at least one platform with 5,000 or more followers. Other linked platforms can be below 5,000.'
         : 'Complete the required items on this step. You can save and exit with an incomplete draft.');
@@ -141,34 +140,22 @@ function OtherPartnerOnboarding({ role, existing, account, notify, onDone, onBac
       return;
     }
     if (!isSupabaseConfigured) {
-      notify('Live registration is unavailable because email verification and backend submission are not configured. Your form data remains on this page. Use Save & exit for a testing draft or Demo Mode for a sample dashboard.');
+      notify('Live registration is unavailable because email verification and backend submission are not configured. Your form data remains on this page. Use Save & exit to keep a testing draft.');
       return;
     }
     submitLock.current = true;
     try { await persist(true); }
     finally { submitLock.current = false; }
   }
-  async function previewForTesting() {
-    if (!canSkip || busy) return;
-    if (!onPreview) {
-      notify('Demo Mode is not enabled. Use Save & exit to keep a testing draft for this session.');
-      return;
-    }
-    const result = await persist(false, false, stage, values);
-    if (!result) return;
-    notify('Opening isolated Demo Mode. No account, consent, approval, listing, booking, or payout was created.');
-    onPreview(result);
-  }
   return <main className={`partner-onboarding role-${role}`} style={{ '--role': info.colour, '--role-bg': info.background }}>
     <header className="partner-simple-header"><button className="icon-btn" onClick={stage ? () => setStage(stage - 1) : onBack} aria-label="Go back"><Icon name="arrowLeft" /></button><div><span>{t('Eazily Partner')} · {stage + 1}/6</span><h1>{t(titles[stage])}</h1></div><span className="language-indicator" aria-label="Interface language: English">EN</span></header>
     <div className="registration-progress" aria-label={`Step ${stage + 1} of 6`}>{titles.map((title, index) => <i key={title} className={index <= stage ? 'done' : ''} />)}</div>
     <section className="partner-form-card"><span className={`application-state ${existing?.status || 'draft'}`}>{(existing?.status || 'Draft').replace('_', ' ')}</span>{existing?.review_notes && <div className="safety-card"><b>{t('Changes requested')}</b><p>{existing.review_notes}</p></div>}
-      {!isSupabaseConfigured && <p className="testing-notice" role="status">Testing mode: drafts stay in this session only and are lost on refresh. Complete registration cannot submit without live email verification and the backend. Demo Mode, when enabled, uses isolated sample data.</p>}
+      {!isSupabaseConfigured && <p className="testing-notice" role="status">Testing mode: drafts stay in this session only and are lost on refresh. Complete registration cannot submit without live email verification and the backend.</p>}
       <form ref={formRef} onSubmit={submit} noValidate><Step role={role} stage={stage} values={values} setValues={setValues} notify={notify} onEdit={setStage} openLegal={setLegalDocument} consentError={consentError} clearConsentError={() => setConsentError('')} application={savedApplication} onSkipConsultantAssessment={skipConsultantAssessment} />
         {role === 'consultant' && stage === 5 && <ConsultantLegal application={savedApplication} onEligibilityChange={setConsultantLegalReady} />}
         {role === 'influencer' && stage === 5 && influencerTestOnly && <p className="testing-notice" role="status"><b>Test-only policies are active.</b> The Influencer Terms and Privacy Policy are not approved legal documents. Replace them before real users register.</p>}
         {role === 'influencer' && stage === 5 && isSupabaseConfigured && !influencerLegalState.loading && !influencerPoliciesReady && <p className="inline-error" role="alert">{influencerLegalState.error || 'Published Influencer Terms and Privacy Policy are required before submission.'}</p>}
-        {canSkip && !(role === 'consultant' && stage === 4) && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => stage === 5 ? previewForTesting() : next(true)}>{stage === 5 && onPreview ? 'Open Demo dashboard' : 'Skip for now'}</button>}
         {role === 'consultant' && consentError && <p role="alert" className="inline-error">{consentError}</p>}<p className="warm-copy">{stage < 5 ? 'Great progress. One step at a time.' : 'Review each answer before sending it for human verification.'}</p>
         <div className="registration-actions"><button type="button" className="link" disabled={busy} onClick={() => persist(false, true)}>{t('Save & exit')}</button>{stage > 0 && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setStage(stage - 1)}>{t('Back')}</button>}{stage < 5 ? <button type="button" className="btn btn-primary" disabled={busy} onClick={next}>{t('Next')}</button> : <button className="btn btn-primary" disabled={busy || (role === 'consultant' && isSupabaseConfigured && !consultantLegalReady) || (role === 'influencer' && isSupabaseConfigured && !influencerPoliciesReady)}>{busy ? 'Submitting…' : 'Complete registration'}</button>}</div>
       </form>
@@ -317,7 +304,7 @@ function BankFields({ values = {}, setValues, field }) {
 }
 
 function ReviewTerms({ role, values, field }) {
-  const terms = role === 'professional' ? 'Arrive sober, avoid tobacco at customer premises, maintain hygiene and respect, clean the work area, disclose charges, and use official Eazily payments.' : role === 'influencer' ? 'Paid collaborations only. Report truthful statistics and complete agreed deliverables. The client prepays; the configured provider handles the 70/30 payout schedule and disputes.' : 'Work within approved expertise, protect confidentiality, keep credentials accurate, and use official Eazily payments. Rates are set by Eazily and the free introduction never converts automatically.';
+  const terms = role === 'professional' ? 'Set clear service prices, arrive sober, maintain hygiene and respect, clean the work area, disclose charges, and use official Eazily payments.' : role === 'influencer' ? 'Set clear package prices, report truthful statistics, and complete agreed deliverables. The client prepays; the configured provider handles the 70/30 payout schedule and disputes.' : 'Set your own consultation rates, work within your verified expertise, protect confidentiality, keep credentials accurate, and use official Eazily payments. The free introduction never converts automatically.';
   return <>{field('referralSource', 'How did you hear about us?', { as: 'select', options: ['', 'Instagram', 'WhatsApp', 'YouTube', 'Facebook', 'Google', 'Friend/Referral', 'Eazily Team', 'Poster/Event', 'Other'] })}{values.referralSource === 'Friend/Referral' && field('referralCode', 'Referral code (optional)')}{values.referralSource === 'Other' && field('referralOther', 'Please specify (optional)')}<section className="summary"><h3>Editable summary</h3><p>{values.name || values.creatorName} · {role === 'consultant' ? displayConsultantCategory(values.category) : values.category} · {values.city}</p><p>{terms}</p>{role !== 'consultant' && <><a href="/terms" target="_blank" rel="noreferrer">Terms and Conditions</a> · <a href="/privacy" target="_blank" rel="noreferrer">Privacy Notice</a></>}</section>{role !== 'consultant' && <label className="consent"><input type="checkbox" checked={Boolean(values.termsAccepted)} onChange={event => fieldChange(event, 'termsAccepted')} /> I accept the role-specific terms.</label>}<label className="consent"><input type="checkbox" checked={Boolean(values.informationAccurate)} onChange={event => fieldChange(event, 'informationAccurate')} /> I confirm that the supplied information is accurate.</label><label className="consent"><input type="checkbox" checked={Boolean(values.promotionalConsent)} onChange={event => fieldChange(event, 'promotionalConsent')} /> Send me promotional messages (optional).</label></>;
   function fieldChange(event, key) { field(key, key) .props.onChange(event); }
 }

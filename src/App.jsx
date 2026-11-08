@@ -10,19 +10,17 @@ import { catalog } from './data/catalog.js';
 import { artworkFor, assetById } from './features/user-art/artwork.js';
 import { replaceNavigationState, useNativeShellBack } from './lib/nativeShell.js';
 import { workspacePaths } from './lib/workspace.js';
-import { PARTNER_DEMO_ENABLED } from './features/partners/demo/config.js';
 import { useAuth } from './auth/useAuth.js';
 import { routeAccess } from './auth/policy.js';
 import { requireBackend } from './services/experience.js';
+import { clearPendingIntent } from './lib/pendingIntent.js';
 import ConnectionNotice from './components/ConnectionNotice.jsx';
 
 const UserApp = lazy(() => import('./pages/UserApp.jsx'));
-const DemoWorkspace = lazy(() => import('./features/partners/demo/DemoWorkspace.jsx'));
 const AuthScreen = lazy(() => import('./auth/AuthScreen.jsx'));
 const PasswordRecoveryScreen = lazy(() => import('./auth/PasswordRecoveryScreen.jsx'));
 const PartnerApp = lazy(() => import('./pages/PartnerApp.jsx'));
 const PartnerOnboarding = lazy(() => import('./features/partners/PartnerOnboarding.jsx'));
-const AdminApp = lazy(() => import('./pages/AdminApp.jsx'));
 function Loading() { return <main className="splash"><Brand/><p role="status">Loading...</p></main>; }
 const WELCOME_COMPLETED_KEY = 'eazily-welcome-completed';
 function hasCompletedWelcome() {
@@ -32,6 +30,10 @@ function completeWelcome() {
   try { localStorage.setItem(WELCOME_COMPLETED_KEY, 'true'); } catch { /* Keep navigation working when storage is unavailable. */ }
 }
 function initialView() {
+  if (location.pathname === '/admin' || location.pathname.startsWith('/admin/') || new URLSearchParams(location.search).has('admin')) {
+    history.replaceState({ eazilyDepth: 0, eazilyWorkspace: 'customer' }, '', workspacePaths.customer);
+    return { stage: 'customer', role: 'customer' };
+  }
   if (location.pathname === '/user/home') return { stage: 'customer', role: 'customer' };
   const role = Object.entries(workspacePaths).find(([, path]) => path === location.pathname)?.[0];
   if (role) return { stage: 'workspace', role };
@@ -49,8 +51,12 @@ export default function App() {
   useEffect(() => () => clearTimeout(timer.current), []);
   const enterCustomer = useCallback(() => { completeWelcome(); replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: 'customer' }, workspacePaths.customer); setView({ stage: 'customer', role: 'customer' }); }, []);
   const enterPartner = useCallback(role => { if (!workspacePaths[role]) return; completeWelcome(); replaceNavigationState({ eazilyDepth: 0, eazilyWorkspace: role }, workspacePaths[role]); setView({ stage: 'workspace', role }); }, []);
+  const switchWorkspace = useCallback(workspace => {
+    if (workspace === 'customer') enterCustomer();
+    else enterPartner(workspace);
+  }, [enterCustomer, enterPartner]);
   const enterWelcome = useCallback(() => { replaceNavigationState({ eazilyDepth: 0 }, '/'); setView({ stage: 'welcome', role: 'customer' }); }, []);
-  const leaveSignIn = () => { if (view.stage === 'auth') setView(authReturnView.current); else enterWelcome(); };
+  const leaveSignIn = () => { clearPendingIntent(); if (view.stage === 'auth') setView(authReturnView.current); else enterWelcome(); };
   useEffect(() => {
     const onSignIn = beginSignIn;
     const onPop = () => setView(initialView());
@@ -81,7 +87,7 @@ export default function App() {
   }, [auth.recovery, enterWelcome]);
   useNativeShellBack(() => {
     if (view.stage === 'auth') { leaveSignIn(); return true; }
-    if (['partner-choice', 'demo', 'registration'].includes(view.stage)) { enterWelcome(); return true; }
+    if (['partner-choice', 'registration'].includes(view.stage)) { enterWelcome(); return true; }
     return false;
   }, view.stage === 'welcome', () => notify(translate('Press back again to exit'), 2200));
   const logout = async () => { await auth.controller.logout(); enterWelcome(); };
@@ -91,21 +97,18 @@ export default function App() {
   const privateWorkspace = view.role !== 'customer' && ['workspace', 'registration'].includes(view.stage);
   const addRole = () => setView({ stage: 'partner-choice', role: view.role });
   const editRegistration = () => setView({ stage: 'registration', role: view.role });
-  const enterDemo = PARTNER_DEMO_ENABLED ? () => setView({ stage: 'demo', role: view.role }) : undefined;
   let content;
   if (auth.recovery) content = <PasswordRecoveryScreen auth={auth} onDone={() => enterCustomer()} />;
   else if (location.pathname === '/terms' || location.pathname === '/privacy') content = <ConsumerPolicyPage kind={location.pathname === '/terms' ? 'terms' : 'privacy_policy'} />;
-  else if (view.stage === 'welcome') content = <Welcome onCustomer={enterCustomer} onService={enterCustomer} onPartner={addRole} onEnterDemo={enterDemo} />;
+  else if (view.stage === 'welcome') content = <Welcome onCustomer={enterCustomer} onService={enterCustomer} onPartner={addRole} />;
   else if (view.stage === 'partner-choice') content = <PartnerChoice onSelect={enterPartner} onBack={enterWelcome} />;
-  else if (view.stage === 'demo' && PARTNER_DEMO_ENABLED) content = <DemoWorkspace initialRole={view.role} onExit={enterWelcome} />;
   else if (auth.status === 'initialising' && (privateWorkspace || view.stage === 'auth')) content = <Loading />;
   else if (auth.status === 'error' && !account.user && !auth.contact && (privateWorkspace || view.stage === 'auth')) content = <main className="setup"><p role="alert">{auth.error}</p><button className="btn btn-primary" onClick={() => void auth.controller.refresh()}>Retry account access</button><button className="link" onClick={enterWelcome}>Back</button></main>;
-  else if (view.stage === 'auth' || (privateWorkspace && !account.user)) content = <AuthScreen auth={auth} partnerRole={view.role === 'customer' || view.role === 'admin' ? null : view.role} onContinue={() => enterPartner(view.role)} onBack={leaveSignIn} onEnterDemo={enterDemo} />;
+  else if (view.stage === 'auth' || (privateWorkspace && !account.user)) content = <AuthScreen auth={auth} partnerRole={view.role === 'customer' ? null : view.role} onContinue={() => enterPartner(view.role)} onBack={leaveSignIn} />;
   else if (account.user && auth.status === 'profile_required') content = <ProfileSetup account={account} onSaved={auth.controller.refresh} notify={notify} logout={logout} />;
   else if (account.user && ['blocked', 'suspended'].includes(auth.status)) content = <main className="setup"><h1>Account access restricted</h1><p>Contact support to review your account status.</p><button className="btn btn-outline" onClick={logout}>Sign out</button></main>;
-  else if (privateWorkspace && view.role === 'admin' && access === 'allowed') content = <AdminApp notify={notify} account={account} logout={logout} />;
-  else if (privateWorkspace && (['registration', 'assessment_required'].includes(access) || view.stage === 'registration' && access === 'allowed')) content = <PartnerOnboarding key={view.role} role={view.role} account={account} existing={account.applications.find(item => item.role === view.role)} notify={notify} onDone={async () => { await auth.controller.refresh(); enterPartner(view.role); }} onBack={enterCustomer} onPreview={enterDemo} />;
-  else if (privateWorkspace && access === 'allowed') content = <PartnerApp key={view.role} role={view.role} account={account} notify={notify} onWorkspace={enterPartner} onAddRole={addRole} onEditRegistration={editRegistration} />;
+  else if (privateWorkspace && (['registration', 'assessment_required'].includes(access) || view.stage === 'registration' && access === 'allowed')) content = <PartnerOnboarding key={view.role} role={view.role} account={account} existing={account.applications.find(item => item.role === view.role)} notify={notify} onDone={async () => { await auth.controller.refresh(); enterPartner(view.role); }} onBack={enterCustomer} />;
+  else if (privateWorkspace && access === 'allowed') content = <PartnerApp key={view.role} role={view.role} account={account} notify={notify} onWorkspace={switchWorkspace} onAddRole={addRole} onEditRegistration={editRegistration} />;
   else if (privateWorkspace) content = <main className="setup"><h1>Workspace unavailable</h1><p>{access === 'denied' ? 'Your account does not have access to this workspace.' : `Application status: ${access.replaceAll('_', ' ')}.`}</p><button className="btn btn-outline" onClick={enterCustomer}>Customer home</button><button className="link" onClick={logout}>Sign out</button></main>;
   else content = <UserApp key={account.user?.id || 'guest'} notify={notify} account={account} onWorkspace={enterPartner} onAddRole={addRole} />;
   return <AccountContext.Provider value={context}><RealtimeProvider value={realtime}><div className={'phone-shell peazily-ui' + (view.role === 'customer' && ['customer', 'workspace'].includes(view.stage) ? ' customer-workspace' : '')}><ConnectionNotice accountError={account.user && auth.error ? auth.error : ''} onRefresh={auth.controller.refresh}/><Suspense fallback={<Loading/>}>{content}</Suspense><Toast message={toast}/></div></RealtimeProvider></AccountContext.Provider>;
@@ -135,8 +138,7 @@ const welcomePreviewServices = [...new Map(Array.from({ length: Math.max(0, ...w
 function Welcome({
   onCustomer,
   onService,
-  onPartner,
-  onEnterDemo
+  onPartner
 }) {
   const [previewStart, setPreviewStart] = useState(0);
   const previewTouching = useRef(false);
@@ -161,7 +163,6 @@ function Welcome({
       </button>
     </section>
     <p className="welcome-sign-in">Browse services. Sign in to save your profile and submit a booking.</p>
-    {PARTNER_DEMO_ENABLED && onEnterDemo && <button type="button" className="btn btn-outline welcome-demo-entry" onClick={onEnterDemo}>Enter Demo Mode</button>}
   </main>;
 }
 function PartnerChoice({

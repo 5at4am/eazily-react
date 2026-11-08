@@ -1,6 +1,5 @@
 -- Step 23. Forward-only security correction after background_automation.sql.
 -- Does not enable providers or change existing financial configuration/data.
-begin;
 
 revoke create on schema public from public,anon,authenticated;
 
@@ -53,7 +52,7 @@ begin
   loop
     select substr(setting,length('search_path=')+1) into configured_path
       from unnest(fn.proconfig) setting where setting like 'search_path=%';
-    if configured_path is null or configured_path !~ '^(public|eazily_private)(, ?(public|eazily_private|storage))*(, ?pg_temp)?$' then
+    if configured_path is null or configured_path !~ '^(public|eazily_private|storage|extensions)(, ?(public|eazily_private|storage|extensions))*(, ?pg_temp)?$' then
       raise exception 'Unreviewed definer search_path for %.%',fn.nspname,fn.proname;
     end if;
     -- pg_temp must be explicit and last, otherwise temp relations precede public.
@@ -65,4 +64,4 @@ begin
     end if;
   end loop;
 end $$;
-commit;
+

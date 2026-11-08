@@ -80,7 +80,7 @@ function payload(values, legal, submit = false) {
   };
 }
 
-export default function ServicePartnerOnboarding({ existing, account, notify, onDone, onBack, onPreview }) {
+export default function ServicePartnerOnboarding({ existing, account, notify, onDone, onBack }) {
   const [values, setValues] = useState(() => normalize(existing, account));
   const [application, setApplication] = useState(existing || null);
   const [stage, setStage] = useState(() => normalize(existing, account).stage);
@@ -163,16 +163,9 @@ export default function ServicePartnerOnboarding({ existing, account, notify, on
   }
   async function skipForTesting() {
     if (!SERVICE_REGISTRATION_TEST_SKIP_ENABLED || isSupabaseConfigured || busy) return;
-    if (stage < 5) {
-      const next = stage + 1;
-      if (await persist(next)) { setErrors({}); setStage(next); window.scrollTo(0, 0); }
-      return;
-    }
-    if (!onPreview) return notify('Demo Mode is not enabled. Use Save & Exit to keep a testing draft for this session.');
-    const result = await persist(5);
-    if (!result) return;
-    notify('Opening isolated Demo Mode. No account, consent, approval, listing, booking, or payout was created.');
-    onPreview(result);
+    if (stage >= 5) return;
+    const next = stage + 1;
+    if (await persist(next)) { setErrors({}); setStage(next); window.scrollTo(0, 0); }
   }
   async function submit(event) {
     event.preventDefault();
@@ -181,7 +174,7 @@ export default function ServicePartnerOnboarding({ existing, account, notify, on
     const nextErrors = invalidStage === undefined ? {} : validate(invalidStage, values, legal);
     setErrors(nextErrors);
     if (invalidStage !== undefined) { setStage(invalidStage); setTimeout(() => document.querySelector('.service-registration [aria-invalid=true]')?.focus(), 0); return notify(Object.values(nextErrors)[0]); }
-    if (!isSupabaseConfigured) return notify('Live registration is unavailable because email verification and backend submission are not configured. Your form data remains on this page. Use Save & Exit for a testing draft or Demo Mode for a sample dashboard.');
+    if (!isSupabaseConfigured) return notify('Live registration is unavailable because email verification and backend submission are not configured. Your form data remains on this page. Use Save & Exit to keep a testing draft.');
     if (lock.current) return;
     lock.current = true; setBusy(true);
     try {
@@ -197,10 +190,10 @@ export default function ServicePartnerOnboarding({ existing, account, notify, on
     <header className="partner-simple-header service-registration-header"><button type="button" className="icon-btn" onClick={stage ? () => setStage(stage - 1) : onBack} aria-label="Go back"><Icon name="arrowLeft" /></button><div className="service-header-copy"><div className="service-header-meta"><span className="service-brand-name">eazily</span><span className="service-role-label">Service Partner</span><span className="service-step-count">Step {stage + 1} of 6</span><span className={`application-state ${application?.status || 'draft'}`}>{application?.status === 'draft' ? 'Draft saved' : application ? application.status.replaceAll('_', ' ') : 'Draft'}</span></div><h1>{titles[stage]}</h1></div><span className="language-indicator" aria-label="Interface language: English">EN</span></header>
     <div className="registration-progress" role="progressbar" aria-valuemin={1} aria-valuemax={6} aria-valuenow={stage + 1} aria-label={`Step ${stage + 1} of 6`}>{titles.map((title, index) => <i key={title} className={index < stage ? 'done' : index === stage ? 'current' : ''} />)}</div>
     <section className="partner-form-card">{application?.review_notes && <div className="safety-card"><b>Changes requested</b><p>{application.review_notes}</p></div>}
-      {!isSupabaseConfigured && <p className="testing-notice" role="status">Local testing only. Drafts stay in this browser session and are lost on refresh. Complete registration cannot submit without live email verification and the backend. Demo Mode, when enabled, uses isolated sample data.</p>}
+      {!isSupabaseConfigured && <p className="testing-notice" role="status">Local testing only. Drafts stay in this browser session and are lost on refresh. Complete registration cannot submit without live email verification and the backend.</p>}
       <form onSubmit={submit} noValidate>
         <ServiceStep stage={stage} values={values} update={update} setValues={setValues} errors={errors} notify={notify} legal={legal} legalLoading={legalLoading} legalError={legalError} reloadLegal={reloadLegal} openLegal={setOpenDocument} onEdit={setStage} />
-        {SERVICE_REGISTRATION_TEST_SKIP_ENABLED && !isSupabaseConfigured && <div className="service-registration-test-skip"><small>Testing only</small><button type="button" className="btn btn-outline" disabled={busy} onClick={skipForTesting}>{stage === 5 && onPreview ? 'Open Demo dashboard' : 'Skip for now'}</button></div>}
+        {SERVICE_REGISTRATION_TEST_SKIP_ENABLED && !isSupabaseConfigured && stage < 5 && <div className="service-registration-test-skip"><small>Testing only</small><button type="button" className="btn btn-outline" disabled={busy} onClick={skipForTesting}>Skip for now</button></div>}
         <div className="registration-actions"><button type="button" className="link" disabled={busy} onClick={() => persist(stage, true)}>Save &amp; Exit</button>{stage > 0 && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => setStage(stage - 1)}>Back</button>}{stage < 5 ? <button type="button" className="btn btn-primary" disabled={busy} onClick={continueStep}>Continue</button> : <button className="btn btn-primary" disabled={busy}>{busy ? 'Submitting…' : 'Complete registration'}</button>}</div>
       </form>
     </section>

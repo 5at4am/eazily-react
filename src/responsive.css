@@ -1,4 +1,4 @@
-/* Responsive shell rules shared by customer, partner, and staff workspaces.
+/* Responsive shell rules shared by customer and partner workspaces.
    Phone layouts stay fluid; wider workspaces use the space rather than a
    centered 430px device frame. */
 @media (min-width: 600px) {
@@ -31,14 +31,6 @@
     width: 100%;
     max-width: none;
   }
-
-  .phone-shell.peazily-ui:has(> .admin-screen) {
-    width: min(100%, 1200px);
-    max-width: 1200px;
-    margin-inline: auto;
-    padding-top: 0;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { width:100%; max-width:none; }
 
   .phone-shell.customer-workspace .bottom-nav.customer-nav {
     left: 50%;
@@ -110,93 +102,6 @@
   .phone-shell.peazily-ui:has(> .partner-workspace) .partner-screen > :is(.pd-topbar,.dashboard-header) { padding-inline:24px; }
 }
 
-@media (min-width: 700px) {
-  /* Restore the staff console's desktop grid; the legacy phone rule had
-     accidentally forced its icon rail layout at every viewport width. */
-  body:has(.phone-shell > .admin-screen) { padding: 0; }
-  .phone-shell.peazily-ui:has(> .admin-screen) {
-    width: 100%;
-    max-width: none;
-    min-height: 100dvh;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen {
-    display: grid;
-    grid-template-columns: 248px minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    width: 100%;
-    min-height: 100dvh;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar {
-    grid-row: 1 / 3;
-    position: sticky;
-    top: 0;
-    width: 248px;
-    height: 100dvh;
-    min-height: 100dvh;
-    display: block;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar :is(.brand-lockup span:last-child, .admin-nav-label, button span, .admin-logo > span) {
-    display: initial;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button {
-    width: 100%;
-    min-width: 0;
-    min-height: 44px;
-    display: flex;
-    justify-content: flex-start;
-    margin: 3px 0;
-    padding: 0 12px;
-  }
-}
-
-@media (min-width: 700px) and (max-width: 900px) {
-  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { grid-template-columns: 220px minmax(0, 1fr); }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar { width: 220px; padding-inline: 10px; }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar :is(.admin-nav-label, button span, .admin-logo > span) { display:initial; }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button { width:100%; min-width:0; justify-content:flex-start; padding:0 10px; }
-}
-
-@media (max-width: 699px) {
-  .phone-shell.peazily-ui:has(> .admin-screen) > .admin-screen { display:block; }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar {
-    position:sticky;
-    top:0;
-    z-index:40;
-    display:flex;
-    flex-direction:row;
-    width:100%;
-    height:auto;
-    min-height:0;
-    overflow-x:auto;
-    overflow-y:hidden;
-    padding:7px;
-    border-right:0;
-    border-bottom:1px solid var(--divider);
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar .admin-logo > span { display:inline-flex; }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button {
-    flex:0 0 auto;
-    width:auto;
-    min-width:max-content;
-    min-height:44px;
-    justify-content:flex-start;
-    margin:0;
-    gap:7px;
-    padding:0 10px;
-  }
-  .phone-shell.peazily-ui:has(> .admin-screen) .admin-sidebar > button span {
-    display:inline;
-    white-space:nowrap;
-  }
-}
-
 @media (min-width: 768px) {
   .phone-shell.peazily-ui .sheet-overlay {
     align-items: center !important;
@@ -255,8 +160,6 @@
 }
 
 @media (max-width: 359px) {
-  .phone-shell.peazily-ui .admin-main { padding-inline: 8px; }
-  .phone-shell.peazily-ui .admin-sidebar > button { flex-basis: 40px; width: 40px; min-width: 40px; }
   .phone-shell.peazily-ui .welcome-screen.welcome-entry { padding-inline: 12px; }
   .phone-shell.peazily-ui .welcome-entry .welcome-tabs button { font-size: 13px; }
 }

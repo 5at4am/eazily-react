@@ -130,22 +130,9 @@ let browser, socket;
     console.log(`PASS partner workspace landscape ${width}x${height}`);
   }
 
-  await send('Page.navigate', { url: 'http://127.0.0.1:5173/scripts/admin-responsive-fixture.html' });
-  await waitFor("document.querySelector('.admin-screen')", 'staff console');
-  for (const width of widths) {
-    await viewport(width, requestedViewportHeights.get(width) ?? (width >= 1024 ? 1000 : 844), width >= 700 ? 5000 : 1200);
-    const navState = await evaluate(`(()=>{const screen=document.querySelector('.admin-screen'),sidebar=document.querySelector('.admin-sidebar'),s=getComputedStyle(screen),n=sidebar.getBoundingClientRect();return {display:s.display,columns:s.gridTemplateColumns,sidebarWidth:n.width,navScroll:sidebar.scrollWidth,navClient:sidebar.clientWidth}})()`);
-    if (width >= 700) {
-      assert.equal(navState.display, 'grid', `Staff console restores its desktop shell at ${width}px`);
-      assert.ok(navState.sidebarWidth >= (width <= 900 ? 220 : 248), `Staff navigation remains labelled at ${width}px`);
-    } else {
-      assert.equal(navState.display, 'block', `Staff navigation collapses to the compact mobile pattern at ${width}px`);
-      assert.ok(navState.navClient > 0, `Staff navigation is available at ${width}px`);
-      assert.ok(await evaluate(`[...document.querySelectorAll('.admin-sidebar > button')].every(button=>getComputedStyle(button.querySelector('span')||button).display!=='none')`), `Staff mobile navigation labels remain visible at ${width}px`);
-    }
-    if ([640, 1440].includes(width)) await capture(`staff-${width}`);
-    console.log(`PASS staff console ${width}px`);
-  }
+  await send('Page.navigate', { url: 'http://127.0.0.1:5173/admin' });
+  await waitFor("document.querySelector('.marketplace-home')", 'customer home after retired Admin route');
+  assert.equal(await evaluate('location.pathname'), '/user/home', 'Legacy Admin URL redirects to customer home');
 
   await send('Page.navigate', { url: 'http://127.0.0.1:5173/' });
   await waitFor("document.querySelector('.marketplace-home')", 'returning customer home');

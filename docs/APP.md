@@ -64,7 +64,7 @@ Keep operation keys for uncertain booking/message retries. Do not retry financia
 
 ## Explicit previews
 
-`features/partners/demo/` remains an isolated preview used by tests. It is hidden unless `VITE_PARTNER_DEMO=true`. Set it to false for live testing and release. Development OTP and registration/assessment skips are not production authentication or approvals.
+The old interactive partner-workspace demo was removed. A separate customer discovery sample fixture still exists for local preview checks under `src/features/services/customerProfessionalDemo.js`; it is isolated behind `VITE_PARTNER_DEMO=true`, an unconfigured Supabase client and no signed-in account. Keep the flag false for normal use and release. These sample professional cards are not real listings and do not grant booking, approval or authentication privileges.
 
 ## Android
 

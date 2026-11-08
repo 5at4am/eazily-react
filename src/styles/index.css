@@ -1,0 +1,15 @@
+/*
+ * Application-wide CSS entry point.
+ * Keep this order stable: several global selectors intentionally override
+ * earlier compatibility rules. Feature styles remain imported by their
+ * feature components instead of being moved into this bundle.
+ */
+@import "../styles.css";
+@import "../experience.css";
+@import "../partner.css";
+@import "../customer-theme.css";
+@import "../product-polish.css";
+@import "../style.css";
+@import "../features/home/marketplace-home.css";
+@import "../responsive.css";
+@import "../app-redesign.css";

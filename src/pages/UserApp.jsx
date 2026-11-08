@@ -12,6 +12,7 @@ import RoleMarketplace from '../features/services/RoleMarketplace.jsx';
 import CustomerAccount from "../features/account/CustomerAccount.jsx";
 import { canonicalService } from "../services/experience.js";
 import { requestSignIn } from '../lib/account.js';
+import { clearPendingIntent, readPendingIntent, savePendingIntent } from '../lib/pendingIntent.js';
 import ServiceIllustration from '../features/user-art/ServiceIllustration.jsx';
 import '../features/user-art/compact-services.css';
 import '../features/user-motion/user-motion.css';
@@ -23,7 +24,7 @@ import { IN_APP_BACK_EVENT } from '../lib/nativeShell.js';
 import { createCustomerNavigator } from '../lib/customerNavigation.js';
 import CustomerNavigation from '../components/CustomerNavigation.jsx';
 import CustomerDrawer from '../components/CustomerDrawer.jsx';
-import { getCustomerProfessionalById } from '../services/marketplace.js';
+import { getCustomerProfessionalById, searchProfessionals } from '../services/marketplace.js';
 import BulkOrders from '../features/bulk-orders/BulkOrders.jsx';
 import CustomerVideos from '../features/videos/CustomerVideos.jsx';
 import { PARTNER_DEMO_ENABLED } from '../features/partners/demo/config.js';
@@ -44,6 +45,8 @@ export default function UserApp({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchFocusToken, setSearchFocusToken] = useState(0);
   const [chatTarget, setChatTarget] = useState(null);
+  const [proResults, setProResults] = useState([]);
+  const resumedIntent = useRef(false);
   useEffect(() => {
     const sidebar = categorySidebar.current;
     const active = sidebar?.querySelector('.group-nav.active');
@@ -66,6 +69,39 @@ export default function UserApp({
     }).catch(error => { if (active) notify(error.message); });
     return () => { active = false; };
   }, [notify, realtimeRevision, service, vendor?.id, location, navigation]);
+  useEffect(() => {
+    if (!account?.user?.id || isolatedDemo || resumedIntent.current) return;
+    const intent = readPendingIntent();
+    if (!intent) return;
+    resumedIntent.current = true;
+    clearPendingIntent();
+    if (intent.type === 'booking' || intent.type === 'request') {
+      if (intent.page?.service && !service) {
+        navigation.go({ route: intent.page.route || 'home', selectedMain: intent.page.selectedMain || null, selectedGroup: intent.page.selectedGroup || null, service: intent.page.service, vendor: null, bulkOrdersOrigin: null }, { replace: true });
+      }
+      setRequest(intent.request);
+      return;
+    }
+    if (intent.type === 'panel') {
+      setProfileSheet(intent.panel);
+      navigation.go({ route: 'profile', selectedMain: null, selectedGroup: null, service: null, vendor: null, bulkOrdersOrigin: null }, { replace: true });
+      return;
+    }
+    if (intent.type === 'route') {
+      navigation.go({ route: intent.route, selectedMain: null, selectedGroup: null, service: null, vendor: null, bulkOrdersOrigin: null }, { replace: true });
+      return;
+    }
+    if (intent.type === 'resume' && intent.page) {
+      navigation.go({ route: intent.page.route || 'home', selectedMain: intent.page.selectedMain || null, selectedGroup: intent.page.selectedGroup || null, service: intent.page.service || null, vendor: null, bulkOrdersOrigin: null }, { replace: true });
+      return;
+    }
+    if (intent.type === 'message' && intent.postId) {
+      startChat({ postId: intent.postId }).then(conversation => {
+        setChatTarget(conversation.id);
+        navigation.go({ route: 'messages', selectedMain: null, selectedGroup: null, service: null, vendor: null, bulkOrdersOrigin: null }, { replace: true });
+      }).catch(error => notify(error.message));
+    }
+  }, [account?.user?.id, isolatedDemo, navigation, notify, service]);
   useLayoutEffect(() => {
     const previous = history.scrollRestoration;
     history.scrollRestoration = 'manual';
@@ -85,10 +121,21 @@ export default function UserApp({
     if (!next) { navigation.back(); return; }
     navigation.go({ vendor: next }, { preserveScroll: true });
   }
+  function pageSnapshot() {
+    return { route, selectedMain, selectedGroup, service, scrollY: 0 };
+  }
+  function signInFor(intent) {
+    savePendingIntent({ ...intent, page: pageSnapshot() });
+    requestSignIn();
+  }
   function openService(next, specificVendor = null) {
-    if (!account?.user && !isolatedDemo) { requestSignIn(); return; }
     const selection = { ...next, serviceName: canonicalService(next.serviceName) };
-    if (['loans', 'transportation', 'blood-bank'].includes(selection.categoryId)) { setRequest(selection); return; }
+    if (['loans', 'transportation', 'blood-bank'].includes(selection.categoryId)) {
+      const booking = { ...selection, city: selection.city || location };
+      if (!account?.user && !isolatedDemo) { signInFor({ type: 'request', request: booking }); return; }
+      setRequest(booking);
+      return;
+    }
     navigation.go({ service: selection, vendor: specificVendor, bulkOrdersOrigin: null });
     setSearch('');
   }
@@ -115,10 +162,20 @@ export default function UserApp({
     if (!query) return [];
     return searchIndex.filter(item => [item.name, item.path, ...(item.aliases ?? [])].join(" ").toLowerCase().includes(query)).slice(0, 10);
   }, [search, searchIndex]);
-  function openPanel(name) { setProfileSheet(name); navigate('profile'); }
+  useEffect(() => {
+    let active = true;
+    const query = search.trim();
+    if (!query) { setProResults([]); return undefined; }
+    searchProfessionals(query, location).then(rows => { if (active) setProResults(rows); }).catch(() => { if (active) setProResults([]); });
+    return () => { active = false; };
+  }, [search, location]);
+  function openPanel(name) {
+    if (!account?.user && !['App Preferences', 'Legal', 'About Eazily'].includes(name)) { signInFor({ type: 'panel', panel: name }); return; }
+    setProfileSheet(name); navigate('profile');
+  }
   function navigate(next) {
     setDrawerOpen(false);
-    if (next === 'messages' && !account?.user) { requestSignIn(); return; }
+    if (next === 'messages' && !account?.user) { signInFor({ type: 'route', route: 'messages' }); return; }
     if (next === route && !service && !bulkOrdersOrigin) { window.scrollTo({ top: 0, behavior: 'auto' }); return; }
     navigation.go({ route: next, selectedMain: next === 'categories' ? selectedMain : null, selectedGroup: next === 'categories' ? selectedGroup : null, service: null, vendor: null, bulkOrdersOrigin: null });
   }
@@ -133,12 +190,18 @@ export default function UserApp({
     setSearchFocusToken(token => token + 1);
   }
   function startBooking(next) {
-    if (!account?.user && !next.demo) { requestSignIn(); return; }
-    setRequest(next);
+    const booking = { ...next, city: next.city || location };
+    if (!account?.user && !next.demo) { signInFor({ type: 'booking', request: booking }); return; }
+    setRequest(booking);
+  }
+  function openMyBookings() {
+    setRequest(null);
+    setProfileSheet('My Bookings');
+    navigate('profile');
   }
   async function messageProvider(postId) {
-    if (!account?.user) { requestSignIn(); return; }
     if (!postId) return notify('This provider does not have a published messaging profile.');
+    if (!account?.user) { signInFor({ type: 'message', postId }); return; }
     try {
       const conversation = await startChat({ postId });
       setChatTarget(conversation.id);
@@ -158,7 +221,10 @@ export default function UserApp({
   function SearchArea() {
     return <div className="search-area">
         <SearchBox value={search} onChange={setSearch} />
-        {translate(search ? <div className="search-results">{translate(results.length ? results.map(item => <button key={item.path} onClick={() => selectSearchResult(item)}><b>{translate(item.name)}</b><small>{translate(item.path)}</small></button>) : <EmptyState title="No matches found" text="Try another spelling or a simpler word." icon="search" />)}</div> : null)}
+        {translate(search ? <div className="search-results">{translate((results.length || proResults.length) ? <>
+          {translate(results.length ? results.map(item => <button key={item.path} onClick={() => selectSearchResult(item)}><b>{translate(item.name)}</b><small>{translate(item.path)}</small></button>) : null)}
+          {translate(proResults.length ? <div className="search-pro-group"><b className="search-group-label">{translate('Professionals')}</b>{proResults.map(item => <button key={item.id} onClick={() => openVendor({ ...item, service_names: [item.matchedService] })}><b>{translate(item.display_name || item.business_name)}</b><small>{translate(`${item.matchedService} · ${item.city || ''}`)}</small></button>)}</div> : null)}
+        </> : <EmptyState title="No matches found" text="Try another spelling or a simpler word." icon="search" />)}</div> : null)}
       </div>;
   }
   function Home() {
@@ -222,6 +288,6 @@ export default function UserApp({
   }, [searchFocusToken]);
   return <div className="user-app-root">
       {showAppBar && <CustomerNavigation title={title} canBack={drilledIn} onBack={() => navigation.back()} onOpenMenu={() => setDrawerOpen(true)} menuOpen={drawerOpen} onSearch={openSearch} />}
-      <CustomerDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} account={account} onNavigate={navigate} onCategory={showCategories} onPanel={openPanel} onAddRole={onAddRole} onWorkspace={onWorkspace} />
-      <ConsumerConsentHost /><Fragment key={pageKey}>{translate(activePage)}</Fragment>{(service || bulkOrdersOrigin) && <BottomNav route={service ? 'categories' : route} onChange={navigate} />}{translate(request ? <RequestSheet request={request} onClose={() => setRequest(null)} notify={notify} /> : null)}</div>;
+      <CustomerDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} account={account} onNavigate={navigate} onCategory={showCategories} onPanel={openPanel} onAddRole={onAddRole} onWorkspace={onWorkspace} onSignIn={panel => panel ? signInFor({ type: 'panel', panel }) : signInFor({ type: 'resume' })} />
+      <ConsumerConsentHost /><Fragment key={pageKey}>{translate(activePage)}</Fragment>{(service || bulkOrdersOrigin) && <BottomNav route={service ? 'categories' : route} onChange={navigate} />}{translate(request ? <RequestSheet request={request} onClose={() => setRequest(null)} onViewBookings={openMyBookings} notify={notify} /> : null)}</div>;
 }

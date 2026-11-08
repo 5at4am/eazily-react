@@ -7,6 +7,7 @@ import './customer-drawer.css';
 
 const accountPanels = [
   ['clipboard', 'My Bookings'],
+  ['bell', 'Notifications'],
   ['person', 'Saved Vendors'],
   ['rupee', 'Wallet'],
   ['message', 'Help & Support'],
@@ -26,7 +27,8 @@ export default function CustomerDrawer({
   onCategory,
   onPanel,
   onAddRole,
-  onWorkspace
+  onWorkspace,
+  onSignIn
 }) {
   const drawer = useRef(null);
   const closeButton = useRef(null);
@@ -68,8 +70,10 @@ export default function CustomerDrawer({
   const partnerRole = ['professional', 'influencer', 'consultant'].find(role => roles.includes(role));
 
   const go = action => () => { onClose(); action(); };
+  const requestSignInWith = panel => (onSignIn || requestSignIn)(panel);
   const openPanel = name => go(() => onPanel(name));
-  const signIn = go(() => requestSignIn());
+  const signIn = go(() => requestSignInWith());
+  const panelSignIn = panel => go(() => requestSignInWith(panel));
   const signOut = go(() => logout());
 
   return <div className={`customer-drawer-root${open ? ' is-open' : ''}`}>
@@ -104,7 +108,7 @@ export default function CustomerDrawer({
 
         <section className="drawer-section" aria-labelledby="drawer-account">
           <h2 id="drawer-account">{translate('Your account')}</h2>
-          {accountPanels.map(([icon, panel]) => <button type="button" className="drawer-row" key={panel} onClick={signedIn ? openPanel(panel) : signIn}>
+          {accountPanels.map(([icon, panel]) => <button type="button" className="drawer-row" key={panel} onClick={signedIn ? openPanel(panel) : panelSignIn(panel)}>
             <span className="drawer-row-icon"><Icon name={icon} size={20} /></span>
             <span className="drawer-row-label">{translate(panel)}</span>
             <Icon name="chevronRight" size={16} />

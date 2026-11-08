@@ -1,0 +1,241 @@
+/* Shared reference-led language for partner home, work and registration. */
+.partner-dashboard-home-view {
+  --pd-ink: #19172c;
+  --pd-muted: #53546a;
+  --pd-border: #e1deec;
+  --pd-surface: #f4f2fb;
+  --pd-accent: var(--role, #0d7c66);
+  color: var(--pd-ink);
+  background: var(--pd-surface);
+}
+
+.partner-dashboard-home-view .pd-topbar {
+  padding-block: 8px 10px;
+  border: 0;
+  background: transparent;
+}
+
+.partner-dashboard-home-view .pd-topbar-row { align-items: center; }
+.partner-dashboard-home-view .pd-brand-lockup { gap: 1px; }
+.partner-dashboard-home-view .pd-brand-wordmark { color: var(--role); font-size: 12px; letter-spacing: -.2px; }
+.partner-dashboard-home-view .pd-brand-lockup h1 {
+  max-width: 720px;
+  color: var(--pd-ink);
+  font-size: clamp(19px, 2.1vw, 22px);
+  font-weight: 750;
+  letter-spacing: -.45px;
+  line-height: 1.2;
+}
+.partner-dashboard-home-view .pd-header-context { margin: 1px 0 0; color: var(--pd-muted); font-size: 12px; line-height: 1.3; }
+.partner-dashboard-home-view .pd-header-actions { gap: 0; }
+.phone-shell.peazily-ui .partner-dashboard-home-view .pd-topbar .pd-icon-button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--role);
+}
+.phone-shell.peazily-ui .partner-dashboard-home-view .pd-topbar .pd-icon-button:hover { border: 0; background: transparent; opacity: .72; }
+.phone-shell.peazily-ui .partner-dashboard-home-view .pd-topbar .pd-icon-button:focus-visible { outline: 2px solid var(--role); outline-offset: 1px; }
+.partner-dashboard-home-view .pd-notification-count { background: var(--role); }
+
+.partner-dashboard-home-view > .partner-screen > .seller-content {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 8px clamp(20px, 4vw, 48px) calc(112px + env(safe-area-inset-bottom));
+}
+
+.partner-home-dashboard {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 18px !important;
+  padding-top: 0;
+}
+.partner-home-dashboard > section,
+.partner-home-dashboard > button { min-width: 0; }
+.partner-home-dashboard .pro-profile-card,
+.partner-home-dashboard .pro-availability,
+.partner-home-dashboard .pro-first-offering,
+.partner-home-dashboard .pro-incoming-row,
+.partner-home-dashboard .pro-job-card,
+.partner-home-dashboard .pro-empty-job,
+.partner-home-dashboard .pro-trial-card {
+  border-radius: 16px;
+  box-shadow: none;
+}
+.partner-home-dashboard .pro-profile-card { border-color: var(--pd-border); padding: 16px; }
+.partner-home-dashboard .pro-profile-avatar { background: var(--home-tint); color: var(--home-accent); }
+.partner-home-dashboard .pro-profile-copy h2 { color: var(--pd-ink); font-size: 16px; }
+.partner-home-dashboard .pro-profile-copy p,
+.partner-home-dashboard .pro-availability p { color: var(--pd-muted); font-size: 13px; }
+.partner-home-dashboard .pro-edit-button { min-height: 44px; border-color: var(--role); color: var(--role); }
+.partner-home-dashboard .pro-availability { border-color: color-mix(in srgb, var(--home-accent) 22%, white); background: color-mix(in srgb, var(--home-tint) 66%, white); }
+.partner-home-dashboard .pro-availability strong { color: var(--home-accent); }
+.partner-home-dashboard .pro-online-dot,
+.partner-home-dashboard .pro-availability.online .pro-online-dot { background-color: var(--home-accent); }
+.partner-home-dashboard .pro-availability .pro-availability-action { border-color: var(--home-accent); color: var(--home-accent); }
+.partner-home-dashboard .pro-section-title { margin-bottom: 12px; }
+.partner-home-dashboard .pro-section-title h2 { color: var(--pd-ink); font-size: 18px; }
+.partner-home-dashboard .pro-section-title > button,
+.partner-home-dashboard .pro-support-link { color: var(--home-accent); }
+
+/* One shared, aligned readout; real counts and amounts stay sourced by the dashboard. */
+.partner-home-dashboard .pro-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--pd-border);
+  border-radius: 16px;
+  background: #fff;
+}
+.partner-home-dashboard .pro-metric {
+  min-height: 82px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 5px;
+  padding: 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.partner-home-dashboard .pro-metric:nth-child(odd) { border-right: 1px solid var(--pd-border); }
+.partner-home-dashboard .pro-metric:nth-child(n + 3) { border-top: 1px solid var(--pd-border); }
+.partner-home-dashboard .pro-metric-icon { display: none; }
+.partner-home-dashboard .pro-metric-label { color: var(--pd-muted); font-size: 12px; white-space: normal; }
+.partner-home-dashboard .pro-metric strong { color: var(--pd-ink); font-size: 20px; font-weight: 650; }
+
+.partner-home-dashboard .pro-incoming,
+.partner-home-dashboard .pro-jobs,
+.partner-home-dashboard .pro-overview { min-width: 0; }
+.partner-home-dashboard .pro-incoming-row,
+.partner-home-dashboard .pro-job-card { border-color: var(--pd-border); }
+.partner-home-dashboard .pro-incoming-row strong,
+.partner-home-dashboard .pro-job-details strong { color: var(--pd-ink); }
+.partner-home-dashboard .pro-incoming-row > b,
+.partner-home-dashboard .pro-job-status { color: var(--home-accent); }
+.partner-home-dashboard .pro-job-icon,
+.partner-home-dashboard .pro-empty-job > span { background: var(--home-tint); color: var(--home-accent); }
+.partner-home-dashboard .pro-empty-job { border: 1px solid var(--pd-border); }
+.partner-home-dashboard .pro-empty-job > button,
+.partner-home-dashboard .pro-first-offering > button,
+.partner-home-dashboard .pro-trial-card > button { border-color: var(--home-accent); color: var(--home-accent); }
+.partner-home-dashboard .pro-review-notice { border-radius: 14px; }
+
+/* Supporting partner routes use the same canvas, role accent and readable density. */
+.partner-dashboard-home-view .pd-dashboard { color: var(--pd-ink); }
+.partner-dashboard-home-view .pd-dashboard .pd-card { border-color: var(--pd-border); border-radius: 16px; box-shadow: none; }
+.partner-dashboard-home-view .pd-dashboard .pd-section-title h2,
+.partner-dashboard-home-view .pd-dashboard .pd-growth-progress-head h2 { color: var(--pd-ink); }
+.partner-dashboard-home-view .pd-dashboard .pd-growth-icon { background: var(--role-bg); color: var(--role); }
+.partner-dashboard-home-view .pd-dashboard .pd-growth-progress { border-color: color-mix(in srgb, var(--role) 22%, white); background: color-mix(in srgb, var(--role-bg) 52%, white); }
+.partner-dashboard-home-view .pd-dashboard .pd-progress-track > span { background: var(--role); }
+.partner-dashboard-home-view .pd-dashboard .pd-payout strong { color: var(--role); }
+.partner-dashboard-home-view .pd-dashboard .pd-text-button { color: var(--role); }
+
+/* Carry the same role identity into jobs, posts, messages and profile routes. */
+.partner-workspace:not(.partner-dashboard-home-view) .partner-screen {
+  color: #19172c;
+  background: #f4f2fb;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .partner-header {
+  border-color: #e1deec;
+  background: #fff;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content .section-head h2,
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content > section > h2 {
+  color: #19172c;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content .partner-list-card,
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content > .choice {
+  border-color: #e1deec;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: none;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content .field:focus-visible,
+.partner-workspace:not(.partner-dashboard-home-view) .seller-content button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--role) 45%, white);
+  outline-offset: 2px;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .partner-profile-hero {
+  border-color: color-mix(in srgb, var(--role) 22%, #e1deec);
+  background: color-mix(in srgb, var(--role-bg) 50%, white);
+  box-shadow: none;
+}
+.partner-workspace:not(.partner-dashboard-home-view) .partner-profile-copy > span,
+.partner-workspace:not(.partner-dashboard-home-view) .profile-menu-row:focus-visible { color: var(--role); }
+.partner-workspace:not(.partner-dashboard-home-view) .partner-profile-avatar,
+.partner-workspace:not(.partner-dashboard-home-view) .profile-menu-icon {
+  background: var(--role-bg);
+  color: var(--role);
+}
+
+/* Registration keeps the six-step flow but shares the partner workspace frame. */
+.partner-onboarding {
+  color: #19172c;
+  background: #f4f2fb;
+  font-family: Manrope, "Segoe UI", system-ui, sans-serif;
+}
+.partner-onboarding .partner-simple-header,
+.partner-onboarding .service-registration-header { border-color: transparent; }
+.partner-onboarding .partner-simple-header h1 { color: #19172c; }
+.partner-onboarding .partner-form-card {
+  border: 1px solid #e1deec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: none;
+}
+.partner-onboarding .registration-progress i { height: 6px; border-radius: 8px; background: #dedbe9; }
+.partner-onboarding .registration-progress i.done,
+.partner-onboarding .registration-progress i.current { background: var(--role); }
+.partner-onboarding .application-state { border-radius: 8px; }
+.partner-onboarding .registration-actions { border-color: #e1deec; background: #fff; }
+.partner-onboarding .chip-grid label.selected,
+.partner-onboarding .service-category-grid button.selected,
+.partner-onboarding .service-check-grid button.selected,
+.partner-onboarding .day-chips button.selected { border-color: var(--role); background: var(--role-bg); color: var(--role); }
+.partner-onboarding .field:focus-visible,
+.partner-onboarding button:focus-visible,
+.partner-onboarding select:focus-visible { outline-color: color-mix(in srgb, var(--role) 46%, white); }
+
+@media (min-width: 600px) {
+  .partner-home-dashboard { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 22px 20px !important; }
+  .partner-home-dashboard .pro-review-notice,
+  .partner-home-dashboard .pro-overview,
+  .partner-home-dashboard .pro-first-offering,
+  .partner-home-dashboard .pro-price-pending,
+  .partner-home-dashboard .pro-trial-card,
+  .partner-home-dashboard .pro-home-links { grid-column: 1 / -1; }
+  .partner-home-dashboard .pro-profile-card { grid-column: 1 / span 7; }
+  .partner-home-dashboard .pro-availability { grid-column: 8 / -1; }
+  .partner-home-dashboard .pro-incoming { grid-column: 1 / span 7; }
+  .partner-home-dashboard .pro-jobs { grid-column: 8 / -1; }
+  .partner-home-dashboard:not(:has(.pro-incoming)) .pro-jobs { grid-column: 1 / -1; }
+  .partner-home-dashboard .pro-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .partner-home-dashboard .pro-metric:nth-child(odd) { border-right: 0; }
+  .partner-home-dashboard .pro-metric + .pro-metric { border-left: 1px solid var(--pd-border); }
+  .partner-home-dashboard .pro-metric:nth-child(n + 3) { border-top: 0; }
+  .partner-home-dashboard .pro-home-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 20px; }
+  .partner-dashboard-home-view .pd-dashboard { max-width: none; }
+  .partner-onboarding { padding-top: 24px; }
+  .partner-onboarding .partner-form-card { padding: 24px; }
+  .partner-onboarding .registration-actions { margin-inline: -24px; padding-inline: 24px; }
+}
+
+@media (max-width: 359px) {
+  .partner-dashboard-home-view .pd-header-context { font-size: 11px; }
+  .partner-dashboard-home-view .pd-brand-lockup h1 { font-size: 18px; }
+  .partner-home-dashboard .pro-incoming,
+  .partner-home-dashboard .pro-jobs { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-home-dashboard *,
+  .partner-dashboard-home-view .pd-topbar *,
+  .partner-onboarding *,
+  .partner-home-dashboard *::before,
+  .partner-onboarding *::before { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

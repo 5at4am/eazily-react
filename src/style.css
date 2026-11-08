@@ -1,0 +1,537 @@
+/*
+ * Eazily shared design and component system.
+ * Owns semantic theme tokens, typography, spacing, shapes, elevation, and
+ * shared inline-SVG icon treatment. Feature/page CSS owns its composition and
+ * consumes these tokens; this does not replace workspace stylesheets.
+ * Keep compatibility aliases until their legacy consumers are migrated.
+ */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "./**/*.{js,jsx,ts,tsx,html}";
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-deep: var(--brand-deep);
+  --color-surface: var(--surface);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-divider: var(--divider);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-role-service: var(--role-service);
+  --color-role-influencer: var(--role-influencer);
+  --color-role-consultant: var(--role-consultant);
+  --font-eazily: var(--font-sans);
+  --spacing-eazily-1: var(--space-1);
+  --spacing-eazily-2: var(--space-2);
+  --spacing-eazily-3: var(--space-3);
+  --spacing-eazily-4: var(--space-4);
+  --spacing-eazily-5: var(--space-5);
+  --spacing-eazily-6: var(--space-6);
+  --spacing-eazily-7: var(--space-7);
+  --spacing-eazily-8: var(--space-8);
+  --radius-eazily-small: var(--radius-small);
+  --radius-eazily-control: var(--radius-control);
+  --radius-eazily-card: var(--radius-card);
+  --radius-eazily-panel: var(--radius-panel);
+}
+
+@layer components {
+  .ui-icon {
+    @apply inline-block align-middle;
+    color: inherit;
+    stroke-width: var(--icon-stroke-width);
+  }
+
+  .ui-field,
+  .ui-sheet {
+    @apply min-w-0;
+  }
+
+  .ui-button {
+    @apply inline-flex min-w-0 items-center justify-center gap-2;
+  }
+}
+
+@font-face {
+  font-family: Manrope;
+  src: url('/fonts/manrope-latin-wght-normal.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+:root {
+  --surface: #FFFFFF;
+  --paper: #F4F2FB;
+  --surface-soft: #F5F3FB;
+  --ink: #19172C;
+  --ink-soft: #38364A;
+  --ink-muted: #53546A;
+  --brand: #6D28D9;
+  --brand-hover: #5B21B6;
+  --brand-soft: #F5F3FB;
+  --brand-tint: #EDE9FE;
+  --brand-deep: #4C1D95;
+  --brand-on-white: #4C1D95;
+  --brand-fill: #6D28D9;
+  --on-brand: #FFFFFF;
+  --brand-gradient: #6D28D9;
+  --reward: #F2A413;
+  --reward-ink: #8A4708;
+  --reward-soft: #FFF8E7;
+  --on-reward: #1C1917;
+  --success: #15803D;
+  --success-soft: #E8F6EE;
+  --danger: #C22525;
+  --danger-soft: #FCEDED;
+  --warning: #B45309;
+  --warning-soft: #FEF3C7;
+  --control-border: #8A8175;
+  --divider: #E1DEEC;
+  --role-service: #0D7C66;
+  --role-service-bg: #E4F5F0;
+  --role-influencer: #BE2E6E;
+  --role-influencer-bg: #FCEAF2;
+  --role-consultant: #9A6200;
+  --role-consultant-bg: #FCF2DC;
+  --font-sans: Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-display: 2.75rem;
+  --fs-title: 1.75rem;
+  --fs-heading: 1.375rem;
+  --fs-lg: 1.125rem;
+  --fs-body: 1rem;
+  --fs-small: .875rem;
+  --fs-caption: .875rem;
+  --fs-micro: .75rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --radius-small: 8px;
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-panel: 16px;
+  --radius-round: 999px;
+  --elevation-1: 0 1px 2px rgba(28,25,23,.05);
+  --elevation-2: 0 4px 16px rgba(28,25,23,.08);
+  --elevation-panel: 0 20px 48px rgba(28,25,23,.16);
+  --control-size: 44px;
+  --nav-height: 88px;
+  --app-width: 430px;
+  --photo-size: 64px;
+  --profile-photo-size: 80px;
+  --hero-art-height: 140px;
+  --icon-size-sm: 16px;
+  --icon-size-md: 20px;
+  --icon-size-lg: 24px;
+  --icon-stroke-width: 1.8;
+  --duration-fast: 120ms;
+  --duration-standard: 180ms;
+  --duration-panel: 240ms;
+  --ease-out: cubic-bezier(.2,.8,.25,1);
+  --ease-interaction: cubic-bezier(.2,.7,.3,1);
+}
+
+/* The persisted theme also follows users between workspaces. */
+html[data-customer-theme='dark'] {
+  color-scheme: dark;
+  --surface: #1A1613;
+  --paper: #100E0C;
+  --surface-soft: #241F1A;
+  --ink: #F7F2EA;
+  --ink-soft: #D8CEC1;
+  --ink-muted: #B5A99A;
+  --brand: #C4B5FD;
+  --brand-hover: #DDD6FE;
+  --brand-soft: #241A39;
+  --brand-tint: #36224F;
+  --brand-deep: #DDD6FE;
+  --reward-ink: #FCD34D;
+  --reward-soft: #2B210F;
+  --success: #86EFAC;
+  --success-soft: #102D1D;
+  --danger: #FCA5A5;
+  --danger-soft: #351919;
+  --warning: #FCD34D;
+  --warning-soft: #342810;
+  --control-border: #998D7C;
+  --divider: #494036;
+  --role-service: #5EEAC3;
+  --role-service-bg: #102F28;
+  --role-influencer: #F9A8D4;
+  --role-influencer-bg: #351B2B;
+  --role-consultant: #FCD34D;
+  --role-consultant-bg: #342810;
+}
+
+html, body { font-family: var(--font-sans); background: var(--surface-soft); color: var(--ink); }
+html { scroll-padding-top: var(--space-8); }
+.phone-shell.peazily-ui,
+html[data-customer-theme='dark'] .phone-shell.peazily-ui {
+  --purple: var(--brand);
+  --violet: var(--brand);
+  --blue: var(--brand);
+  --deep: var(--brand-deep);
+  --navy: var(--ink);
+  --lav: var(--brand-soft);
+  --bg: var(--paper);
+  --white: var(--surface);
+  --muted: var(--ink-muted);
+  --line: var(--divider);
+  --green: var(--success);
+  --grad: var(--brand-gradient);
+  --shadow: var(--elevation-2);
+  --customer-card: var(--surface);
+  --customer-raised: var(--surface-soft);
+  --product-ink: var(--ink);
+  --product-muted: var(--ink-muted);
+  --product-surface: var(--surface);
+  --product-soft: var(--surface-soft);
+  --product-control: var(--control-border);
+  --product-accent: var(--brand);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  box-shadow: var(--elevation-panel);
+}
+.phone-shell.peazily-ui :is(.screen,.setup,.welcome-screen,.partner-screen,.partner-onboarding) { background:var(--paper); color:var(--ink); }
+.phone-shell.peazily-ui :is(p,li,.sheet-sub,.sheet-note,.privacy-note,.payment-warning,.policy-note,.empty p) { font-size:var(--fs-small); line-height:1.65; }
+.phone-shell.peazily-ui :is(small,.eyebrow,.form-label,.crumb,.chip,.sample-label,.verified-label) { font-size:var(--fs-caption); line-height:1.5; }
+.phone-shell.peazily-ui .form-label { display:block; margin-bottom:var(--space-2); color:var(--ink); font-size:var(--fs-small); font-weight:700; }
+.phone-shell.peazily-ui .field-hint,.phone-shell.peazily-ui .field-error { display:block; margin-top:var(--space-2); font-size:var(--fs-small); line-height:1.5; }
+.phone-shell.peazily-ui .field-hint { color:var(--ink-muted); }
+.phone-shell.peazily-ui .field-error { color:var(--danger); font-weight:600; }
+.phone-shell.peazily-ui .field[aria-invalid="true"] { border-color:var(--danger); }
+.phone-shell.peazily-ui .field[aria-invalid="true"]:focus-visible { outline-color:var(--danger); }
+.phone-shell.peazily-ui :is(h1,h2,h3) { overflow-wrap:anywhere; letter-spacing:-.025em; }
+.phone-shell.peazily-ui :is(.btn,.icon-btn,.sheet-close,.link,.section-head button) { min-height:var(--control-size); border-radius:var(--radius-control); font-size:var(--fs-small); font-weight:600; }
+.phone-shell.peazily-ui :is(.btn-primary,.pd-primary,.chat-send) { background:var(--brand-gradient); border-color:var(--brand-fill); color:var(--on-brand); box-shadow:none; }
+.phone-shell.peazily-ui .btn-primary:hover { background:var(--brand-fill); }
+.phone-shell.peazily-ui :is(.btn-outline,.icon-btn,.sheet-close,.pd-secondary) { background:var(--surface); color:var(--ink); border-color:var(--control-border); }
+.phone-shell.peazily-ui :is(button,a,input,textarea,select,summary):focus-visible { outline:var(--space-1) solid var(--brand); outline-offset:var(--space-1); }
+.phone-shell.peazily-ui :is(button,a,input,textarea,select,summary) { scroll-margin-block:var(--space-8); }
+.phone-shell.peazily-ui :is(input,textarea,select) { accent-color:var(--brand-fill); }
+.phone-shell.peazily-ui :is(.field,.catalog-search,.chat-search,.vendor-filters select) { min-height:var(--control-size); background:var(--surface); border-color:var(--control-border); color:var(--ink); border-radius:var(--radius-control); font-size:var(--fs-body); }
+.phone-shell.peazily-ui :is(.field,.catalog-search input,.chat-search input)::placeholder { color:var(--ink-muted); opacity:1; }
+.phone-shell.peazily-ui .catalog-search input { color:var(--ink); background:transparent; min-width:0; min-height:var(--control-size); font-size:var(--fs-body); }
+.phone-shell.peazily-ui .field:focus-within { outline:2px solid var(--brand); outline-offset:2px; box-shadow:none; }
+/* Search is a composite control: focus belongs on the pill, not on the inner input. */
+.phone-shell.peazily-ui :is(.catalog-search,.chat-search):focus-within { outline:2px solid var(--brand); outline-offset:-2px; box-shadow:none; }
+.phone-shell.peazily-ui :is(.catalog-search,.chat-search) input:focus,
+.phone-shell.peazily-ui :is(.catalog-search,.chat-search) input:focus-visible { outline:0; }
+.phone-shell.peazily-ui :is(.catalog-search,.chat-search):focus-within > svg { color:var(--brand); }
+.phone-shell.peazily-ui :is(.topbar,.simple-head,.catalog-header,.page-title,.bulk-header) { background:var(--surface); color:var(--ink); border-color:var(--divider); backdrop-filter:none; }
+.phone-shell.peazily-ui :is(.sheet,.sheet-bottom,.vendor-booking-footer) { background:var(--surface); color:var(--ink); border-color:var(--divider); }
+.phone-shell.peazily-ui .sheet { border-radius:var(--radius-panel) var(--radius-panel) 0 0; box-shadow:var(--elevation-panel); }
+.phone-shell.peazily-ui :is(.summary,.privacy-note,.pricing-preview,.booking-card,.vendor-card,.service-card,.pro-card,.flow-card,.conversation,.account-shortcuts button,.profile-list .choice,.group-card,.service-option,.main-category-card,.sub-card) { background:var(--surface); color:var(--ink); border-color:var(--divider); border-radius:var(--radius-card); box-shadow:var(--elevation-1); }
+.phone-shell.peazily-ui :is(.summary-row,.payment-breakdown,.policy-note) { color:var(--ink); border-color:var(--divider); }
+.phone-shell.peazily-ui .summary-row { align-items:flex-start; flex-wrap:wrap; gap:var(--space-2); font-size:var(--fs-small); }
+.phone-shell.peazily-ui .summary-row span { color:var(--ink-muted); }
+.phone-shell.peazily-ui .summary-row b { max-width:100%; font-variant-numeric:tabular-nums; }
+.phone-shell.peazily-ui :is(.empty,.success) h2 { font-size:var(--fs-heading); }
+.phone-shell.peazily-ui .inline-error { background:var(--danger-soft); color:var(--danger); border-color:var(--danger); border-radius:var(--radius-control); padding:var(--space-3); }
+.phone-shell.peazily-ui .success-check { background:var(--success-soft); color:var(--success); box-shadow:none; }
+.phone-shell.peazily-ui .verified-label { color:var(--success); background:var(--success-soft); }
+.phone-shell.peazily-ui .sample-label { color:var(--reward-ink); background:var(--reward-soft); }
+
+/* Customer home: location and search first, services before promotions. */
+.phone-shell.peazily-ui .home-v3 .home-discovery-header { padding:var(--space-6) var(--space-5) var(--space-2); background:var(--paper); }
+.phone-shell.peazily-ui .home-discovery-header .user-home-header { padding:0; background:transparent; color:var(--ink); }
+.phone-shell.peazily-ui .home-discovery-header .user-home-header h1 { font-size:var(--fs-heading); margin:var(--space-4) 0 var(--space-2); color:var(--ink); }
+.phone-shell.peazily-ui .home-discovery-header .user-home-header p { font-size:var(--fs-small); color:var(--ink-muted); }
+.phone-shell.peazily-ui .compact-location { color:var(--ink); background:transparent; border:0; min-height:var(--control-size); text-align:left; }
+.phone-shell.peazily-ui .compact-location :is(b,small) { font-size:var(--fs-caption); color:var(--ink-muted); }
+.phone-shell.peazily-ui .compact-location b { color:var(--ink); font-weight:600; }
+.phone-shell.peazily-ui .home-discovery-header .search-cart-row { margin-top:var(--space-4); background:transparent; grid-template-columns:minmax(0,1fr); padding:0; }
+.phone-shell.peazily-ui .section { padding:var(--space-5); }
+.phone-shell.peazily-ui .section-head { align-items:center; flex-wrap:wrap; gap:var(--space-2); margin-bottom:var(--space-4); }
+.phone-shell.peazily-ui .section-head h2 { font-size:var(--fs-lg); font-weight:700; }
+.phone-shell.peazily-ui .section-head p { font-size:var(--fs-small); color:var(--ink-muted); }
+.phone-shell.peazily-ui .home-v3 .explore-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--space-3); }
+.phone-shell.peazily-ui .explore-grid button { padding:0; min-width:0; color:var(--ink); }
+.phone-shell.peazily-ui .explore-grid button i { width:100%; background:var(--surface); border:1px solid var(--divider); border-radius:var(--radius-card); }
+.phone-shell.peazily-ui .explore-grid button b { display:block; font-size:var(--fs-caption); line-height:1.5; font-weight:600; white-space:normal; overflow:visible; -webkit-line-clamp:unset; }
+.phone-shell.peazily-ui .home-v3 .hero-header { margin:var(--space-3) var(--space-5); padding:var(--space-5); border-radius:var(--radius-card); background:var(--brand-gradient); min-height:0; box-shadow:none; }
+.phone-shell.peazily-ui .hero-header .hero-promotion { min-height:0; grid-template-columns:minmax(0,1fr) minmax(0,32%); }
+.phone-shell.peazily-ui .hero-header .hero-copy { padding:0; }
+.phone-shell.peazily-ui .hero-header .hero-copy span { font-size:var(--fs-caption); color:var(--on-brand); letter-spacing:.04em; }
+.phone-shell.peazily-ui .hero-header .hero-copy h2 { color:var(--on-brand); font-size:var(--fs-heading); line-height:1.3; margin-block:var(--space-2); }
+.phone-shell.peazily-ui .hero-header .hero-copy p { font-size:var(--fs-small); color:var(--on-brand); opacity:1; }
+.phone-shell.peazily-ui .hero-header .btn-white { background:var(--surface); color:var(--brand-deep); font-size:var(--fs-small); padding-inline:var(--space-3); margin-top:var(--space-3); }
+.phone-shell.peazily-ui .hero-header .hero-person { height:var(--hero-art-height); margin:0; align-self:center; }
+.phone-shell.peazily-ui .hero-header .hero-person::before,.phone-shell.peazily-ui .hero-header .hero-person::after,.phone-shell.peazily-ui .hero-art { display:none; }
+.phone-shell.peazily-ui .hero-header .hero-dots { position:static; justify-content:center; gap:var(--space-2); height:auto; margin:var(--space-3) 0 0; }
+.phone-shell.peazily-ui :is(.hero-dots,.home-provider-dots) button { width:var(--control-size); height:var(--control-size); min-height:var(--control-size); padding:var(--space-4); background:transparent; border:0; opacity:1; position:relative; }
+.phone-shell.peazily-ui :is(.hero-dots,.home-provider-dots) button::after { content:''; display:block; height:var(--space-2); width:var(--space-2); border-radius:var(--radius-round); background:var(--ink-muted); }
+.phone-shell.peazily-ui .hero-dots button::after { background:var(--on-brand); opacity:.5; }
+.phone-shell.peazily-ui :is(.hero-dots,.home-provider-dots) button.active::after { width:var(--space-4); background:var(--brand); opacity:1; }
+.phone-shell.peazily-ui .hero-dots button.active::after { background:var(--on-brand); }
+.phone-shell.peazily-ui .promotion-play { display:flex; align-items:center; justify-content:center; gap:var(--space-2); min-height:var(--control-size); margin-inline:auto; padding:var(--space-2); background:transparent; color:var(--on-brand); border:0; font-size:var(--fs-caption); }
+.phone-shell.peazily-ui .home-provider-dots { flex-wrap:wrap; }
+.phone-shell.peazily-ui .home-bulk-orders-strip { margin:var(--space-5); padding:var(--space-4); background:var(--surface); color:var(--ink); border:1px solid var(--divider); box-shadow:none; }
+.phone-shell.peazily-ui .home-bulk-orders-label h2 { color:var(--ink); font-size:var(--fs-small); letter-spacing:0; }
+.phone-shell.peazily-ui .home-bulk-orders-icon { background:var(--brand-soft); color:var(--brand); }
+.phone-shell.peazily-ui .home-bulk-orders-cta { background:var(--surface); border:1px solid var(--control-border); color:var(--brand); }
+.phone-shell.peazily-ui .home-bulk-orders-ticker-window { background:var(--surface-soft); color:var(--ink-soft); }
+.phone-shell.peazily-ui .home-bulk-orders-ticker-window::before,.phone-shell.peazily-ui .home-bulk-orders-ticker-window::after { display:none; }
+.phone-shell.peazily-ui .home-provider-viewport { margin-right:0; }
+.phone-shell.peazily-ui .home-provider-card { display:grid; grid-template-columns:var(--photo-size) minmax(0,1fr); align-items:start; gap:var(--space-3); padding:var(--space-4); border:1px solid var(--divider); border-radius:var(--radius-card); background:var(--surface); color:var(--ink); box-shadow:var(--elevation-1); cursor:default; }
+.phone-shell.peazily-ui .home-provider-photo { height:var(--photo-size); width:var(--photo-size); background:var(--surface-soft); color:var(--brand); border-radius:var(--radius-round); }
+.phone-shell.peazily-ui .home-provider-details { padding:0; min-width:0; }
+.phone-shell.peazily-ui .home-provider-details>small { color:var(--ink-muted); font-size:var(--fs-caption); font-weight:400; letter-spacing:0; text-transform:none; }
+.phone-shell.peazily-ui .home-provider-details h3 { font-size:var(--fs-lg); margin:var(--space-1) 0 var(--space-2); line-height:1.4; }
+.phone-shell.peazily-ui .home-provider-facts { gap:var(--space-2); }
+.phone-shell.peazily-ui .home-provider-facts span { padding:0; min-height:0; border-radius:0; background:transparent; color:var(--ink-soft); font-size:var(--fs-caption); font-weight:400; line-height:1.5; }
+.phone-shell.peazily-ui .home-provider-facts .provider-price { font-size:var(--fs-body); color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; }
+.phone-shell.peazily-ui .home-provider-details .sample-label { margin-bottom:var(--space-2); }
+.phone-shell.peazily-ui .home-service-showcase { background:transparent; border:0; box-shadow:none; }
+.phone-shell.peazily-ui .service-showcase-glow { display:none; }
+.phone-shell.peazily-ui .more-service-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
+.phone-shell.peazily-ui .more-service-card { border-color:var(--divider); background:var(--surface); border-radius:var(--radius-card); box-shadow:var(--elevation-1); }
+.phone-shell.peazily-ui .more-service-card::before { display:none; }
+.phone-shell.peazily-ui .more-service-card>i { background:var(--surface-soft); }
+.phone-shell.peazily-ui .more-service-card b { font-size:var(--fs-small); min-height:0; display:block; -webkit-line-clamp:unset; overflow:visible; }
+.phone-shell.peazily-ui .more-service-card small { font-size:var(--fs-caption); }
+.phone-shell.peazily-ui .service-showcase-heading span { font-size:var(--fs-caption); color:var(--ink-muted); }
+.phone-shell.peazily-ui .promise-section { background:var(--surface); color:var(--ink); }
+.phone-shell.peazily-ui .promise-rail article { background:transparent; border-color:var(--divider); }
+.phone-shell.peazily-ui .promise-rail h3 { font-size:var(--fs-body); }
+
+/* Professionals and pricing have the same hierarchy on lists and profiles. */
+.phone-shell.peazily-ui .experience-body { padding:var(--space-5); }
+.phone-shell.peazily-ui .experience-body>h2 { font-size:var(--fs-heading); }
+.phone-shell.peazily-ui .experience-section { background:var(--surface); border-color:var(--divider); padding:var(--space-5); border-radius:var(--radius-card); }
+.phone-shell.peazily-ui .vendor-filters { flex-wrap:wrap; gap:var(--space-3); }
+.phone-shell.peazily-ui .vendor-filters label { font-size:var(--fs-small); }
+.phone-shell.peazily-ui .vendor-card { padding:var(--space-4); }
+.phone-shell.peazily-ui .vendor-card h3 { font-size:var(--fs-lg); margin:0; }
+.phone-shell.peazily-ui .vendor-card .avatar { width:var(--photo-size); height:var(--photo-size); border-radius:var(--radius-round); object-fit:cover; }
+.phone-shell.peazily-ui .vendor-card .vendor-specialisation { color:var(--ink-muted); margin-block:var(--space-3); }
+.phone-shell.peazily-ui .vendor-meta { display:flex; flex-wrap:wrap; gap:var(--space-2); margin-block:var(--space-3); color:var(--ink-soft); font-size:var(--fs-small); }
+.phone-shell.peazily-ui .vendor-meta>span { display:inline-flex; align-items:center; gap:var(--space-1); }
+.phone-shell.peazily-ui .vendor-availability { display:flex; gap:var(--space-2); color:var(--role-service); font-size:var(--fs-small); margin-block:var(--space-3); }
+.phone-shell.peazily-ui .vendor-card-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3); padding-top:var(--space-3); border-top:1px solid var(--divider); }
+.phone-shell.peazily-ui .vendor-price { color:var(--ink); font-size:var(--fs-body); font-weight:700; font-variant-numeric:tabular-nums; }
+.phone-shell.peazily-ui .vendor-price small { display:block; color:var(--ink-muted); font-weight:400; }
+.phone-shell.peazily-ui .professional-profile { padding-inline:var(--space-5); }
+.phone-shell.peazily-ui .professional-profile-photo { width:var(--profile-photo-size); height:var(--profile-photo-size); border-radius:var(--radius-round); }
+.phone-shell.peazily-ui .professional-profile-hero { grid-template-columns:var(--profile-photo-size) minmax(0,1fr); gap:var(--space-4); }
+.phone-shell.peazily-ui .professional-profile-title h2 { font-size:var(--fs-heading); }
+.phone-shell.peazily-ui .professional-profile-title p { font-size:var(--fs-small); }
+.phone-shell.peazily-ui .professional-stat { background:var(--surface-soft); border-color:var(--divider); border-radius:var(--radius-card); padding:var(--space-4); }
+.phone-shell.peazily-ui .professional-stat b { font-size:var(--fs-lg); }
+.phone-shell.peazily-ui .professional-stat small { font-size:var(--fs-caption); font-weight:400; }
+.phone-shell.peazily-ui .professional-profile-section h3 { font-size:var(--fs-body); font-weight:700; }
+.phone-shell.peazily-ui .professional-profile-section>p,.phone-shell.peazily-ui .professional-facts :is(b,small),.phone-shell.peazily-ui .professional-reviews :is(b,p) { font-size:var(--fs-small); }
+.phone-shell.peazily-ui .service-summary-card { background:var(--surface-soft); border-color:var(--divider); }
+.phone-shell.peazily-ui .service-price-line { border-color:var(--divider); font-size:var(--fs-small); flex-wrap:wrap; }
+.phone-shell.peazily-ui .professional-service-list>div { font-size:var(--fs-small); flex-wrap:wrap; }
+.phone-shell.peazily-ui .professional-details-grid p { font-size:var(--fs-small); }
+.phone-shell.peazily-ui .professional-reviews small { font-size:var(--fs-caption); }
+.phone-shell.peazily-ui .professional-booking-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3); }
+.phone-shell.peazily-ui .professional-booking-footer .btn { flex:1; width:auto; }
+.phone-shell.peazily-ui .booking-review { padding:var(--space-4); margin-block:var(--space-5); background:var(--surface-soft); border:1px solid var(--divider); border-radius:var(--radius-card); }
+.phone-shell.peazily-ui .booking-review h3 { font-size:var(--fs-body); margin:0 0 var(--space-3); }
+.phone-shell.peazily-ui .booking-review dl { margin:0; }
+.phone-shell.peazily-ui .booking-review dl>div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--space-2); padding-block:var(--space-2); border-bottom:1px solid var(--divider); font-size:var(--fs-small); }
+.phone-shell.peazily-ui .booking-review dl>div:last-child { border:0; }
+.phone-shell.peazily-ui .booking-review dt { color:var(--ink-muted); }
+.phone-shell.peazily-ui .booking-review dd { margin:0; font-weight:600; overflow-wrap:anywhere; }
+.phone-shell.peazily-ui .booking-next-step { padding:var(--space-4); border-radius:var(--radius-card); background:var(--brand-soft); color:var(--ink); margin-block:var(--space-4); text-align:left; }
+
+/* Navigation, catalog and workspaces share neutral surfaces and violet actions. */
+.phone-shell.peazily-ui .bottom-nav { background:var(--surface); border-color:var(--divider); backdrop-filter:none; padding:var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom)); }
+.phone-shell.peazily-ui .bottom-nav .nav-item { min-height:var(--control-size); padding:var(--space-2) var(--space-1); color:var(--ink-muted); font-size:var(--fs-caption); line-height:1.4; font-weight:500; }
+.phone-shell.peazily-ui .customer-nav .nav-item { font-size:var(--fs-micro); }
+.phone-shell.peazily-ui .bottom-nav .nav-item.active { color:var(--brand); font-weight:700; }
+.phone-shell.peazily-ui .customer-nav .nav-item.active .nav-icon { background:var(--brand-soft); color:var(--brand); }
+.phone-shell.peazily-ui .bottom-nav .post-nav .nav-icon { background:var(--brand-fill); color:var(--on-brand); }
+.phone-shell.peazily-ui .user-compact-services .catalog-side { background:var(--surface); border-color:var(--divider); }
+.phone-shell.peazily-ui .user-compact-services .group-nav { background:transparent; color:var(--ink-muted); font-size:var(--fs-caption)!important; }
+.phone-shell.peazily-ui .user-compact-services .group-nav.active { background:var(--brand-soft); color:var(--brand); font-weight:700; }
+.phone-shell.peazily-ui .user-compact-services :is(.service-option,.group-card) { padding:var(--space-3)!important; }
+.phone-shell.peazily-ui .user-compact-services :is(.service-option b,.service-option small,.group-card b) { font-size:var(--fs-caption)!important; line-height:1.5; display:block; overflow:visible; -webkit-line-clamp:unset; white-space:normal; }
+.phone-shell.peazily-ui .catalog-welcome { background:var(--brand-gradient); color:var(--on-brand); }
+.phone-shell.peazily-ui .partner-workspace { --purple:var(--brand); --lav:var(--brand-soft); --pd-ink:var(--ink); --pd-muted:var(--ink-muted); --pd-border:var(--divider); --pd-surface:var(--paper); }
+.phone-shell.peazily-ui :is(.pd-topbar,.pd-card,.pd-identity,.pd-metrics article,.partner-list-card,.pd-shortcuts button,.partner-profile-hero) { background:var(--surface); color:var(--ink); border-color:var(--divider); border-radius:var(--radius-card); box-shadow:var(--elevation-1); }
+.phone-shell.peazily-ui :is(.pd-icon-button,.pd-switch,.pd-avatar) { background:var(--surface); color:var(--ink); border-color:var(--control-border); }
+.phone-shell.peazily-ui .pd-role-tag { display:inline-flex; align-items:center; flex-wrap:wrap; gap:var(--space-1); color:var(--role); background:var(--role-bg); font-size:var(--fs-caption); border-radius:var(--radius-small); padding:var(--space-2); }
+.phone-shell.peazily-ui .pd-heading-row { align-items:flex-start; flex-wrap:wrap; }
+.phone-shell.peazily-ui .pd-metric-icon,.phone-shell.peazily-ui .pd-identity-icon { background:var(--role-bg); color:var(--role); }
+.phone-shell.peazily-ui .pd-count { background:var(--brand-soft); color:var(--brand); }
+.phone-shell.peazily-ui .pd-secondary { border:1px solid var(--control-border); }
+.phone-shell.peazily-ui .pd-notice { background:var(--warning-soft); color:var(--warning); border-color:var(--warning); }
+.phone-shell.peazily-ui .pd-notice :is(p,button,svg) { color:var(--warning); }
+.phone-shell.peazily-ui .pd-empty>span { background:var(--surface-soft); color:var(--ink-muted); }
+.phone-shell.peazily-ui .partner-profile-hero { border-top:var(--space-1) solid var(--role); }
+.phone-shell.peazily-ui .pd-identity { border-top:var(--space-1) solid var(--role); }
+
+@media (max-width:390px) {
+  .phone-shell.peazily-ui .home-v3 .explore-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .phone-shell.peazily-ui .hero-header .hero-promotion { grid-template-columns:minmax(0,1fr); }
+  .phone-shell.peazily-ui .hero-header .hero-person { display:none; }
+  .phone-shell.peazily-ui .professional-details-grid { grid-template-columns:minmax(0,1fr); }
+  .phone-shell.peazily-ui .professional-profile-hero { grid-template-columns:var(--photo-size) minmax(0,1fr); }
+  .phone-shell.peazily-ui .professional-profile-photo { width:var(--photo-size); height:var(--photo-size); }
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .phone-shell.peazily-ui *, .phone-shell.peazily-ui *::before, .phone-shell.peazily-ui *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}
+
+/* Consistent Back affordance for customer and partner sheets. */
+.sheet-navigation { display:flex; align-items:center; min-height:var(--control-size); margin-bottom:var(--space-3); padding-right:var(--space-8); }
+.sheet-back { display:inline-flex; align-items:center; gap:var(--space-2); min-height:var(--control-size); padding:0 var(--space-3); border:1px solid var(--control-border); border-radius:var(--radius-control); background:var(--surface); color:var(--ink); font-size:var(--fs-small); font-weight:600; cursor:pointer; }
+.sheet-back:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+
+/* One dependable component language across sign-in, shopping, partner work,
+   and booking sheets. Role colors remain reserved for role-specific status. */
+.phone-shell.peazily-ui :is(.btn-primary,.pd-primary,.chat-send) {
+  background:var(--brand-fill);
+  border-color:var(--brand-fill);
+  color:var(--on-brand);
+  box-shadow:none;
+  transition:background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+.phone-shell.peazily-ui :is(.btn-primary,.pd-primary,.chat-send):hover:not(:disabled) {
+  background:var(--brand-hover);
+  border-color:var(--brand-hover);
+}
+.phone-shell.peazily-ui :is(.btn-primary,.pd-primary,.chat-send):active:not(:disabled) { filter:brightness(.94); }
+.phone-shell.peazily-ui :is(button,a,input,select,textarea,summary):disabled { cursor:not-allowed; opacity:.58; }
+.phone-shell.peazily-ui :is(.btn-outline,.pd-secondary) {
+  border:1px solid var(--control-border);
+  background:var(--surface);
+  color:var(--ink);
+}
+.phone-shell.peazily-ui .btn-outline:hover:not(:disabled) { border-color:var(--brand); background:var(--brand-soft); color:var(--brand-deep); }
+.phone-shell.peazily-ui :is(.section-head,.section-title) { color:var(--ink); }
+.phone-shell.peazily-ui :is(.section-head h2,.section-title h2) { line-height:1.3; }
+.phone-shell.peazily-ui :is(.catalog-search,.field,.vendor-filters select):focus-within,
+.phone-shell.peazily-ui :is(.field,.vendor-filters select):focus-visible {
+  border-color:var(--brand);
+  outline:2px solid color-mix(in srgb,var(--brand) 20%,transparent);
+  outline-offset:1px;
+  box-shadow:none;
+}
+.phone-shell.peazily-ui :is(.topbar,.catalog-header,.customer-navigation) { box-shadow:0 1px 0 var(--divider); }
+.phone-shell.peazily-ui .status-pill { display:inline-flex; align-items:center; min-height:28px; font-size:var(--fs-micro); line-height:1.3; }
+.phone-shell.peazily-ui :is(.vendor-card,.booking-card,.service-card,.professional-profile-section,.account-panel) {
+  border:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  box-shadow:none;
+}
+.phone-shell.peazily-ui :is(.vendor-card,.booking-card,.service-card) { background:var(--surface); color:var(--ink); }
+.phone-shell.peazily-ui :is(.vendor-card,.booking-card,.service-card) :is(p,small) { color:var(--ink-muted); }
+.phone-shell.peazily-ui :is(.vendor-card,.booking-card,.service-card) :is(h2,h3,b) { color:var(--ink); }
+.phone-shell.peazily-ui :is(.choice,.profile-list .choice,.account-shortcuts button) { min-height:var(--control-size); border-color:var(--divider); border-radius:var(--radius-control); }
+.phone-shell.peazily-ui :is(.choice,.profile-list .choice,.account-shortcuts button):hover { border-color:var(--control-border); background:var(--brand-soft); }
+.phone-shell.peazily-ui .nav-unread { font-variant-numeric:tabular-nums; }
+.phone-shell.peazily-ui ::selection { color:var(--on-brand); background:var(--brand-deep); }
+
+/* Welcome and role selection: clear task choice, familiar controls, no promo chrome. */
+.phone-shell.peazily-ui .welcome-screen.welcome-entry {
+  background:var(--paper);
+}
+.phone-shell.peazily-ui .welcome-entry .welcome-tabs button { color:var(--ink-muted); font-size:var(--fs-small); font-weight:650; }
+.phone-shell.peazily-ui .welcome-entry .welcome-tabs button[aria-selected="true"] { color:var(--brand-deep); }
+.phone-shell.peazily-ui .welcome-entry .welcome-tabs button[aria-selected="true"]::after { background:var(--brand-fill); }
+.phone-shell.peazily-ui .welcome-entry .welcome-customer-preview { border-color:var(--divider); border-radius:var(--radius-card); box-shadow:var(--elevation-1); }
+.phone-shell.peazily-ui .welcome-entry .welcome-preview-image { border-color:var(--divider); border-radius:var(--radius-control); background:var(--surface-soft); }
+.phone-shell.peazily-ui .welcome-entry .welcome-preview-image span { color:var(--ink); font-size:var(--fs-micro); line-height:1.3; }
+.phone-shell.peazily-ui .welcome-entry .welcome-sign-in { color:var(--ink-muted); font-size:var(--fs-small); line-height:1.5; }
+.phone-shell.peazily-ui .welcome-entry :is(.welcome-tabs button,.welcome-preview-tap) { transition:background-color var(--duration-fast) var(--ease-interaction),color var(--duration-fast) var(--ease-interaction),transform var(--duration-fast) var(--ease-interaction); }
+.phone-shell.peazily-ui .welcome-entry :is(.welcome-tabs button,.welcome-preview-tap):active { transform:scale(.99); }
+.phone-shell.peazily-ui .welcome-entry :is(.welcome-tabs button,.welcome-preview-tap):focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+.phone-shell.peazily-ui .welcome-choice {
+  min-height:84px;
+  border:1px solid var(--divider);
+  border-left:1px solid var(--divider);
+  border-radius:var(--radius-card);
+  background:var(--surface);
+  color:var(--ink);
+  box-shadow:none;
+}
+.phone-shell.peazily-ui .welcome-choice:hover { border-color:var(--role,var(--brand)); background:var(--surface); }
+.phone-shell.peazily-ui .welcome-choice small { color:var(--ink-muted); font-size:var(--fs-small); line-height:1.5; }
+
+/* Shared interaction timings. State feedback remains CSS-only and independent
+   of the user action; this keeps React handlers and navigation untouched. */
+.phone-shell.peazily-ui :is(.btn,.icon-btn,.nav-item,.nav-action,.choice,.service-option,.group-nav,.filter-chips button,.transport-tabs button,.welcome-choice,.marketplace-collection,.more-service-card,.customer-drawer button,.sheet-close,.sheet-back,.bulk-add,.bulk-quantity-row button,.chat-list-item) {
+  transition-property:background-color,color,border-color,box-shadow,opacity,transform,filter;
+  transition-duration:var(--duration-fast);
+  transition-timing-function:var(--ease-interaction);
+}
+.phone-shell.peazily-ui :is(.field,.catalog-search,.chat-search,.search,.vendor-filters select) {
+  transition:border-color var(--duration-fast) var(--ease-interaction),box-shadow var(--duration-fast) var(--ease-interaction),background-color var(--duration-fast) ease;
+}
+.phone-shell.peazily-ui :is(.welcome-tabs button::after,.bottom-nav.customer-nav .nav-item::before) {
+  transition:opacity var(--duration-fast) ease,transform var(--duration-fast) var(--ease-interaction),background-color var(--duration-fast) ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  .phone-shell.peazily-ui .welcome-entry .welcome-tabs button:hover { background-color:var(--surface-soft); color:var(--ink); }
+  .phone-shell.peazily-ui .customer-navigation .nav-action:hover,
+  .phone-shell.peazily-ui .user-menu-button:hover { background-color:var(--surface-soft); }
+  .phone-shell.peazily-ui .home-service-showcase :is(.service-card-visual,.market-bottom button):hover:not(:disabled) { filter:brightness(.97); }
+  .phone-shell.peazily-ui .home-bulk-orders-cta:hover:not(:disabled) { filter:brightness(.94); }
+  .phone-shell.peazily-ui :is(.icon-btn,.nav-action,.choice,.service-option,.group-nav,.filter-chips button,.transport-tabs button,.welcome-choice,.customer-drawer .drawer-row,.customer-drawer .drawer-signin,.customer-drawer .drawer-signout,.sheet-close,.sheet-back,.bulk-add,.chat-list-item):hover:not(:disabled) {
+    background-color:var(--brand-soft);
+  }
+  .phone-shell.peazily-ui :is(.choice,.service-option,.group-nav,.filter-chips button,.transport-tabs button,.welcome-choice,.bulk-add,.chat-list-item):hover:not(:disabled) {
+    border-color:color-mix(in srgb,var(--brand) 38%,var(--divider));
+  }
+  .phone-shell.peazily-ui :is(.marketplace-collection,.more-service-card):hover:not(:disabled) {
+    transform:translateY(-1px);
+    box-shadow:var(--elevation-1);
+  }
+  .phone-shell.peazily-ui .bottom-nav.customer-nav .nav-item:hover:not(.active) { color:var(--brand-deep); }
+}
+.phone-shell.peazily-ui :is(.btn,.icon-btn,.nav-item,.nav-action,.choice,.service-option,.group-nav,.filter-chips button,.transport-tabs button,.welcome-choice,.marketplace-collection,.more-service-card,.customer-drawer button,.sheet-close,.sheet-back,.bulk-add,.bulk-quantity-row button,.chat-list-item):active:not(:disabled) {
+  transform:scale(.985);
+}
+.phone-shell.peazily-ui :is(.welcome-tabs button,.bottom-nav.customer-nav .nav-item)::after { opacity:0; }
+.phone-shell.peazily-ui .welcome-tabs button::after { transform:scaleX(.7); }
+.phone-shell.peazily-ui .welcome-tabs button[aria-selected="true"]::after { opacity:1; transform:scaleX(1); }
+.phone-shell.peazily-ui .bottom-nav.customer-nav .nav-item.active::before { opacity:1; transform:translateX(-50%) scaleX(1); }
+.phone-shell.peazily-ui .bottom-nav.customer-nav .nav-item:not(.active)::before { opacity:0; transform:translateX(-50%) scaleX(.7); }
+.phone-shell.peazily-ui .link { text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-interaction),text-decoration-color var(--duration-fast) ease; }
+.phone-shell.peazily-ui .bulk-quantity-row button:active:not(:disabled),
+.phone-shell.peazily-ui .market-bottom button:active:not(:disabled),
+.phone-shell.peazily-ui .more-service-card:active:not(:disabled),
+.phone-shell.peazily-ui .bottom-nav.customer-nav .nav-item:active:not(:disabled),
+.phone-shell.peazily-ui .customer-navigation .nav-action:active:not(:disabled),
+.phone-shell.peazily-ui .user-menu-button:active:not(:disabled) { transform:scale(.985); }
+.phone-shell.peazily-ui :is(.pd-dashboard button,.pd-topbar button):not(:disabled) {
+  transition:background-color var(--duration-fast) var(--ease-interaction),border-color var(--duration-fast) var(--ease-interaction),color var(--duration-fast) var(--ease-interaction),box-shadow var(--duration-fast) var(--ease-interaction),transform var(--duration-fast) var(--ease-interaction),filter var(--duration-fast) ease;
+}
+@media (hover:hover) and (pointer:fine) {
+  .phone-shell.peazily-ui .link:hover:not(:disabled) { color:var(--brand-deep); text-decoration:underline; }
+  .phone-shell.peazily-ui .marketplace-home .explore-grid button:hover:not(:disabled) { color:var(--brand-deep); }
+  .phone-shell.peazily-ui .marketplace-home .explore-grid button:hover:not(:disabled) i { background:var(--brand-soft); }
+  .phone-shell.peazily-ui .section-head > button:hover:not(:disabled) { color:var(--brand-deep); }
+  .phone-shell.peazily-ui .pd-dashboard button:hover:not(:disabled),
+  .phone-shell.peazily-ui .pd-topbar button:hover:not(:disabled) { filter:brightness(.975); }
+  .phone-shell.peazily-ui .pd-dashboard button:active:not(:disabled),
+  .phone-shell.peazily-ui .pd-topbar button:active:not(:disabled) { filter:brightness(.94); }
+}
+
+@media (min-width:700px) {
+  .phone-shell.peazily-ui:not(:has(.marketplace-home)) { box-shadow:0 12px 44px rgb(28 25 23 / 10%); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .phone-shell.peazily-ui :is(.btn-primary,.pd-primary,.chat-send,.btn-outline,.choice,.welcome-choice) { transition:none; }
+  .phone-shell.peazily-ui .welcome-entry :is(.welcome-tabs button,.welcome-preview-tap):active { transform:none; }
+  .phone-shell.peazily-ui :is(.btn,.icon-btn,.nav-item,.nav-action,.choice,.service-option,.group-nav,.filter-chips button,.transport-tabs button,.welcome-choice,.marketplace-collection,.more-service-card,.customer-drawer button,.sheet-close,.sheet-back,.bulk-add,.bulk-quantity-row button,.chat-list-item):active:not(:disabled) { transform:none; }
+  .phone-shell.peazily-ui .user-menu-button:active:not(:disabled) { transform:none; }
+}

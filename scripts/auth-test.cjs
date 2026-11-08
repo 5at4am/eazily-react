@@ -2,10 +2,13 @@ const assert=require('node:assert/strict');
 const tick=()=>new Promise(r=>setTimeout(r,0));
 (async()=>{
  const {validOtp,routeAccess,accountState,clearAccountStorage,EMPTY_ACCOUNT,safeAuthError,confirmedEmail}=await import('../src/auth/policy.js');
- const {createAuthController}=await import('../src/auth/controller.js');
+  const {createAuthController}=await import('../src/auth/controller.js');
+  const {workspacePaths}=await import('../src/lib/workspace.js');
  assert.equal(validOtp('0000'),false);assert.equal(validOtp('123456'),true);
  const user={user:{id:'a'},profile:{id:'a',full_name:'Fixture',account_status:'active',role:'customer'},applications:[],roles:[],staff:null,isAdmin:false};
- assert.equal(routeAccess(EMPTY_ACCOUNT,'admin'),'signed_out');assert.equal(routeAccess(user,'admin'),'denied');
+  assert.equal(routeAccess(EMPTY_ACCOUNT,'admin'),'signed_out');assert.equal(routeAccess(user,'admin'),'denied');
+  assert.equal(routeAccess({...user,isAdmin:true,profile:{...user.profile,role:'admin'}},'admin'),'denied','Admin routes stay unavailable even for legacy admin accounts');
+  assert.equal(workspacePaths.admin,undefined,'Admin is not a selectable workspace');
  assert.equal(routeAccess({...user,roles:['admin']},'admin'),'denied');
  assert.equal(routeAccess(user,'customer'),'allowed');assert.equal(accountState({...user,profile:null}),'profile_required');
  for(const role of ['professional','influencer','consultant'])for(const [status,expected] of [['draft','registration'],['submitted','allowed'],['under_review','allowed'],['rejected','rejected'],['suspended','suspended'],['blocked','blocked'],['approved',role==='consultant'?'assessment_required':'allowed']])assert.equal(routeAccess({...user,applications:[{id:'p',role,status}]},role),expected);

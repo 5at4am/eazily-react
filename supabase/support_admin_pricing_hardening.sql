@@ -25,6 +25,7 @@ begin
 end $$;
 create trigger realtime_support_ticket_replies after insert on public.support_ticket_replies
   for each row execute function public.emit_realtime_support_reply_event();
+revoke execute on function public.emit_realtime_support_reply_event() from public, anon, authenticated;
 
 create function public.admin_enable_confirmed_seller_pricing() returns void
 language plpgsql security definer set search_path=public,pg_temp as $$

@@ -1,4 +1,4 @@
-export const EMPTY_ACCOUNT = Object.freeze({ user:null, profile:null, applications:[], roles:[], staff:null, isAdmin:false });
+export const EMPTY_ACCOUNT = Object.freeze({ user:null, profile:null, applications:[], roles:[] });
 export const validOtp=(code,length=6)=>Number.isInteger(length)&&length>=4&&length<=10&&new RegExp(`^\\d{${length}}$`).test(code);
 export function normalizeEmail(value) {
   const email=String(value??'').trim().toLowerCase();
@@ -77,7 +77,7 @@ export function routeAccess(account,role) {
   const state=accountState(account);
   if (state!=='authenticated') return state;
   if (role==='customer') return 'allowed';
-  if (role==='admin') return account.isAdmin?'allowed':'denied';
+  if (role==='admin') return 'denied';
   if (!['professional','influencer','consultant'].includes(role)) return 'denied';
   const application=account.applications.find(a=>a.role===role);
   if (!application||application.status==='draft'||application.status==='changes_required') return 'registration';

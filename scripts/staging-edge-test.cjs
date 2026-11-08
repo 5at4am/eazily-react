@@ -3,7 +3,7 @@ const { readFileSync, readdirSync }=require('node:fs');
 const vm=require('node:vm');
 const assert=require('node:assert/strict');
 (async()=>{
-  const financialHandlers = new Set(['seller-create-payment','cashfree-create-collaboration','cashfree-release-split','cashfree-release-hold','cashfree-webhook']);
+  const financialHandlers = new Set(['seller-create-payment','seller-create-subscription-payment','cashfree-create-collaboration','cashfree-release-split','cashfree-release-hold','cashfree-webhook']);
   for(const name of readdirSync('supabase/functions',{withFileTypes:true}).filter(d=>d.isDirectory()&&financialHandlers.has(d.name)).map(d=>d.name)) {
     const source=readFileSync(`supabase/functions/${name}/index.ts`,'utf8');
     const branch=source.match(/Deno\.serve\(async (?:req|request) => \{\s*(if \(Deno\.env\.get\('EAZILY_FINANCIAL_PROVIDERS_ENABLED'\)[^\n]+)/);
@@ -13,5 +13,5 @@ const assert=require('node:assert/strict');
       assert.equal((await handler()).status,503);
     }
   }
-  console.log('PASS: five financial Edge handlers fail closed before any side effect (local guard test, not Deno deployment).');
+  console.log('PASS: six financial Edge handlers fail closed before any side effect (local guard test, not Deno deployment).');
 })().catch(e=>{console.error(e.message);process.exitCode=1;});

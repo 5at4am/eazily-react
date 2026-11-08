@@ -6,10 +6,9 @@ export async function getWorkspaceAccount() {
   const { data: { user }, error } = await db.auth.getUser();
   if (error && error.name !== 'AuthSessionMissingError') throw error;
   if (!user) return { user: null, profile: null, applications: [], roles: [] };
-  const [profiles, applications, staff] = await Promise.all([
+  const [profiles, applications] = await Promise.all([
     readRows('profiles', q => q.eq('id', user.id)),
     readRows('partner_applications', q => q.eq('customer_id', user.id)),
-    readRows('staff_access', q => q.eq('account_id', user.id).eq('active', true).is('revoked_at', null)),
   ]);
   let profile=profiles[0]??null;
   if (!profile) { const repaired=await db.rpc('ensure_my_profile'); if(repaired.error)throw repaired.error;profile=repaired.data; }
@@ -18,7 +17,7 @@ export async function getWorkspaceAccount() {
     const result=await db.rpc('get_consultant_assessment_eligibility',{p_application_id:app.id});
     if(result.error)throw result.error;assessments[app.id]=result.data?.eligible===true;
   }
-  return { user, profile, applications, assessments, roles: applications.filter(a => a.status === 'approved').map(a => a.role), staff: staff[0] ?? null, isAdmin: profiles[0]?.role === 'admin' || Boolean(staff[0]?.permissions?.length || staff[0]?.staff_role==='super_admin') };
+  return { user, profile, applications, assessments, roles: applications.filter(a => a.status === 'approved').map(a => a.role) };
 }
 
 export async function saveApplication(role, details, submit = false) {

@@ -11,7 +11,6 @@ import { firstHomeHeroArtwork, homeHeroArtwork } from './homeHeroArtwork.js';
 import { UserVendorSkeleton } from '../user-motion/UserLoading.jsx';
 import './home-carousel.css';
 import { mergeServicePool } from './moreServiceRotation.js';
-import { getDemoNearbyCustomerProfessionals } from '../services/customerProfessionalDemo.js';
 const moreHomeServices = topServices.filter(service => !['Electrician', 'AC Service'].includes(service.name));
 const bulkTickerMessage = 'Office, society ya event? • Multiple services ek saath • Apni requirement bhejein';
 function HomeProviderCarousel({ providers, loading, onOpen, motionReduced }) {
@@ -41,7 +40,7 @@ function HomeProviderCarousel({ providers, loading, onOpen, motionReduced }) {
   const current = count ? (index - 1 + count) % count : 0;
   if (loading) return <UserVendorSkeleton count={1} rail />;
   if (!count) return null;
-  return <div className="home-provider-carousel"><div className="home-provider-viewport" onPointerDown={event => { start.current = event.clientX; paused.current = true; }} onPointerMove={event => { if (start.current == null) return; const movement = event.clientX - start.current; if (Math.abs(movement) > 8 && !event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.setPointerCapture(event.pointerId); setDrag(movement); }} onPointerUp={finish} onPointerCancel={finish}><div className={`home-provider-track${transitioning ? ' is-moving' : ''}`} style={{ transform: `translate3d(calc(${-index * 100}% + ${index * 30 + drag}px),0,0)` }} onTransitionEnd={() => { if (index === 0) { setTransitioning(false); setIndex(count); } else if (index === count + 1) { setTransitioning(false); setIndex(1); } }}>{slides.map((provider, slideIndex) => { const name = provider.display_name || provider.business_name || 'Professional'; const service = provider.selected_service || provider.service_names?.[0] || 'Home service'; return <article className="home-provider-card" key={`${provider.id}-${slideIndex}`}><div className="home-provider-photo">{provider.photo_url ? <img src={provider.photo_url} alt={name} loading="lazy" /> : <Icon name="person" size={42} />}</div><div className="home-provider-details">{provider.demo && <span className="sample-label">{translate("Demo profile")}</span>}<small>{translate(service)}</small><h3>{translate(name)}</h3><div className="home-provider-facts">{provider.review_count > 0 ? <span><Icon name="star" size={16} />{Number(provider.rating || 0).toFixed(1)} · {provider.review_count} {translate(provider.demo ? 'sample reviews' : 'reviews')}</span> : <span>{translate('No reviews yet')}</span>}{provider.experience_years > 0 && <span>{provider.experience_years} Years</span>}<span className="provider-price">{translate(provider.starting_price == null ? 'Request a quote' : `From ₹${Number(provider.starting_price).toLocaleString('en-IN')}`)}</span><span><Icon name="clock" size={16} />{translate(provider.available_now ? 'Available now' : provider.available_now === false ? 'Currently offline' : provider.availability || 'Availability by confirmation')}</span>{(provider.city || provider.coverage?.[0]) && <span><Icon name="location" size={13} />{translate(provider.city || provider.coverage[0])}</span>}</div><button type="button" className="btn btn-outline full" onClick={event => { event.stopPropagation(); if (!suppressClick.current) onOpen(provider); }}>{translate('View profile')}</button></div></article>; })}</div></div>{count > 1 && <div className="home-provider-dots" aria-label="Provider slides" onFocusCapture={() => { paused.current = true; }} onBlurCapture={() => { paused.current = false; }}>{providers.map((provider, dot) => <button type="button" key={provider.id} className={dot === current ? 'active' : ''} aria-pressed={dot === current} aria-label={`Show provider ${dot + 1}`} onClick={() => { setTransitioning(true); setIndex(dot + 1); }} />)}</div>}{count > 1 && !motionReduced && <button type="button" className="link" aria-pressed={autoPlay} onClick={() => setAutoPlay(value => !value)}>{translate(autoPlay ? "Pause profiles" : "Play profiles")}</button>}</div>;
+  return <div className="home-provider-carousel"><div className="home-provider-viewport" onPointerDown={event => { start.current = event.clientX; paused.current = true; }} onPointerMove={event => { if (start.current == null) return; const movement = event.clientX - start.current; if (Math.abs(movement) > 8 && !event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.setPointerCapture(event.pointerId); setDrag(movement); }} onPointerUp={finish} onPointerCancel={finish}><div className={`home-provider-track${transitioning ? ' is-moving' : ''}`} style={{ transform: `translate3d(calc(${-index * 100}% + ${index * 30 + drag}px),0,0)` }} onTransitionEnd={() => { if (index === 0) { setTransitioning(false); setIndex(count); } else if (index === count + 1) { setTransitioning(false); setIndex(1); } }}>{slides.map((provider, slideIndex) => { const name = provider.display_name || provider.business_name || 'Professional'; const service = provider.selected_service || provider.service_names?.[0] || 'Home service'; return <article className="home-provider-card" key={`${provider.id}-${slideIndex}`}><div className="home-provider-photo">{provider.photo_url ? <img src={provider.photo_url} alt={name} loading="lazy" /> : <Icon name="person" size={42} />}</div><div className="home-provider-details"><small>{translate(service)}</small><h3>{translate(name)}</h3><div className="home-provider-facts">{provider.review_count > 0 ? <span><Icon name="star" size={16} />{Number(provider.rating || 0).toFixed(1)} · {provider.review_count} {translate('reviews')}</span> : <span>{translate('No reviews yet')}</span>}{provider.experience_years > 0 && <span>{provider.experience_years} Years</span>}<span className="provider-price">{translate(provider.starting_price == null ? 'Request a quote' : `From ₹${Number(provider.starting_price).toLocaleString('en-IN')}`)}</span><span><Icon name="clock" size={16} />{translate(provider.available_now ? 'Available now' : provider.available_now === false ? 'Currently offline' : provider.availability || 'Availability by confirmation')}</span>{(provider.city || provider.coverage?.[0]) && <span><Icon name="location" size={13} />{translate(provider.city || provider.coverage[0])}</span>}</div><button type="button" className="btn btn-outline full" onClick={event => { event.stopPropagation(); if (!suppressClick.current) onOpen(provider); }}>{translate('View profile')}</button></div></article>; })}</div></div>{count > 1 && <div className="home-provider-dots" aria-label="Provider slides" onFocusCapture={() => { paused.current = true; }} onBlurCapture={() => { paused.current = false; }}>{providers.map((provider, dot) => <button type="button" key={provider.id} className={dot === current ? 'active' : ''} aria-pressed={dot === current} aria-label={`Show provider ${dot + 1}`} onClick={() => { setTransitioning(true); setIndex(dot + 1); }} />)}</div>}{count > 1 && !motionReduced && <button type="button" className="link" aria-pressed={autoPlay} onClick={() => setAutoPlay(value => !value)}>{translate(autoPlay ? "Pause profiles" : "Play profiles")}</button>}</div>;
 }
 export default function UserHome({
   route,
@@ -55,7 +54,6 @@ export default function UserHome({
   onBulkOrders,
   city,
   onCityChange,
-  demoMode = false
 }) {
   const [professionals, setProfessionals] = useState([]);
   const [professionalsLoading, setProfessionalsLoading] = useState(true);
@@ -66,7 +64,7 @@ export default function UserHome({
     let active = true;
     setProfessionalsLoading(true);
     setProfessionalsError('');
-    (demoMode ? getDemoNearbyCustomerProfessionals(city, true) : getNearbyCustomerProfessionals(city)).then(rows => {
+    getNearbyCustomerProfessionals(city).then(rows => {
       if (active) {
         setProfessionals(rows);
         setProfessionalsLoading(false);
@@ -74,13 +72,13 @@ export default function UserHome({
     }).catch(e => {
       if (active) { setProfessionalsLoading(false); setProfessionalsError(e.message); notify(e.message); }
     });
-    if (!demoMode) getCurrentProfile().then(p => {
+    getCurrentProfile().then(p => {
       if (active) setCustomer(p);
     }).catch(e => { if (active) notify(e.message); });
     return () => {
       active = false;
     };
-  }, [city, demoMode, notify, professionalsReload]);
+  }, [city, notify, professionalsReload]);
   const [locationOpen, setLocationOpen] = useState(false);
   const [location, setLocation] = useState({
     locality: city,
@@ -91,9 +89,7 @@ export default function UserHome({
   const [heroPaused, setHeroPaused] = useState(false);
   const [heroStopped, setHeroStopped] = useState(true);
   const [motionReduced, setMotionReduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [moreServicePool, setMoreServicePool] = useState(() => demoMode ? mergeServicePool(moreHomeServices, topServices) : moreHomeServices);
+  const [moreServicePool, setMoreServicePool] = useState(moreHomeServices);
   const touchStart = useRef(null);
   const bulkTickerText = useRef(null);
   const bulkTickerTrack = useRef(null);
@@ -122,14 +118,13 @@ export default function UserHome({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
-    if (demoMode) return undefined;
     let active = true;
     getActiveServiceCatalogue().then(services => {
       if (!active || !services.length) return;
       setMoreServicePool(mergeServicePool(moreHomeServices.map(service => ({ ...service, categoryId: 'manpower' })), services));
     }).catch(() => {});
     return () => { active = false; };
-  }, [demoMode]);
+  }, []);
   useEffect(() => {
     if (heroPaused || heroStopped || document.hidden || motionReduced) return undefined;
     const timer = window.setInterval(() => setHeroIndex(index => (index + 1) % heroSlides.length), 4500);
@@ -223,12 +218,5 @@ export default function UserHome({
       event.preventDefault(); const nextCity = addressSearch.trim(); if (!nextCity) return;
       setLocation({ locality: nextCity, address: "Service city" }); onCityChange(nextCity); setLocationOpen(false); notify("Service city updated");
     }}><Field label="Service city" placeholder="For example, Bhopal" value={addressSearch} onChange={event => setAddressSearch(event.target.value)} required maxLength={100} /><button type="submit" className="btn btn-primary full" disabled={!addressSearch.trim()}>{translate("Confirm city")}</button></form><button type="button" className="btn btn-outline full" onClick={() => { setLocationOpen(false); setProfileSheet("Location & Addresses"); }}>{translate("Manage addresses")}</button></Sheet>}
-    {translate(cartOpen ? <Sheet onClose={() => setCartOpen(false)}><span className="eyebrow">{translate("YOUR CART")}</span><h2 className="sheet-title">{translate("Selected services")}</h2>{translate(cart.length ? <><div className="cart-list">{translate(cart.map(item => <article key={item.id}><span><b>{translate(item.name)}</b><small>Choose a professional to confirm pricing</small></span><button aria-label={`Remove ${item.name}`} onClick={() => setCart(current => current.filter(entry => entry.id !== item.id))}>{translate("Remove")}</button></article>))}</div><button className="btn btn-primary full" onClick={() => {
-          setCartOpen(false);
-          setRequest({
-            categoryId: "manpower",
-            serviceName: cart[0].name
-          });
-        }}>{translate("Continue to checkout")}</button></> : <div className="cart-empty"><Icon name="cart" size={38} /><h3>{translate("Your cart is empty")}</h3><p>{translate("Add a nearby service to compare and book.")}</p></div>)}</Sheet> : null)}
   </main>;
 }

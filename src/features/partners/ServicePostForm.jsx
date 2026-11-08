@@ -10,6 +10,8 @@ import MediaUpload from './MediaUpload.jsx';
 import './service-posting.css';
 
 const PRICING = ['Fixed Price', 'Starting Price', 'Inspection-Based Quote'];
+const POST_STEPS = [['briefcase', 'Service'], ['rupee', 'Fees'], ['eye', 'Photos & preview'], ['check', 'Review & publish']];
+const POST_TITLES = ['Kaunsa kaam?', 'Aapki fees.', 'Photo aur preview.', 'Review & publish'];
 const travelsToCustomer = place => ['At the customer’s location', 'Both'].includes(place);
 const money = value => value === '' || value == null ? '—' : `₹${Number(value).toLocaleString('en-IN')}`;
 
@@ -61,6 +63,13 @@ export default function ServicePostForm({ post, application, accountId, notify, 
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState('');
+  const [packages, setPackages] = useState(() => (cached?.packages || []));
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  const setPackageAt = (index, field, value) => setPackages(current => {
+    const next = current.slice();
+    next[index] = { ...(next[index] || {}), [field]: value };
+    return next;
+  });
   const [success, setSuccess] = useState(null);
   const services = registeredServices(profile);
   const canVisit = travelsToCustomer(profile.servicePlace);
@@ -90,9 +99,9 @@ export default function ServicePostForm({ post, application, accountId, notify, 
   }
 
   function go(nextStep) {
-    if (nextStep > step && !validate(step)) return;
+    if (nextStep > step && step <= 2 && !validate(step)) return;
     setStep(nextStep);
-    try { sessionStorage.setItem(storageKey, JSON.stringify({ ...values, savedStep: nextStep })); } catch { /* Continue without browser cache. */ }
+    try { sessionStorage.setItem(storageKey, JSON.stringify({ ...values, packages, savedStep: nextStep })); } catch { /* Continue without browser cache. */ }
     document.querySelector('.partner-post-sheet')?.scrollTo?.({ top: 0, behavior: 'smooth' });
   }
 
@@ -111,6 +120,7 @@ export default function ServicePostForm({ post, application, accountId, notify, 
       visitingCharge: canVisit ? String(values.visitingCharge || 0) : '0',
       visitTreatment: canVisit ? values.visitTreatment : 'Additional',
       media: [...values.primaryMedia, ...values.additionalMedia].slice(0, 10),
+      packages: packages.filter(item => item?.name?.trim() && item.price !== '' && item.price != null),
     };
   }
 
@@ -132,15 +142,16 @@ export default function ServicePostForm({ post, application, accountId, notify, 
       sessionStorage.removeItem(storageKey);
       if (actionName === 'draft') {
         notify(supabase ? 'Draft saved' : 'Testing draft saved. It is not publicly published.');
+        setLastSavedAt(new Date().toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }));
         onDone(result);
         return;
       }
-      const message = result.review_notes?.startsWith('Updated version awaiting Admin review')
+      const message = result.review_notes?.startsWith('Updated version awaiting')
         ? 'Badla hua version review mein hai. Pehle se approved post live rahegi.'
         : result.status === 'published'
         ? 'Aapki service post ho gayi!'
         : result.status === 'pending_review'
-          ? 'Service review ke liye bhej di gayi. Approval ke baad live hogi.'
+          ? 'A quick safety check is needed before this service goes live.'
           : 'Service save ho gayi. Verification approve hone ke baad live ho sakegi.';
       setSuccess({ result, message });
       notify(message);
@@ -158,17 +169,38 @@ export default function ServicePostForm({ post, application, accountId, notify, 
     <button type="button" className="btn btn-outline full" onClick={() => { sessionStorage.removeItem(storageKey); onDone(success.result, { addAnother: true }); }}>Ek aur service jodein</button>
   </section>;
 
+  const previewMedia = [...values.primaryMedia, ...values.additionalMedia];
+  const filteredPackages = packages.filter(item => item.name && item.price !== '');
+  const livePreview = (
+    <div className="service-live-preview-card">
+      <span className="eyebrow">Live preview</span>
+      <div className="service-preview-cover small">{previewMedia.length ? <MediaPreview media={previewMedia.slice(0, 1)} /> : <ServiceIllustration name={values.service?.serviceName || values.service?.categoryLabel || 'grid'} />}</div>
+      <h3>{values.title || 'Service title'}</h3>
+      {values.description && <p className="preview-desc">{values.description}</p>}
+      <p className="service-preview-price"><b>{money(values.serviceCharge)}</b> service charge</p>
+      {canVisit && <p>{money(values.visitingCharge || 0)} visiting · {values.visitTreatment}</p>}
+      {filteredPackages.length > 0 && <div className="preview-packages">{filteredPackages.map((item, index) => <div key={index}><b>{item.name}</b><span>{money(item.price)}</span></div>)}</div>}
+      <p className="preview-meta">{profile.businessName || profile.name || 'Service Partner'} · {profile.city || 'Registered area'}</p>
+    </div>
+  );
+
   return <form className="service-post-flow" onSubmit={event => { event.preventDefault(); action('submit'); }}>
-    <header className="service-post-heading"><div><span>Step {step} of 3</span><h2>{['Kaunsa kaam?', 'Aapki fees.', 'Photo aur post.'][step - 1]}</h2></div><button type="button" className="link" disabled={busy} onClick={() => action('draft')}>Save Draft</button></header>
-    <div className="service-post-progress" aria-label={`Step ${step} of 3`}><i style={{ width: `${step / 3 * 100}%` }} /></div>
-    {step === 1 && <ServiceStep values={values} update={update} services={services} search={search} setSearch={setSearch} errors={errors} onEditProfile={() => onDone(null, { editProfile: true })} />}
-    {step === 2 && <FeesStep values={values} update={update} canVisit={canVisit} servicePlace={profile.servicePlace} errors={errors} />}
-    {step === 3 && <PhotoStep values={values} update={update} profile={profile} canVisit={canVisit} onEdit={go} errors={errors} />}
-    {errors.submit && <p className="inline-error" role="alert">{errors.submit}</p>}
-    <footer className="service-post-actions">
-      {step > 1 && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => go(step - 1)}>Peeche / Back</button>}
-      {step < 3 ? <button type="button" className="btn btn-primary" onClick={() => go(step + 1)}>Aage / Continue</button> : <button className="btn btn-primary" disabled={busy}>{busy ? 'Posting…' : 'Post Karein / Publish Service'}</button>}
-    </footer>
+    <header className="service-post-heading"><div><ol className="service-post-steps" aria-label={`Step ${step} of 4`}>{POST_STEPS.map(([icon, label], index) => <li key={label} className={index + 1 < step ? 'done' : index + 1 === step ? 'current' : ''}><Icon name={icon} size={15} /><span>{label}</span></li>)}</ol><h2>{POST_TITLES[step - 1]}</h2></div><div className="service-head-actions"><button type="button" className="link" disabled={busy} onClick={() => action('draft')}>Save Draft</button>{lastSavedAt && <small className="draft-time">Saved {lastSavedAt}</small>}</div></header>
+    <div className="service-post-grid">
+      <div className="service-post-main">
+        {step === 1 && <ServiceStep values={values} update={update} services={services} search={search} setSearch={setSearch} errors={errors} onEditProfile={() => onDone(null, { editProfile: true })} />}
+        {step === 1 && <details className="service-post-packages"><summary>Optional packages (Basic / Standard / Premium)</summary><div className="package-editor">{[0, 1, 2].map(index => <div className="package-row" key={index}><input placeholder={`Package ${index + 1} name`} value={packages[index]?.name || ''} onChange={event => setPackageAt(index, 'name', event.target.value)} /><input type="number" min="0" inputMode="numeric" placeholder={`₹ price`} value={packages[index]?.price ?? ''} onChange={event => setPackageAt(index, 'price', event.target.value)} /><input placeholder="What's included (short)" value={packages[index]?.description || ''} onChange={event => setPackageAt(index, 'description', event.target.value)} /></div>)}</div></details>}
+        {step === 2 && <FeesStep values={values} update={update} canVisit={canVisit} servicePlace={profile.servicePlace} errors={errors} />}
+        {step === 3 && <PhotoStep values={values} update={update} profile={profile} canVisit={canVisit} onEdit={go} errors={errors} />}
+        {step === 4 && <section className="service-post-step service-review-step"><h3>Review your listing</h3><dl><div><dt>Service</dt><dd>{values.service?.serviceName || '—'}</dd></div><div><dt>Title</dt><dd>{values.title || '—'}</dd></div><div><dt>Description</dt><dd>{values.description || '—'}</dd></div><div><dt>Pricing</dt><dd>{values.pricingType} · ₹{money(values.serviceCharge)}{canVisit ? ` · Visiting ₹${money(values.visitingCharge || 0)}` : ''}</dd></div>{filteredPackages.length > 0 && <div><dt>Packages</dt><dd>{filteredPackages.map(item => item.name).join(', ')}</dd></div>}<div><dt>Media</dt><dd>{previewMedia.length} photo(s)</dd></div></dl><p className="policy-note">After publishing, customers can request this service. You can edit it anytime.</p></section>}
+        {errors.submit && <p className="inline-error" role="alert">{errors.submit}</p>}
+        <footer className="service-post-actions">
+          {step > 1 && <button type="button" className="btn btn-outline" disabled={busy} onClick={() => go(step - 1)}>Peeche / Back</button>}
+          {step < 4 ? <button type="button" className="btn btn-primary" onClick={() => go(step + 1)}>Aage / Continue</button> : <button className="btn btn-primary" disabled={busy} type="submit">{busy ? 'Posting…' : 'Publish Service / Post Karein'}</button>}
+        </footer>
+      </div>
+      <aside className="service-live-preview">{livePreview}</aside>
+    </div>
   </form>;
 }
 
@@ -184,7 +216,7 @@ function ServiceStep({ values, update, services, search, setSearch, errors, onEd
 }
 
 function FeesStep({ values, update, canVisit, servicePlace, errors }) {
-  return <section className="service-post-step"><div><Field label="Service charge — ₹" type="number" inputMode="decimal" min="0" step="0.01" required value={values.serviceCharge} onChange={event => update(current => ({ ...current, serviceCharge: event.target.value }))} /><small className="field-help">Is kaam ke liye aapki fees.</small>{errors.serviceCharge && <p className="inline-error" role="alert">{errors.serviceCharge}</p>}</div>
+  return <section className="service-post-step"><p className="service-customer-line">Customers will see: {values.pricingType === 'Starting Price' ? 'From ' : ''}{money(values.serviceCharge)}{canVisit && values.visitTreatment === 'Additional' ? ` + ₹${money(values.visitingCharge || 0)} visiting` : ''}</p><div><Field label="Service charge — ₹" type="number" inputMode="decimal" min="0" step="0.01" required value={values.serviceCharge} onChange={event => update(current => ({ ...current, serviceCharge: event.target.value }))} /><small className="field-help">Is kaam ke liye aapki fees.</small>{errors.serviceCharge && <p className="inline-error" role="alert">{errors.serviceCharge}</p>}</div>
     {canVisit && <><div><Field label="Visiting charge — ₹" type="number" inputMode="decimal" min="0" step="0.01" value={values.visitingCharge} onChange={event => update(current => ({ ...current, visitingCharge: event.target.value }))} /><small className="field-help">Customer ke yahan aane ki fees. ₹0 means no visiting charge.</small>{errors.visitingCharge && <p className="inline-error" role="alert">{errors.visitingCharge}</p>}</div><label className="field-wrap"><span>Visiting charge treatment</span><select className="field" value={values.visitTreatment} onChange={event => update(current => ({ ...current, visitTreatment: event.target.value }))}><option>Additional</option><option>Included</option></select></label><p className="service-price-note">{values.visitTreatment === 'Additional' ? 'Customer-location booking mein visiting charge service fee ke alag lagta hai.' : 'Visiting charge aapki service fee mein included hai; alag se nahi judta.'}</p></>}
     {!canVisit && <p className="service-price-note"><b>At-shop service:</b> Visiting charge apply nahi hoga.</p>}
     <details className="service-pricing-options"><summary>Other pricing options</summary><label className="field-wrap"><span>Pricing type</span><select className="field" value={values.pricingType} onChange={event => update(current => ({ ...current, pricingType: event.target.value }))}>{PRICING.map(item => <option key={item}>{item}</option>)}</select></label></details>

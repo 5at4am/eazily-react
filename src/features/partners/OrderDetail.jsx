@@ -4,6 +4,7 @@ import { readRows, rpc } from '../../services/experience.js';
 import { translate as t } from '../../lib/translate.js';
 import { openOfficialCheckout } from '../../services/paymentCheckout.js';
 import { useRealtime } from '../../lib/realtime.jsx';
+import { supabase } from '../../lib/supabase.js';
 import { getServiceBookingEstimate } from '../../services/marketplace.js';
 import SupportForm from '../account/SupportForm.jsx';
 const money = n => new Intl.NumberFormat('en-IN',{ style:'currency',currency:'INR' }).format(Number(n || 0)/100);
@@ -63,6 +64,7 @@ export default function OrderDetail({ order, customer = false, notify, onChange 
   const [quote,setQuote] = useState(null), [events,setEvents] = useState([]), [otp,setOtp] = useState(''), [reason,setReason] = useState(''), [busy,setBusy] = useState(false);
   const [intake,setIntake] = useState(null);
   const [intakeError,setIntakeError] = useState(false);
+  const [photoUrls,setPhotoUrls] = useState([]);
   const [offerAvailable,setOfferAvailable] = useState(null);
   const [input,setInput] = useState({service:'',visit:'0',extra:'0',quantity:'1',scope:'',taxInclusive:false});
   const [issueText,setIssueText] = useState(''), [issues,setIssues] = useState([]);
@@ -71,6 +73,14 @@ export default function OrderDetail({ order, customer = false, notify, onChange 
   async function reload() { const [q,e] = await Promise.all([rpc('get_order_quote',{p_order:order.id}),readRows('seller_order_events',q=>q.eq('order_id',order.id).order('created_at'))]); setQuote(q);setEvents(e); }
   useEffect(() => { let active=true; Promise.all([rpc('get_order_quote',{p_order:order.id}),readRows('seller_order_events',q=>q.eq('order_id',order.id).order('created_at'))]).then(([q,e])=>{if(active){setQuote(q);setEvents(e);}}).catch(e=>notify(e.message));return()=>{active=false;}; },[order.id,notify,revision]);
   useEffect(() => { if(order.role!=='professional')return undefined;let active=true;setIntake(null);setIntakeError(false);rpc('get_service_booking_intake',{p_order:order.id}).then(value=>{if(active)setIntake(value);}).catch(()=>{if(active)setIntakeError(true);});return()=>{active=false;}; },[order.id,order.role,order.status,revision]);
+  useEffect(() => {
+    if (!intake?.photos?.length) { setPhotoUrls([]); return undefined; }
+    let active = true;
+    Promise.all(intake.photos.map(path => supabase.storage.from('request-media').createSignedUrl(path, 300)
+      .then(result => result.data?.signedUrl || null)
+      .catch(() => null))).then(urls => { if (active) setPhotoUrls(urls.filter(Boolean)); });
+    return () => { active = false; };
+  }, [intake]);
   useEffect(() => {
     if (customer || order.role !== 'professional' || order.status !== 'requested' || order.backup_price_approval_pending) return undefined;
     let active = true, timer;
@@ -88,7 +98,7 @@ export default function OrderDetail({ order, customer = false, notify, onChange 
   async function action(fn) { if(busy)return;if(!networkOnline){notify('You are offline. Reconnect before changing this booking.');return;}setBusy(true);try{await fn();await reload();await onChange?.();}catch(e){notify(e.message);}finally{setBusy(false);} }
   const field = (name,label,props={}) => <Field label={t(label)} value={input[name]} onChange={e=>setInput(v=>({...v,[name]:e.target.value}))} {...props}/>;
   return <section className="seller-panel"><h2>{order.title}</h2><p>EAZ-{order.id.slice(0,8).toUpperCase()} · {t(order.backup_price_approval_pending ? 'Backup price approval needed' : order.role==='professional' && order.journey_status==='on_the_way' && order.status==='accepted' ? 'On the way' : order.role==='consultant' && order.status==='requested' ? (customer ? 'Consultation enquiry sent' : 'Enquiry received') : order.role==='consultant' && order.status==='accepted' ? (customer ? 'Consultation enquiry accepted' : 'Enquiry accepted') : customer && order.role==='professional' ? ({requested:'Requested · awaiting professional',accepted:'Accepted · Confirmed',active:'In progress',awaiting_acceptance:'Awaiting customer confirmation',completed:'Completed',cancelled:'Cancelled'}[order.status] || order.status) : order.status)}</p>{order.deadline&&<p>{new Date(order.deadline).toLocaleString('en-IN')}</p>}
-    {intake&&<section className="payment-breakdown"><h3>{t('Work requirement')}</h3><p>{intake.requirement}</p>{intake.address&&<p><b>{t('Service address')}:</b> {intake.address}</p>}</section>}
+    {intake&&<section className="payment-breakdown"><h3>{t('Work requirement')}</h3><p>{intake.requirement}</p>{intake.address&&<p><b>{t('Service address')}:</b> {intake.address}</p>}{photoUrls.length>0&&<div className="request-photo-grid">{photoUrls.map((url,index)=><a key={index} href={url} target="_blank" rel="noreferrer"><img src={url} alt={`${t('Request photo')} ${index+1}`} /></a>)}</div>}</section>}
     {intakeError&&<p role="status">{t('Booking work details are unavailable. Please try again later.')}</p>}
     {customer&&order.role==='professional'&&order.status==='requested'&&<p>{t(order.details?.matchResult || 'Waiting for the selected professional to respond.')}{order.response_due_at&&` · ${t('Response due')} ${new Date(order.response_due_at).toLocaleString('en-IN')}`}</p>}
     {order.role==='professional'&&order.backup_price_approval_pending&&(customer?<section className="payment-breakdown"><h3>{t('Review backup professional price')}</h3><p>{t('The backup professional accepted, but this booking is not Confirmed until you approve the changed estimate.')}</p>{order.details?.initialEstimate?.available&&<p>{t('Original professional estimate')}: <b>{money(order.details.initialEstimate.totalPaise)}</b></p>}{[['servicePaise','Service price'],['visitingPaise','Visiting charge'],['platformPaise','Platform charges'],['taxPaise','Applicable tax'],['totalPaise','Estimated payable']].map(([key,label])=><p key={key}>{t(label)}: <b>{money(order.details?.backupEstimate?.[key])}</b></p>)}<button className="btn btn-primary" disabled={busy||!networkOnline||!order.details?.backupEstimate?.available} onClick={()=>action(()=>rpc('customer_respond_backup_price',{p_order:order.id,p_approve:true,p_estimate:order.details.backupEstimate}))}>{t('Approve backup price and confirm')}</button><button className="btn btn-outline" disabled={busy||!networkOnline} onClick={()=>action(()=>rpc('customer_respond_backup_price',{p_order:order.id,p_approve:false,p_estimate:order.details?.backupEstimate||null}))}>{t('Decline backup price')}</button></section>:<p>{t('You accepted the backup offer. Waiting for customer price approval; this booking is not Confirmed yet.')}</p>)}

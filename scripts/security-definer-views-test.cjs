@@ -36,10 +36,10 @@ const secret = 'PRIVATE_REGISTRATION_SENTINEL';
       alter default privileges in schema public grant all on tables to authenticated,anon;
       alter default privileges in schema public grant all on sequences to authenticated,anon;`);
     await db.exec(readFileSync('scripts/fixtures/supabase-rls-auto-enable.sql', 'utf8'));
-    assert.equal(manifest.migrations.at(-1).sequence, 48);
+    assert.equal(manifest.migrations.at(-1).sequence, manifest.migrations.length);
     for (const entry of manifest.migrations) {
       const sql = readFileSync(`supabase/${entry.file}`, 'utf8');
-      assert.equal(createHash('sha256').update(sql).digest('hex'), entry.sha256, `${entry.file} checksum`);
+      assert.equal(createHash('sha256').update(sql.replace(/\r\n/g, '\n')).digest('hex'), entry.sha256, `${entry.file} checksum`);
       await db.exec(sql);
     }
 

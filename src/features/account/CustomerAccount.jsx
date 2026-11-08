@@ -13,6 +13,7 @@ import ProfileDetails from './ProfileDetails.jsx';
 import AccountSecurity from './AccountSecurity.jsx';
 import { useAuth } from '../../auth/useAuth.js';
 import { CustomerPartnerBookings } from '../services/PartnerOfferings.jsx';
+import CustomerNotifications, { CustomerNotificationBadge } from './CustomerNotifications.jsx';
 import { sellerMemberships } from '../../lib/workspace.js';
 import { UserPanelSkeleton } from '../user-motion/UserLoading.jsx';
 import { useRealtime } from '../../lib/realtime.jsx';
@@ -164,7 +165,8 @@ export default function CustomerAccount({
   }
   const link = code ? `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(code)}` : '';
   function content() {
-    if (panel === 'My Bookings') return <CustomerPartnerBookings notify={notify} />;
+    if (panel === 'My Bookings') return <CustomerPartnerBookings notify={notify} onBrowse={() => { setPanel(null); onNavigate('categories'); }} />;
+    if (panel === 'Notifications') return <CustomerNotifications userId={account?.user?.id} onOpenBookings={() => open('My Bookings')} onOpenWallet={() => open('Wallet')} />;
     if (panel === 'Security & Login') return <AccountSecurity auth={auth} account={account} notify={notify} onSignedOut={logout} />;
     if (profileSections.some(([, name]) => name === panel) || panel === 'Help & Support') return <ProfileDetails section={panel} profile={profile} accountId={account?.user?.id} notify={notify} onProfile={setProfile} onOpenBookings={() => open('My Bookings')} />;
     if (panel === 'Logout') return <><p>{translate("Log out of your Eazily account?")}</p><button className="btn btn-primary full" onClick={logout}>{translate("Confirm Logout")}</button><button className="btn btn-outline full" onClick={() => setPanel(null)}>{translate("Cancel")}</button></>;
@@ -191,10 +193,10 @@ export default function CustomerAccount({
   return <main className="screen customer-account" aria-labelledby="customer-profile-title"><h1 id="customer-profile-title" className="user-sr-only">{translate("My Profile")}</h1><section className="account-header"><ProfileAvatar profile={profile} /><div><h2>{translate(profile?.full_name || 'Your account')}</h2><p>{translate(account?.user?.email || profile?.email || 'Sign in to see your account')}</p></div><button className="link" onClick={() => {
         setDraft(profile || {});
         open('Account & Profile');
-    }}>{translate(profile ? "Edit Profile" : 'Sign In')}</button></section>{sellerMemberships(account || {}).length || account?.isAdmin ? <section className="workspace-switch"><h3>Workspaces</h3>{sellerMemberships(account).map(role=><button key={role} onClick={()=>onWorkspace(role)}>Switch to {partnerRoles[role].label}</button>)}{account.isAdmin&&<button onClick={()=>onWorkspace('admin')}>Admin workspace</button>}<button onClick={onAddRole}>Add another partner role</button></section> : <section className="workspace-switch"><button onClick={onAddRole}>Join as an Eazily Partner</button></section>}{translate(profile && (!profile.full_name || !profile.email || !profile.city) && <button className="complete-profile" onClick={() => {
+    }}>{translate(profile ? "Edit Profile" : 'Sign In')}</button></section>{sellerMemberships(account || {}).length ? <section className="workspace-switch"><h3>Workspaces</h3>{sellerMemberships(account).map(role=><button key={role} onClick={()=>onWorkspace(role)}>Switch to {partnerRoles[role].label}</button>)}<button onClick={onAddRole}>Add another partner role</button></section> : <section className="workspace-switch"><button onClick={onAddRole}>Join as an Eazily Partner</button></section>}{translate(profile && (!profile.full_name || !profile.email || !profile.city) && <button className="complete-profile" onClick={() => {
       setDraft(profile);
       open('Account & Profile');
-    }}>{translate("Complete Profile \u2192")}</button>)}<section className="account-shortcuts">{translate([['clipboard', 'My Bookings'], ['person', 'Saved Vendors'], ['message', 'Help & Support']].map(([icon, name]) => <button key={name} onClick={() => open(name)}><Icon name={icon} /><b>{translate(name)}</b></button>))}</section><section className="profile-list profile-sections">{translate(profileSections.map(([icon, name]) => <button className="choice" key={name} onClick={() => open(name)}><span><Icon name={icon} />{translate(name)}</span><Icon name="chevronRight" /></button>))}</section><ReferralCard onOpen={() => open('Refer & Earn')} /><button className="btn btn-outline profile-logout" onClick={() => open('Logout')}>Logout</button><BottomNav route="profile" onChange={onNavigate} />{translate(panel && <Sheet manageHistory={false} onClose={() => setPanel(null)}><h2 className="sheet-title">{translate(panel)}</h2>{translate(content())}</Sheet>)}</main>;
+    }}>{translate("Complete Profile \u2192")}</button>)}<section className="account-shortcuts">{translate([['clipboard', 'My Bookings'], ['bell', 'Notifications'], ['person', 'Saved Vendors'], ['message', 'Help & Support']].map(([icon, name]) => <button key={name} onClick={() => open(name)}><Icon name={icon} /><b>{translate(name)}</b>{name === 'Notifications' ? <CustomerNotificationBadge userId={account?.user?.id} /> : null}</button>))}</section><section className="profile-list profile-sections">{translate(profileSections.map(([icon, name]) => <button className="choice" key={name} onClick={() => open(name)}><span><Icon name={icon} />{translate(name)}</span><Icon name="chevronRight" /></button>))}</section><ReferralCard onOpen={() => open('Refer & Earn')} /><button className="btn btn-outline profile-logout" onClick={() => open('Logout')}>Logout</button><BottomNav route="profile" onChange={onNavigate} />{translate(panel && <Sheet manageHistory={false} onClose={() => setPanel(null)}><h2 className="sheet-title">{translate(panel)}</h2>{translate(content())}</Sheet>)}</main>;
 }
 
 

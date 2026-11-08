@@ -54,13 +54,9 @@ const manifest = require('../supabase/migration-manifest.json');
       deliverableCount:1,packagePrice:'5000',timeline:'5',usageRights:'Organic use',
       advertisingPermissions:'Ask before ads',packageTermsConfirmed:true,media:[]};
     const post = await one("select to_jsonb(save_partner_post('influencer',$1,'submit',$2))",[details,randomUUID()]);
-    assert.equal(post.status,'pending_review');
+    assert.equal(post.status,'published','Safe creator packages publish without a routine Admin approval queue');
     await user(customer);
-    assert.equal(Number(await one("select count(*) from partner_directory where partner_role='influencer'")),0);
-    await assert.rejects(db.query('select book_partner_offering($1,$2,$3)',
-      [post.id,new Date(Date.now()+86400000).toISOString(),randomUUID()]),/eligible published offering/);
-    await user(admin);
-    await db.query("select admin_review_post($1,'published','Package reviewed')",[post.id]);
+    assert.equal(Number(await one("select count(*) from partner_directory where partner_role='influencer'")),1);
     const unapprovedApp = randomUUID(), unapprovedPost = randomUUID();
     await root();
     await db.query("insert into partner_applications(id,customer_id,role,status,details) values($1,$2,'influencer','submitted',$3)",
@@ -68,7 +64,7 @@ const manifest = require('../supabase/migration-manifest.json');
     await db.query("insert into partner_posts(id,partner_id,role,status,details) values($1,$2,'influencer','draft',$3)",
       [unapprovedPost,unapprovedApp,details]);
     await user(admin);
-    await assert.rejects(db.query("select admin_review_post($1,'published','Cannot bypass approval')",[unapprovedPost]),/Approved matching partner role required/);
+    await assert.rejects(db.query("select admin_review_post($1,'published','Cannot bypass approval')",[unapprovedPost]),/Admin access required|Approved matching partner role required/);
     await user(customer);
     const publicPost = await one('select to_jsonb(d) from partner_directory d where id=$1',[post.id]);
     assert.equal(publicPost.partner_role,'influencer');

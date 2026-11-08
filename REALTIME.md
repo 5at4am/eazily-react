@@ -1,6 +1,6 @@
 # Eazily real-time synchronization
 
-This implementation adds one shared, authenticated real-time transport for the existing Customer, Service Partner, Influencer, Consultant, and authorised Admin workspaces. It does not add a second booking, payment, subscription, or notification system.
+This implementation adds one shared, authenticated real-time transport for the existing Customer, Service Partner, Influencer, and Consultant workspaces. The Admin/staff interface and authenticated staff access are retired by the local-only Admin capability retirement source migration. It does not add a second booking, payment, subscription, or notification system.
 
 ## How it works
 
@@ -13,7 +13,6 @@ The shared client opens at most these scoped channels:
 - Signed-in account: `audience_key = <auth user UUID>`.
 - Current approved partner role: `professional`, `influencer`, or `consultant`.
 - Customer discovery: the selected city, such as `city:bhopal`.
-- Authorised Admin workspace: `admin`.
 
 Channels are removed when the session, workspace, or city changes and at logout. Public provider data is still fetched from the existing sanitized directory views. The event stream is only a refresh hint.
 
@@ -25,7 +24,7 @@ Channels are removed when the session, workspace, or city changes and at logout.
 - `src/App.jsx`: starts the transport only after account and workspace restoration; refreshes account metadata for application, profile, consent, and assessment changes.
 - `src/pages/UserApp.jsx`: sets the customer city subscription and refreshes a directly opened provider.
 - `src/pages/PartnerApp.jsx`: refreshes the active partner dashboard, availability, trial/subscription, banners, and Consultant eligibility.
-- `src/pages/AdminApp.jsx`, `src/features/partners/PartnerAdmin.jsx`, and `SellerAdminSettings.jsx`: refresh authorised queues, records, summaries, finance, and partner configuration.
+- Historical Admin workspace file references in earlier revisions are retained only as implementation history; the Admin UI has been removed from the current source tree.
 - `src/features/services/PartnerOfferings.jsx`, `RoleMarketplace.jsx`, and `ServiceExperience.jsx`: refresh customer discovery, public availability, bookings, messages, and reviews.
 - `src/features/account/CustomerAccount.jsx` and `ProfileDetails.jsx`: refresh account records, wallet, payments, services, support, and legal records without resetting form state.
 - `src/features/partners/OrderDetail.jsx`: refreshes the open order, quote, and history; blocks protected order/payment actions while the browser is offline.

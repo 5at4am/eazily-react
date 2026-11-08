@@ -4,7 +4,8 @@ const { createHmac, webcrypto } = require('node:crypto');
 const vm = require('node:vm');
 
 const secret = 'local-test-only-secret';
-const orderId = 'eazily_local_test_order';
+let orderId = 'eazily_local_test_order';
+const rpcCalls = [];
 let collaboration = { order_id: 'order-1', cashfree_order_id: orderId, customer_total: 100, payment_status: 'pending' };
 let order = { id: 'order-1', status: 'awaiting_acceptance' };
 let handler;
@@ -40,12 +41,11 @@ vm.runInNewContext(source, {
     EAZILY_FINANCIAL_PROVIDERS_ENABLED: 'true', CASHFREE_CLIENT_SECRET: secret,
     SUPABASE_URL: 'https://example.invalid', SUPABASE_SERVICE_ROLE_KEY: 'test-only',
   })[name] }, serve: callback => { handler = callback; } },
-  createClient: () => ({ from: query }),
+  createClient: () => ({ from: query, rpc: async (name, args) => { rpcCalls.push({ name, args }); return { error: null }; } }),
 });
 
-async function send(type, overrideSignature) {
-  const body = JSON.stringify({ type, data: { order: { order_id: orderId }, payment: { payment_amount: 100, payment_currency: 'INR' } } });
-  const timestamp = 'test-timestamp';
+async function send(type, overrideSignature, timestamp = String(Date.now())) {
+  const body = JSON.stringify({ type, data: { order: { order_id: orderId }, payment: { cf_payment_id: 'cashfree-payment-1', payment_amount: 100, payment_currency: 'INR' } } });
   const signature = overrideSignature ?? createHmac('sha256', secret).update(timestamp + body).digest('base64');
   return handler({ text: async () => body, headers: { get: name => ({ 'x-webhook-timestamp': timestamp, 'x-webhook-signature': signature })[name] } });
 }
@@ -53,6 +53,7 @@ async function send(type, overrideSignature) {
 (async () => {
   assert.equal((await send('PAYMENT_SUCCESS_WEBHOOK', 'forged')).status, 401);
   assert.equal(collaboration.payment_status, 'pending', 'An unsigned event cannot change payment state');
+  assert.equal((await send('PAYMENT_SUCCESS_WEBHOOK', undefined, String(Date.now() - 6 * 60 * 1000))).status, 401, 'A signed but stale event is rejected');
   collaboration.payment_status = 'paid';
   assert.equal((await send('PAYMENT_FAILED_WEBHOOK')).status, 200);
   assert.equal(collaboration.payment_status, 'paid', 'A late failure cannot undo a verified payment');
@@ -64,5 +65,16 @@ async function send(type, overrideSignature) {
   assert.equal(collaboration.payment_status, 'failed');
   await send('PAYMENT_SUCCESS_WEBHOOK');
   assert.equal(collaboration.payment_status, 'paid', 'A later successful attempt can settle a failed attempt');
+  order.status = 'pending_payment';
+  await send('PAYMENT_SUCCESS_WEBHOOK');
+  assert.equal(order.status, 'awaiting_acceptance', 'A successful payment advances the pending order');
+  orderId = 'eazs_00112233445566778899aabbccddeeff';
+  assert.equal((await send('PAYMENT_FAILED_WEBHOOK')).status, 200);
+  assert.equal(rpcCalls.at(-1).name, 'fail_seller_subscription_payment');
+  assert.equal(rpcCalls.at(-1).args.p_order, orderId);
+  assert.equal((await send('PAYMENT_SUCCESS_WEBHOOK')).status, 200);
+  assert.equal(rpcCalls.at(-1).name, 'record_verified_seller_subscription_payment');
+  assert.equal(rpcCalls.at(-1).args.p_request, '00112233-4455-6677-8899-aabbccddeeff');
+  assert.equal(rpcCalls.at(-1).args.p_amount, 10000);
   console.log('Cashfree webhook state regression: passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });

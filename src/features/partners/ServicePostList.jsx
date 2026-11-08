@@ -3,11 +3,11 @@ import ServiceIllustration from '../user-art/ServiceIllustration.jsx';
 import MediaPreview from './MediaPreview.jsx';
 import './service-post-status.css';
 
-const labels = { published: 'Live', paused: 'Paused', draft: 'Draft', pending_review: 'In review', changes_required: 'Changes requested', rejected: 'Rejected', archived: 'Archived' };
+const labels = { published: 'Live', paused: 'Paused', draft: 'Draft', pending_review: 'Safety check', changes_required: 'Update needed', rejected: 'Not approved', archived: 'Archived' };
 const nextStep = post => {
-  if (post.status === 'pending_review') return 'We’re reviewing this service. You can still edit it; changes may restart review.';
-  if (post.status === 'changes_required') return 'Update the service using the review note, then submit it again for review.';
-  if (post.status === 'rejected') return 'This listing was not approved. Review the note before editing or contacting support.';
+  if (post.status === 'pending_review') return 'This listing needs a quick safety check before it appears to customers. You can still edit it.';
+  if (post.status === 'changes_required') return 'Make the requested update, then publish again.';
+  if (post.status === 'rejected') return 'This listing cannot be shown. Review the reason before editing or contacting support.';
   if (post.status === 'paused') return post.review_notes?.startsWith('Admin hidden:') ? 'This listing is hidden by Eazily. Contact support if you think this is a mistake.' : 'Customers cannot see this listing while it is paused.';
   return '';
 };

@@ -23,7 +23,7 @@ let browser, socket;
   await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await send('Page.navigate',{url:'http://127.0.0.1:5173/'});await pause(1500);
   const account={user:{id:'local-service-post-review',testing:true},profile:{name:'Fixture'},roles:['professional'],applications:[{id:'local-service-app',role:'professional',status:'draft',details:{registrationComplete:true,stage:5,name:'Aarav Sample',businessName:'Fictional Bhopal Repairs',city:'Bhopal',locality:'MP Nagar',servicePlace:'Both',serviceAreas:'MP Nagar, Arera Colony',workingDays:['Monday','Saturday'],category:'Home & Property',services:['Electrician','AC Service'],serviceSelections:[{categoryId:'home-property',categoryLabel:'Home & Property',serviceId:'Electrician',serviceName:'Electrician'},{categoryId:'electronics',categoryLabel:'Electronics',serviceId:'AC Service',serviceName:'AC Service'}]}}]};
-  await evaluate(`sessionStorage.clear();sessionStorage.setItem('eazily-testing-account',${JSON.stringify(JSON.stringify(account))});localStorage.setItem('eazily-language','English');location.href='/seller/service/dashboard'`);await pause(1300);
+   await evaluate(`sessionStorage.clear();sessionStorage.setItem('eazily-testing-account',${JSON.stringify(JSON.stringify(account))});localStorage.setItem('eazily-language','English');location.href='/seller/service/dashboard'`);await pause(1300);
   assert.ok(await evaluate(`document.body.textContent.includes('Apna kaam yahan add karein')`),'First-service guidance appears');
   await click('+ Add Service / Service Jodein');
   assert.equal(await evaluate(`document.querySelector('.service-post-heading span').textContent`),'Step 1 of 3');

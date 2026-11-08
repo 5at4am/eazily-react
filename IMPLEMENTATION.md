@@ -47,9 +47,11 @@ Apply both after the seller scripts so later function definitions do not replace
 
 ## Development-only partner demo (September 12)
 
-The former partner Preview samples control now opens an interactive, isolated Demo Mode for all three roles. See [PARTNER-DEMO.md](PARTNER-DEMO.md) for supported journeys, unavailable stages, the single `VITE_PARTNER_DEMO` flag, exact files/integration points and complete removal instructions. The real partner body is preserved apart from the gate/entry integration; registration, posting, authentication, business services, SQL and public assets are unchanged. No SQL or app deployment was performed.
+> Historical note: the interactive partner Demo Mode and its dedicated guide/screenshots were removed in a later source cleanup. The test results below describe that earlier implementation and are not evidence that the feature exists in the current build. A limited customer discovery sample fixture remains; see `docs/APP.md`.
 
-Verified locally: production build and demo exclusion, lint, actual-SQL pricing comparisons in PGlite, demo state/transition tests, three-role Edge journeys at 360/390/430px and centered desktop width, network/storage isolation, original dashboard callbacks and carousel, and the existing production smoke suite. Screenshots are in `docs/partner-demo/`. Live backend/provider transactions remain untested and were not invoked.
+The former partner Preview samples control opened an interactive, isolated Demo Mode for all three roles. That implementation was gated by `VITE_PARTNER_DEMO`; the real partner body was preserved apart from the gate/entry integration. Registration, posting, authentication, business services and SQL were outside that demo implementation.
+
+Earlier local verification covered production demo exclusion, lint, demo state/transition tests, three-role Edge journeys, network/storage isolation, dashboard callbacks and the production smoke suite. The old demo-specific screenshot folder and guide are no longer present. These historical results do not replace current tests. Live backend/provider transactions were not invoked as part of that work.
 
 The supplied Word document contains the product specification but no embedded screenshots. The implementation uses the existing Eazily colours and components.
 

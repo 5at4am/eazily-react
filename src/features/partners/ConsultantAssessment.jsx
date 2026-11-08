@@ -12,11 +12,11 @@ function messageFor(result) {
   return '';
 }
 
-export default function ConsultantAssessment({ application, values, setValues, notify, onSkip, demo = false }) {
+export default function ConsultantAssessment({ application, values, setValues, notify, onSkip }) {
   const [assessment, setAssessment] = useState(null);
   const [fieldIndex, setFieldIndex] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [loading, setLoading] = useState(Boolean(isSupabaseConfigured && !demo));
+  const [loading, setLoading] = useState(Boolean(isSupabaseConfigured));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const language = 'English';
@@ -27,9 +27,9 @@ export default function ConsultantAssessment({ application, values, setValues, n
 
   useEffect(() => {
     let active = true;
-    if (demo || !isSupabaseConfigured || !application?.id) {
+    if (!isSupabaseConfigured || !application?.id) {
       setLoading(false);
-      setAssessment({ available: false, reason: demo ? 'Demo assessment uses sample data only. Skip for now opens the sample consultant dashboard without recording a pass.' : 'A configured assessment backend and six approved questions for this field are required. Local testing can use Skip for now; it never records a pass.' });
+      setAssessment({ available: false, reason: 'A configured assessment backend and six approved questions for this field are required. Local testing can use Skip for now; it never records a pass.' });
       return undefined;
     }
     setLoading(true);
@@ -44,16 +44,16 @@ export default function ConsultantAssessment({ application, values, setValues, n
       .catch(nextError => { if (active) { setError(nextError.message); setAssessment(null); } })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [application?.id, field?.category, field?.specialisation, language, setValues, demo]);
+  }, [application?.id, field?.category, field?.specialisation, language, setValues]);
 
   if (loading) return <section className="consultant-assessment"><p role="status">Restoring your assessment attempt…</p></section>;
-  if (error) return <section className="consultant-assessment"><p className="inline-error" role="alert">{error}</p><button type="button" className="btn btn-outline" onClick={() => location.reload()}>Retry</button><TestingSkip onSkip={onSkip} demo={demo} /></section>;
-  if (!assessment?.available) return <section className="consultant-assessment"><h3>{displayConsultantCategory(field?.category)} · {field?.specialisation}</h3><p className="testing-notice" role="status">Assessment unavailable: {assessment?.reason || 'Fewer than six approved questions are available for this field.'}</p><p>Your registration progress is preserved. Unrelated questions will not be substituted.</p><TestingSkip onSkip={onSkip} demo={demo} /></section>;
+  if (error) return <section className="consultant-assessment"><p className="inline-error" role="alert">{error}</p><button type="button" className="btn btn-outline" onClick={() => location.reload()}>Retry</button><TestingSkip onSkip={onSkip} /></section>;
+  if (!assessment?.available) return <section className="consultant-assessment"><h3>{displayConsultantCategory(field?.category)} · {field?.specialisation}</h3><p className="testing-notice" role="status">Assessment unavailable: {assessment?.reason || 'Fewer than six approved questions are available for this field.'}</p><p>Your registration progress is preserved. Unrelated questions will not be substituted.</p><TestingSkip onSkip={onSkip} /></section>;
 
   const question = assessment.questions?.[questionIndex];
   const selected = assessment.responses?.[question?.id] || '';
   const resultMessage = messageFor(assessment);
-  if (resultMessage) return <section className={`consultant-assessment assessment-${assessment.status}`}><h3>{resultMessage}</h3>{assessment.status === 'passed' ? <><p>This field can proceed to Review and Consent. Credentials, documents, human approval, consent and an assigned rate remain separate requirements.</p>{fieldIndex < fields.length - 1 && <button type="button" className="btn btn-primary" onClick={() => { setAssessment(null); setFieldIndex(index => index + 1); }}>Continue to next selected field</button>}</> : <p>This attempt did not pass. Retake eligibility: {assessment.retakeAvailable ? 'Available' : assessment.retakeMessage || 'Not currently available'}.</p>}</section>;
+  if (resultMessage) return <section className={`consultant-assessment assessment-${assessment.status}`}><h3>{resultMessage}</h3>{assessment.status === 'passed' ? <><p>This field can proceed to Review and Consent. Credentials, documents, human verification and consent remain separate requirements. You set your own consultation price when publishing a listing.</p>{fieldIndex < fields.length - 1 && <button type="button" className="btn btn-primary" onClick={() => { setAssessment(null); setFieldIndex(index => index + 1); }}>Continue to next selected field</button>}</> : <p>This attempt did not pass. Retake eligibility: {assessment.retakeAvailable ? 'Available' : assessment.retakeMessage || 'Not currently available'}.</p>}</section>;
 
   async function select(optionId) {
     if (busy) return;
@@ -88,11 +88,11 @@ export default function ConsultantAssessment({ application, values, setValues, n
   </section>;
 }
 
-function TestingSkip({ onSkip, demo }) {
-  if (!CONSULTANT_ASSESSMENT_TEST_SKIP_ENABLED || (isSupabaseConfigured && !demo)) return null;
+function TestingSkip({ onSkip }) {
+  if (!CONSULTANT_ASSESSMENT_TEST_SKIP_ENABLED || isSupabaseConfigured) return null;
   return <div className="assessment-test-skip"><small>Testing only</small><button type="button" className="btn btn-outline" onClick={() => {
     const marker = { status: 'skipped_for_testing', savedAt: new Date().toISOString() };
-    if (!demo) sessionStorage.setItem(TEST_SKIP_KEY, JSON.stringify(marker));
+    sessionStorage.setItem(TEST_SKIP_KEY, JSON.stringify(marker));
     onSkip(marker);
   }}>Skip for now</button></div>;
 }

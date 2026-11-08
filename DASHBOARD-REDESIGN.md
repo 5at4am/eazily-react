@@ -1,6 +1,8 @@
 # Partner dashboard mobile visual redesign
 
-Open `http://127.0.0.1:5173/` while the local Vite server is running. Sign in through the existing flow or restore your partner workspace, then open Home. The former static **Preview samples** control is now **Enter Demo Mode** when `VITE_PARTNER_DEMO=true` in development. See [PARTNER-DEMO.md](PARTNER-DEMO.md) for interactive journeys, isolation, limitations and removal instructions. No real account or authorization bypass was added.
+> Historical implementation note. It documents a prior version that included an interactive partner Demo Mode. That demo has since been removed; links and paths to its deleted guide/source below are historical references, not current instructions. See [the current project structure](docs/PROJECT-STRUCTURE.md) and [application guide](docs/APP.md) for the live architecture.
+
+Open `http://127.0.0.1:5173/` while the local Vite server is running. Sign in through the existing flow or restore your partner workspace, then open Home. The descriptions below record the earlier dashboard presentation and should not be used to infer current Demo Mode behavior.
 
 ## Presentation changes
 

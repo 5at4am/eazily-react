@@ -16,7 +16,7 @@
   color: var(--ink);
   box-shadow: none;
 }
-.phone-shell.peazily-ui:not(:has(.marketplace-home, .admin-screen)) { box-shadow: none; }
+.phone-shell.peazily-ui:not(:has(.marketplace-home)) { box-shadow: none; }
 
 html,
 body { background: var(--surface-soft); color: var(--ink); }

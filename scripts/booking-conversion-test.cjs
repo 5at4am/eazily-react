@@ -31,14 +31,17 @@ async function component(file) {
       { order_id: 'lead-one', status: 'new' }, { order_id: 'lead-one', status: 'new' },
       { order_id: 'lead-two', status: 'lost' }, { order_id: 'cancelled', status: 'new' },
       { order_id: 'unknown', status: 'new' },
-    ], earnings: [{ amount: 250, state: 'pending' }, { amount: 90, state: 'security_hold' }, { amount: 25, state: 'reversed' }], posts: [], reviews: [] },
+    ], earnings: [
+      { amount: 2500, state: 'pending', created_at: new Date().toISOString() },
+      { amount: 900, state: 'security_hold', created_at: new Date().toISOString() },
+    ], posts: [], reviews: [] },
     online: false, busy: false, trial: null, setRoute() {}, setSheet() {}, act() {},
-    setAvailability() {}, setOnline() {}, total: () => 0, money: value => `INR ${value}`,
+    setAvailability() {}, setOnline() {}, money: value => `INR ${value}`,
   }));
-  assert.match(html, /<strong>1<\/strong><span>Open booking leads<\/span>/);
-  assert.match(html, /<strong>1<\/strong><span>Accepted bookings<\/span>/);
-  assert.match(html, /<strong>1<\/strong><span>Completed jobs<\/span>/);
-  assert.match(html, /INR 250<\/strong><span>Recorded earnings<\/span>/);
+  assert.match(html, /<span class="pro-metric-label">Today&#x27;s earnings<\/span><strong>INR 2500<\/strong>/);
+  assert.match(html, /<span class="pro-metric-label">Total earnings<\/span><strong>INR 2500<\/strong>/);
+  assert.match(html, /<span class="pro-metric-label">Jobs completed<\/span><strong>1<\/strong>/);
+  assert.match(html, /<span class="pro-metric-label">Customer rating<\/span><strong>—<\/strong>/);
   const requested = renderToStaticMarkup(React.createElement(OrderDetail, { order: orders[0], customer: true, notify() {} }));
   const accepted = renderToStaticMarkup(React.createElement(OrderDetail, { order: orders[2], customer: true, notify() {} }));
   assert.match(requested, /Requested · awaiting professional/);

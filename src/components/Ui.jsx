@@ -8,6 +8,13 @@ const openSheets = [];
 export function Brand() {
   return <span className="eazily-name">{translate("Eazily")}</span>;
 }
+
+/** Shared native button; keep its variants mapped to the product button styles. */
+export function Button({ variant = "primary", className = "", type = "button", children, ...props }) {
+  const variantClass = variant === "outline" ? "btn-outline" : "btn-primary";
+  return <button type={type} className={`ui-button btn ${variantClass} ${className}`.trim()} {...props}>{children}</button>;
+}
+
 const userNav = [["home", "home", "Home"], ["categories", "compass", "Explore"], ["messages", "messageCircle", "Messages"], ["videos", "clapperboard", "Videos"], ["profile", "person", "Profile"]];
 export function BottomNav({
   route,
@@ -43,14 +50,56 @@ export function BottomNav({
       if (!document.querySelector('.bottom-nav')) document.documentElement.classList.remove('eazily-keyboard-open');
     };
   }, []);
-  const items = customItems ?? (seller ? [["home", "home", "Home"], ["messages", "message", "Messages"], ["post", "plus", "Post"], ["orders", "clipboard", "Orders"], ["profile", "person", "Profile"]] : userNav);
-  const customerNav = !seller && !customItems;
-  return <nav aria-label={seller ? "Partner navigation" : "Main navigation"} className={`bottom-nav ${seller ? "seller-nav" : ""} ${customerNav ? "customer-nav" : ""}`}>
-      {translate(items.map(([id, icon, label]) => <button type="button" key={id} aria-current={route === id ? "page" : undefined} className={`nav-item ${route === id ? "active" : ""} ${id === "post" ? "post-nav" : ""}`} onClick={() => id === "post" ? onPost?.() : onChange(id)}>
-          <span className="nav-icon"><Icon name={icon} size={customerNav ? 22 : id === "post" ? 26 : 19} />{id === 'messages' && unread > 0 && <b className="nav-unread" aria-label={`${unread} unread messages`}>{unread > 99 ? '99+' : unread}</b>}</span>
-          {translate(label)}
-        </button>))}
-    </nav>;
+  const isSeller = seller || Boolean(customItems && customItems.some(([id]) => id === "post"));
+  const items = customItems ?? (isSeller ? [["home", "home", "Home"], ["messages", "message", "Messages"], ["post", "plus", "Post"], ["orders", "clipboard", "Orders"], ["profile", "person", "Profile"]] : userNav);
+  const customerNav = !isSeller && !customItems;
+  return (
+    <nav
+      aria-label={isSeller ? "Partner navigation" : "Main navigation"}
+      className={`bottom-nav ${isSeller ? "seller-nav" : ""} ${customerNav ? "customer-nav" : ""}`}
+    >
+      {items.map(([id, icon, label]) => {
+        const isActive = route === id;
+        const isPost = id === "post";
+        const isMessages = id === "messages";
+        const hasUnread = isMessages && unread > 0;
+        const translatedLabel = translate(label);
+        const ariaLabel = hasUnread ? `${translatedLabel}, ${unread} unread` : translatedLabel;
+
+        return (
+          <button
+            type="button"
+            key={id}
+            aria-current={isActive ? "page" : undefined}
+            aria-label={ariaLabel}
+            className={`nav-item ${isActive ? "active" : ""} ${isPost ? "post-nav" : ""}`}
+            onClick={event => {
+              event.preventDefault();
+              if (isPost) {
+                if (onPost) onPost();
+                else onChange(id);
+              } else {
+                onChange(id);
+              }
+            }}
+          >
+            <span className="nav-icon">
+              <Icon
+                name={icon}
+                size={isPost ? 24 : 20}
+              />
+              {hasUnread && (
+                <span className="nav-unread" aria-hidden="true">
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              )}
+            </span>
+            <span className="nav-label">{translatedLabel}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
 }
 export function SearchBox({
   value,
@@ -129,7 +178,7 @@ export function Sheet({
     };
   }, []);
   return <div className="sheet-overlay" onMouseDown={event => event.target === event.currentTarget && onClose()}>
-      <section ref={dialog} className={`sheet ${className}`} role="dialog" aria-modal="true" aria-label="Eazily details">
+      <section ref={dialog} className={`sheet ui-sheet ${className}`} role="dialog" aria-modal="true" aria-label="Eazily details">
         <button className="sheet-close" onClick={onClose} aria-label="Close"><Icon name="close" /></button>
         <div className="handle" /><div className="sheet-navigation"><button type="button" className="sheet-back" onClick={onClose}><Icon name="arrowLeft" size={18} />{translate("Back")}</button></div>
         {translate(children)}
@@ -150,7 +199,7 @@ export function Field({
   const Element = as;
   return <label className="field-wrap">
       <span className="form-label">{translate(label)}</span>
-      {translate(as === "select" ? <select className="field" {...fieldProps}>{props.value === '' && !options.includes('') && <option value="" disabled>{translate('Select an option')}</option>}{translate(options.map(option => <option key={option} value={option}>{translate(option)}</option>))}</select> : as === "textarea" ? <textarea className="field area" {...fieldProps} /> : <Element className="field" {...fieldProps} />)}
+      {translate(as === "select" ? <select className="ui-field field" {...fieldProps}>{props.value === '' && !options.includes('') && <option value="" disabled>{translate('Select an option')}</option>}{translate(options.map(option => <option key={option} value={option}>{translate(option)}</option>))}</select> : as === "textarea" ? <textarea className="ui-field field area" {...fieldProps} /> : <Element className="ui-field field" {...fieldProps} />)}
       {hint && <span className="field-hint" id={`${id}-hint`}>{translate(hint)}</span>}
       {error && <span className="field-error" id={`${id}-error`} aria-live="polite">{translate(error)}</span>}
     </label>;
@@ -167,5 +216,5 @@ export function EmptyState({
   actionLabel,
   onAction
 }) {
-  return <div className="empty-state large"><Icon name={icon} size={34} /><b>{translate(title)}</b><span>{translate(text)}</span>{actionLabel && onAction && <button type="button" className="btn btn-outline empty-state-action" onClick={onAction}>{translate(actionLabel)}</button>}</div>;
+  return <div className="empty-state large"><Icon name={icon} size={34} /><b>{translate(title)}</b><span>{translate(text)}</span>{actionLabel && onAction && <Button variant="outline" className="empty-state-action" onClick={onAction}>{translate(actionLabel)}</Button>}</div>;
 }

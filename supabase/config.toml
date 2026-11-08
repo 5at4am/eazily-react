@@ -31,6 +31,9 @@ port = 54324
 [functions.seller-create-payment]
 verify_jwt = true
 
+[functions.seller-create-subscription-payment]
+verify_jwt = true
+
 [functions.cashfree-create-collaboration]
 verify_jwt = true
 

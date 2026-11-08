@@ -16,7 +16,6 @@ const unavailablePattern = /(^|\b)(unavailable|not accepting|offline only|suspen
 
 export function isCustomerEligibleProfessional(vendor, serviceName, location) {
   if (!vendor) return false;
-  if (vendor.demo === true) return true;
   if (vendor.partner_role && vendor.partner_role !== 'professional') return false;
   if (vendor.verification_status !== 'verified') return false;
   if (vendor.account_status && vendor.account_status !== 'active') return false;
@@ -26,6 +25,9 @@ export function isCustomerEligibleProfessional(vendor, serviceName, location) {
   if (!vendor.available_now && unavailablePattern.test(vendor.availability || vendor.availability_status || '')) return false;
   const requested = canonical(serviceName);
   if (!(vendor.service_names || []).some(name => canonical(name) === requested)) return false;
+  // A directory row represents one published post. Do not show the same
+  // professional's other-service post as if it offered the requested service.
+  if (vendor.selected_service && canonical(vendor.selected_service) !== requested) return false;
   const city = lower(location);
   const coverage = [...(vendor.coverage || []), vendor.city].filter(Boolean).map(lower);
   return !city || coverage.some(area => area === city || area.includes(city) || city.includes(area));

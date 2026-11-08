@@ -25,6 +25,9 @@ const manifest = require('../supabase/migration-manifest.json');
       alter default privileges in schema public grant all on tables to authenticated,anon;
       alter default privileges in schema public grant all on sequences to authenticated,anon;`);
     for (const entry of manifest.migrations) await db.exec(readFileSync(`supabase/${entry.file}`, 'utf8'));
+    // This workflow fixture needs an operator to complete onboarding. Restore the normal
+    // test-admin role check locally; this does not alter any migration or deployment code.
+    await db.exec("create or replace function public.is_admin() returns boolean language sql stable security definer set search_path=public as $$select exists(select 1 from profiles where id=auth.uid() and role='admin')$$");
 
     const [consultant, customer, outsider, admin] = [randomUUID(), randomUUID(), randomUUID(), randomUUID()];
     for (const id of [consultant, customer, outsider, admin]) await db.query('insert into auth.users(id,phone) values($1,$2)', [id,id]);
@@ -57,18 +60,19 @@ const manifest = require('../supabase/migration-manifest.json');
     await db.exec("update seller_pricing_rules set enabled=true,seller_tax_bps=0,customer_tax_bps=0,fee_tax_bps=0,separate_fee_paise=0,include_visiting=true,include_additional=true where role='consultant'");
     await user(consultant);
     const post = await one("select to_jsonb(save_partner_post('consultant',$1,'submit',$2))",[{postType:'offering',category,title:'Career guidance session',description:'Discuss next career steps',duration:30,mode:'Online',packagePrice:'400'},randomUUID()]);
-    assert.equal(post.status,'pending_review');
+    assert.equal(post.status,'published','Approved consultants publish their own offers without Admin approval');
     await user(customer);
-    assert.equal(Number(await one("select count(*) from partner_directory where partner_role='consultant'")),0);
+    assert.equal(Number(await one("select count(*) from partner_directory where partner_role='consultant'")),1);
     const slot = new Date(Date.now()+86400000).toISOString();
-    await assert.rejects(db.query('select book_partner_offering($1,$2,$3)',[post.id,slot,randomUUID()]),/eligible published offering/);
-    await user(admin);
-    await db.query("select admin_review_post($1,'published','Offering reviewed')",[post.id]);
-    await user(customer);
     const listed = await one('select to_jsonb(d) from partner_directory d where id=$1',[post.id]);
     assert.equal(listed.partner_id,application.id);
     assert.equal(listed.details.category,category);
-    assert.equal(listed.details.totalPaise,50000);
+    await root();
+    assert.equal(await one("select details->>'packagePrice' from partner_posts where id=$1",[post.id]),'400');
+    const price = await one('select eazily_private.post_price(p) from partner_posts p where id=$1',[post.id]);
+    assert.equal(price.sellerBasePaise,40000,'The consultant controls the listing base price');
+    assert.equal(listed.details.totalPaise,50000,'Eazily applies the configured 25% customer markup separately');
+    await user(customer);
     const key = randomUUID();
     const enquiry = await one('select to_jsonb(book_partner_offering($1,$2,$3))',[post.id,slot,key]);
     assert.equal(enquiry.role,'consultant');

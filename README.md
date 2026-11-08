@@ -1,6 +1,6 @@
 # Eazily
 
-Eazily is a React/Vite product with customer, service professional, influencer, consultant and admin workspaces. Supabase provides authentication, database, private file storage and realtime updates. Capacitor packages the app for Android.
+Eazily is a React/Vite product with customer, service professional, influencer, and consultant workspaces. The Admin/staff interface and authenticated Admin/staff authorization have been removed from the current source. Supabase provides authentication, database, private file storage and realtime updates. Capacitor packages the app for Android.
 
 ## Run locally
 
@@ -29,6 +29,7 @@ Keep real values in untracked environment files. Never place service-role, datab
 | Guide | Contents |
 | --- | --- |
 | [Documentation index](docs/README.md) | Current guides and historical feature references |
+| [Project structure](docs/PROJECT-STRUCTURE.md) | Folder ownership, React components, styling layers and safe cleanup guidance |
 | [Application guide](docs/APP.md) | Folder structure, Auth, navigation, persistence and Android |
 | [Database guide](docs/database/README.md) | Active backend, table families, RPCs, RLS, Storage and migrations |
 | [Testing guide](docs/TESTING.md) | Local checks, live development tests and browser/device verification |

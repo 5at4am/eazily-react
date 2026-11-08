@@ -4,8 +4,8 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const root = path.join(__dirname, '..');
 const suites = ['auth','database','staging','staging-preflight','build-policy','seller','legal-assessment','consultant-legal','consumer-legal',
-  'service-registration','partner-registration-flow','service-posting','realtime','chat','automation',
-  'staging-edge','catalog-service','professional-discovery','professional-discovery-database','customer-bookings'];
+  'service-registration','partner-registration-flow','partner-review-notifications','service-posting','realtime','chat','automation',
+  'staging-edge','subscription-payment','cashfree-webhook-security','catalog-service','professional-discovery','professional-discovery-database','customer-bookings','pending-intent','customer-notifications','seller-level-earnings','vendor-notifications'];
 const results = [];
 fs.mkdirSync(path.join(root, '.tmp'), { recursive: true });
 for (const suite of suites) {

@@ -29,9 +29,9 @@ const manifest = require('../supabase/migration-manifest.json');
       alter default privileges in schema public grant all on tables to authenticated,anon;
       alter default privileges in schema public grant all on sequences to authenticated,anon;`);
     await db.exec(readFileSync('scripts/fixtures/supabase-rls-auto-enable.sql', 'utf8'));
-    assert.equal(manifest.migrations.at(-1).sequence, 46);
+    assert.equal(manifest.migrations.find(entry => entry.file === 'bulk_quote_requests.sql')?.sequence, 46);
     for (const entry of manifest.migrations) {
-      const sql = readFileSync(`supabase/${entry.file}`, 'utf8');
+      const sql = readFileSync(`supabase/${entry.file}`, 'utf8').replace(/\r\n/g, '\n');
       assert.equal(createHash('sha256').update(sql).digest('hex'), entry.sha256, `${entry.file} checksum`);
       await db.exec(sql);
     }
@@ -84,11 +84,12 @@ const manifest = require('../supabase/migration-manifest.json');
     await db.exec('reset role');
     await db.query("insert into staff_access(account_id,staff_role,permissions) values($1,'operations',array['orders.view'])", [staff]);
     await user(staff);
-    assert.equal(await scalar('select count(*)::int from bulk_quote_requests'), 1, 'Authorized orders staff sees request');
+    assert.equal(await scalar('select has_staff_permission(\'orders.view\')'), false, 'Staff permissions are retired');
+    assert.equal(await scalar('select count(*)::int from bulk_quote_requests'), 0, 'Retired staff cannot access the Admin orders queue');
     await db.exec('reset role');
     assert.equal(await scalar('select count(*)::int from service_requests'), 0, 'No automatic vendor routing');
     assert.equal(await scalar('select count(*)::int from partner_orders'), 0, 'No partner booking created');
     assert.equal(await scalar('select count(*)::int from customer_payments'), 0, 'No payment created');
-    console.log('PASS: migration 46, legal gate, 20+ quote, quantities, retry, validation, ownership, staff queue, no matching or payment.');
+    console.log('PASS: migration 46, legal gate, 20+ quote, quantities, retry, validation, owner isolation, retired staff queue, no matching or payment.');
   } finally { await db.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

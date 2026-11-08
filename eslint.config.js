@@ -4,7 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
-  { ignores: ["dist", ".tmp", "android", ".agents/skills/**", ".opencode/skills/**"] },
+  { ignores: ["dist", "dist-admin", ".tmp", "android", ".agents/skills/**", ".opencode/skills/**"] },
   {
     files: ["**/*.{js,jsx}"],
     languageOptions: {

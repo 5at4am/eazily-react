@@ -19,7 +19,7 @@ export async function acceptConsumerPolicies(documents, terms, privacy) {
   return data;
 }
 
-const transactions = new Set(['submit_request', 'book_partner_offering', 'book_free_introduction', 'reserve_wallet', 'request_official_payment', 'claim_referral']);
+const transactions = new Set(['submit_request', 'book_partner_offering', 'request_professional_booking_with_intake', 'book_free_introduction', 'reserve_wallet', 'request_official_payment', 'claim_referral']);
 export function requiresConsumerConsent(name, args) {
   return transactions.has(name) || (name === 'respond_to_quote' && args.p_approve === true);
 }

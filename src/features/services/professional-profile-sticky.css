@@ -14,4 +14,13 @@
 .professional-booking-footer {
   position: static;
   flex: 0 0 auto;
+  z-index: 2;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  box-shadow: 0 -8px 20px rgb(28 25 23 / 6%);
+}
+
+/* Keep a modal sheet above the customer navigation even if a build leaves the
+   navigation at the same z-index as the overlay. */
+.user-app-root .sheet-overlay {
+  z-index: 60;
 }

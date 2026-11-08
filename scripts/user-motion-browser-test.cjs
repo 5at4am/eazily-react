@@ -51,6 +51,14 @@ let server, browser, socket;
       'import.meta.env.VITE_SUPABASE_ANON_KEY': '""',
       'import.meta.env.DEV': 'false'
     },
+    loader: {
+      '.jpg': 'dataurl',
+      '.jpeg': 'dataurl',
+      '.png': 'dataurl',
+      '.svg': 'dataurl',
+      '.webp': 'dataurl',
+      '.woff2': 'dataurl'
+    },
     plugins: [{
       name: 'delayed-user-data',
       setup(api) {

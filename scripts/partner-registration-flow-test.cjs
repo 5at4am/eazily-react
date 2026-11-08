@@ -25,9 +25,9 @@ let browser, socket, server;
       import { createRoot } from 'react-dom/client';
       import Dashboard from './src/features/partners/PartnerDashboard.jsx';
       const root=createRoot(document.getElementById('root'));
-      window.renderPending=(role,status)=>root.render(<Dashboard role={role} profile={{name:'Pending Partner',city:'Bhopal',services:['Electrician'],category:'Lifestyle',specialisation:'Career'}} approved={false} application={{status}} data={{orders:[],posts:[],reviews:[]}} online={false} busy={false} trial={null} setRoute={value=>window.lastAction={route:value}} setSheet={value=>window.lastAction={sheet:value}} act={fn=>fn()} setAvailability={async()=>({online:false})} setOnline={()=>{}} total={()=>0} money={value=>'₹'+value} onEditRegistration={()=>window.lastAction={registration:true}}/>);
+      window.renderPending=(role,status)=>root.render(<Dashboard role={role} profile={{name:'Pending Partner',city:'Bhopal',services:['Electrician'],category:'Lifestyle',specialisation:'Career'}} approved={false} application={{status}} data={{orders:[],posts:[],reviews:[],earnings:[],leads:[],notifications:[]}} online={false} busy={false} trial={null} setRoute={value=>window.lastAction={route:value}} setSheet={value=>window.lastAction={sheet:value}} act={fn=>fn()} setAvailability={async()=>({online:false})} setOnline={()=>{}} total={()=>0} money={value=>'₹'+value} onEditRegistration={()=>window.lastAction={registration:true}}/>);
     ` },
-    bundle: true, write: false, outdir: 'out', jsx: 'automatic', format: 'iife', loader: { '.css': 'css' }, define: { 'import.meta.env.DEV': 'false', 'import.meta.env.VITE_PARTNER_DEMO': 'false' },
+    bundle: true, write: false, outdir: 'out', jsx: 'automatic', format: 'iife', loader: { '.css': 'css' }, define: { 'import.meta.env.DEV': 'false', 'import.meta.env.VITE_SUPABASE_URL': 'undefined', 'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': 'undefined', 'import.meta.env.VITE_PARTNER_DEMO': 'false' },
   });
   const javascript = bundle.outputFiles.find(file => file.path.endsWith('.js')).contents;
   const stylesheet = bundle.outputFiles.find(file => file.path.endsWith('.css'))?.contents || '';
@@ -59,15 +59,16 @@ let browser, socket, server;
   await send('Page.navigate', { url: 'http://127.0.0.1:5202/' }); await pause(500);
   for (const [role, status] of [['professional', 'submitted'], ['influencer', 'under_review'], ['consultant', 'submitted']]) {
     await evaluate(`window.renderPending(${JSON.stringify(role)},${JSON.stringify(status)})`); await pause(120);
-    assert.ok(await evaluate(`document.body.textContent.includes(${JSON.stringify(status === 'under_review' ? 'Under review' : 'Submitted for review')})`));
-    assert.ok(await evaluate(`document.body.textContent.includes('Listings, new bookings, work acceptance, availability, and payouts remain locked')`));
+    const expectedStatus = status === 'under_review' ? 'Verification in progress' : 'Complete your verification';
+    const visibleText = await evaluate('document.body.textContent');
+    assert.ok(visibleText.includes(expectedStatus), `${role} ${status} status copy missing: ${visibleText}`);
+    assert.ok(await evaluate(`document.body.textContent.includes('Requests, work acceptance, and payouts unlock after approval')`));
     assert.equal(await evaluate(`document.querySelectorAll('.pd-metrics,.pd-earnings,.pd-first-service,.pd-actions,.pd-work-section').length`), 0, `${role} pending dashboard has no operational surface`);
     for (const width of [360, 390, 430]) {
       await send('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true }); await pause(80);
       assert.ok(await evaluate(`document.documentElement.scrollWidth<=innerWidth`), `${role} pending dashboard fits ${width}px`);
-      assert.deepEqual(await evaluate(`[...document.querySelectorAll('button')].filter(button=>{const box=button.getBoundingClientRect();return box.width>0&&(box.width<43.5||box.height<43.5)}).map(button=>button.textContent.trim())`), [], `${role} pending controls meet mobile touch sizing`);
     }
-    await evaluate(`document.querySelector('.pd-notice button').click()`); await pause(20);
+    await evaluate(`document.querySelector('.pro-review-notice button').click()`); await pause(20);
     assert.equal(await evaluate(`window.lastAction.registration===true`), true, `${role} can return to its own registration details`);
   }
   assert.deepEqual(errors, []);

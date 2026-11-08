@@ -2,94 +2,256 @@ import Icon from '../../components/Icon.jsx';
 import { partnerRoles } from '../../data/partners.js';
 import { translate as t } from '../../lib/translate.js';
 import { displayInfluencerCategory } from '../../data/influencerCategories.js';
-import { PARTNER_DEMO_ENABLED } from './demo/config.js';
+import { displayConsultantCategory } from '../../data/consultantCategories.js';
+import { computeSellerLevel } from '../../lib/sellerLevel.js';
+import { weeklyEarnings } from '../../lib/earningsChart.js';
 import './partner-dashboard.css';
+import './partner-reference.css';
 
-const presentation = {
-  professional: { title: 'Service dashboard', label: 'Service Partner', icon: 'workers', accent: 'var(--purple)', incoming: 'New requests', ongoing: 'Upcoming jobs', workIcon: 'briefcase', primary: 'Add service' },
-  influencer: { title: 'Creator dashboard', label: 'Influencer Partner', icon: 'megaphone', accent: 'var(--purple)', incoming: 'New enquiries', ongoing: 'Upcoming collaborations', workIcon: 'video', primary: 'Create post' },
-  consultant: { title: 'Consultation dashboard', label: 'Consultation Partner', icon: 'briefcase', accent: 'var(--purple)', incoming: 'New enquiries', ongoing: 'Upcoming consultations', workIcon: 'calendar', primary: 'Manage availability' },
+const ROLE_CONFIGS = {
+  professional: { getCategory: profile => profile.category || '' },
+  influencer: {
+    getCategory: profile => displayInfluencerCategory(profile.category) || '',
+  },
+  consultant: {
+    getCategory: profile => displayConsultantCategory(profile.category) || '',
+  },
 };
 
-export function DashboardTopBar({ role, name, greeting, notifications, setRoute, setSheet, profile = {}, approved = false, view = 'home' }) {
-  const config = presentation[role];
-  const displayName = profile.name || profile.creatorName || name || partnerRoles[role].label;
-  return <header className="pd-topbar">
-    <div className="pd-topbar-row"><div className="pd-welcome"><p className="pd-greeting">{t(greeting)}, {displayName}</p><p className="pd-role-location"><span>{t(config.label)}</span>{profile.city && <><span aria-hidden="true">·</span><span>{profile.city}</span></>}<span className={`pd-verification${approved ? ' is-approved' : ''}`}><Icon name={approved ? 'check' : 'clock'} size={13} />{t(approved ? 'Verified' : 'Review pending')}</span></p></div>
-      <div className="pd-header-actions"><button type="button" className="pd-icon-button" aria-label={t('Messages')} onClick={() => setRoute('messages')}><Icon name="message" size={19} /></button><button type="button" className="pd-icon-button" aria-label={t('Notifications')} onClick={() => setSheet('Notifications')}><Icon name="bell" size={19} />{notifications > 0 && <span className="pd-notification-count">{notifications}</span>}</button><button type="button" className="pd-avatar" aria-label={t('View Profile')} onClick={() => setRoute('profile')}>{displayName.charAt(0).toUpperCase()}</button><button type="button" className="pd-switch" aria-label={t('Switch workspace')} onClick={() => setSheet('workspace')}><Icon name="grid" size={17} /></button></div>
-    </div>
-    <h1 className="pd-view-title">{t(view === 'growth' ? 'Business growth' : view === 'earnings' ? 'Earnings' : 'Daily work')}</h1>
-  </header>;
+function formatOrderDeadline(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} · ${date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
 }
 
-export default function PartnerDashboard({ role, profile, approved, application, data, online, busy, trial, setRoute, setSheet, act, setAvailability, setOnline, total, money, onEditRegistration, onEnterDemo }) {
-  const config = presentation[role];
-  if (!approved) {
-    const status = application.status === 'under_review' ? 'Under review' : 'Submitted for review';
-    return <div className={`pd-dashboard pd-${role}`} style={{ '--pd-accent': config.accent }}>
-      <DashboardIdentity {...{ role, profile, approved, online, busy, setRoute, act, setAvailability, setOnline }} reviews={data.reviews.length} />
-      <section className="pd-notice" role="status"><Icon name="shield" size={20} /><div><b>{t(status)}</b><p>{t('Your partner dashboard is ready while verification is pending. Listings, new bookings, work acceptance, availability, and payouts remain locked until Eazily approves this application.')}</p></div><button className="pd-text-button" onClick={onEditRegistration}>{t('Review details')}<Icon name="chevronRight" size={16} /></button></section>
-      {PARTNER_DEMO_ENABLED && onEnterDemo && <div className="pd-preview-control"><span>Interactive sample workspace</span><button type="button" className="pd-text-button" onClick={onEnterDemo}>Enter Demo Mode<Icon name="grid" size={16} /></button></div>}
-    </div>;
-  }
-  const requestedOrders = data.orders.filter(order => order.status === 'requested' && !order.backup_price_approval_pending);
+function indiaDateKey(value) {
+  if (!value) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(value));
+  const date = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${date.year}-${date.month}-${date.day}`;
+}
+
+function byUpcomingDeadline(first, second) {
+  const firstDeadline = Date.parse(first.deadline || '');
+  const secondDeadline = Date.parse(second.deadline || '');
+  if (Number.isFinite(firstDeadline) && Number.isFinite(secondDeadline)) return firstDeadline - secondDeadline;
+  if (Number.isFinite(firstDeadline)) return -1;
+  if (Number.isFinite(secondDeadline)) return 1;
+  const firstCreated = Date.parse(first.created_at || '') || 0;
+  const secondCreated = Date.parse(second.created_at || '') || 0;
+  return firstCreated - secondCreated;
+}
+
+/* ─── Top Bar ─────────────────────────────────────────────────────────────── */
+export function DashboardTopBar({ role, name, notifications, setSheet, profile = {}, view = 'home', greeting = 'Welcome' }) {
+  const displayName = profile.name || profile.creatorName || name || partnerRoles[role]?.label || 'Partner';
+  const pageTitle = view === 'home'
+    ? (role === 'professional' ? 'Service Dashboard' : role === 'influencer' ? 'Creator Dashboard' : 'Consultant Dashboard')
+    : view === 'orders'
+      ? 'Jobs'
+      : view === 'profile'
+        ? 'Profile'
+        : view === 'growth'
+          ? (role === 'influencer' ? 'Growth' : 'Business growth')
+          : view === 'earnings'
+            ? 'Earnings'
+            : 'Daily work';
+
+  return (
+    <header className={`pd-topbar pd-topbar-professional pd-topbar-${role}`}>
+      <div className="pd-topbar-row">
+        <div className="pd-brand-lockup"><span className="pd-brand-wordmark">Eazily</span><h1>{view === 'home' ? `${t(greeting)}, ${displayName.split(/\s+/)[0]}` : t(pageTitle)}</h1><p className="pd-header-context">{t(partnerRoles[role]?.label || 'Partner')}{profile.city ? ` · ${profile.city}` : ''}</p></div>
+        <div className="pd-header-actions">
+          <button
+            type="button"
+            className="pd-icon-button"
+            aria-label={t('Notifications')}
+            onClick={() => setSheet('Notifications')}
+          >
+            <Icon name="bell" size={19} />
+            {notifications > 0 && <span className="pd-notification-count">{notifications > 9 ? '9+' : notifications}</span>}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ─── Main Partner Dashboard ──────────────────────────────────────────────── */
+export default function PartnerDashboard({
+  role = 'professional',
+  profile = {},
+  approved = false,
+  application = {},
+  data = { orders: [], leads: [], earnings: [], reviews: [], posts: [], notifications: [] },
+  online = true,
+  busy = false,
+  trial = null,
+  setRoute,
+  setSheet,
+  act,
+  setAvailability,
+  setOnline,
+  total,
+  money,
+  onEditRegistration,
+}) {
+  /* Metric calculations */
+  const requestedOrders = data.orders.filter(order => order.status === 'requested' && !order.backup_price_approval_pending).sort(byUpcomingDeadline);
   const pendingPriceOrders = role === 'professional' ? data.orders.filter(order => order.backup_price_approval_pending) : [];
-  const requested = requestedOrders.length;
-  const active = data.orders.filter(order => ['accepted', 'active'].includes(order.status));
-  const completed = data.orders.filter(order => order.status === 'completed').length;
-  const openLeadOrderIds = new Set((data.leads || []).filter(lead => lead.order_id && lead.status !== 'lost').map(lead => lead.order_id));
-  const openBookingLeads = requestedOrders.filter(order => openLeadOrderIds.has(order.id)).length;
-  const acceptedBookings = data.orders.filter(order => ['accepted', 'active', 'awaiting_acceptance'].includes(order.status)).length;
-  const recordedEarnings = data.earnings.filter(entry => ['available', 'pending', 'paid'].includes(entry.state)).reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
-  const metrics = {
-    professional: [['New enquiries', openBookingLeads, 'message'], ['Accepted bookings', acceptedBookings, 'briefcase'], ['Completed jobs', completed, 'check'], ['Recorded earnings', money(recordedEarnings), 'rupee']],
-    influencer: [['New enquiries', requested, 'message'], ['Accepted enquiries', active.length, 'video'], ['Live posts', data.posts.filter(post => post.status === 'published').length, 'megaphone'], ['Available payout', money(total('available')), 'rupee']],
-    consultant: [['Accepted enquiries', active.length, 'calendar'], ['Completed orders', completed, 'check'], ['New enquiries', requested, 'message'], ['Available payout', money(total('available')), 'rupee']],
-  }[role];
-  const quick = {
-    professional: [['My Services', 'briefcase', () => setRoute('post')], ['Business growth', 'chart', () => setRoute('growth')]],
-    influencer: [['My Posts', 'megaphone', () => setRoute('post')], ['Business growth', 'chart', () => setRoute('growth')]],
-    consultant: [['Availability', 'calendar', () => setRoute('orders')], ['Business growth', 'chart', () => setRoute('growth')]],
-  }[role];
-  const urgent = !approved ? { text: 'Verification pending. Complete your registration review before accepting work.', action: 'Review details', run: onEditRegistration } : application.review_notes ? { text: application.review_notes, action: 'Review details', run: onEditRegistration } : requested ? { text: `${requested} ${role === 'influencer' ? 'collaboration enquiry' : 'new request'}${requested === 1 ? '' : 's'} waiting for your response.`, action: 'View requests', run: () => setRoute('orders') } : null;
-  const fallbackAction = role === 'consultant' ? () => setRoute('orders') : () => setSheet('post');
-  const hasServicePosts = data.posts.some(post => (post.details?.postType || 'offering') === 'offering' && post.status !== 'archived');
+  const activeOrders = data.orders.filter(order => ['accepted', 'active', 'awaiting_acceptance'].includes(order.status)).sort(byUpcomingDeadline);
+  const completedOrders = data.orders.filter(order => order.status === 'completed').length;
+  const todayKey = indiaDateKey(new Date());
+  const todayEarnings = data.earnings.reduce((sum, entry) => {
+    if (indiaDateKey(entry.created_at) !== todayKey) return sum;
+    if (['available', 'pending', 'paid'].includes(entry.state)) return sum + Number(entry.amount || 0);
+    if (entry.state === 'reversed') return sum - Number(entry.amount || 0);
+    return sum;
+  }, 0);
+  const totalEarnings = total
+    ? ['available', 'pending', 'paid'].reduce((sum, state) => sum + Number(total(state) || 0), 0)
+    : data.earnings.reduce((sum, entry) => sum + (['available', 'pending', 'paid'].includes(entry.state) ? Number(entry.amount || 0) : entry.state === 'reversed' ? -Number(entry.amount || 0) : 0), 0);
+  const ratings = data.reviews.map(review => Number(review.rating)).filter(rating => Number.isFinite(rating) && rating > 0);
+  const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : null;
+  return <PartnerHomeDashboard
+    role={role}
+    profile={profile}
+    approved={approved}
+    application={application}
+    data={data}
+    trial={trial}
+    online={online}
+    busy={busy}
+    requestedOrders={requestedOrders}
+    pendingPriceOrders={pendingPriceOrders}
+    activeOrders={activeOrders}
+    completedOrders={completedOrders}
+    todayEarnings={todayEarnings}
+    totalEarnings={totalEarnings}
+    averageRating={averageRating}
+    money={money}
+    setRoute={setRoute}
+    setSheet={setSheet}
+    act={act}
+    setAvailability={setAvailability}
+    setOnline={setOnline}
+    onEditRegistration={onEditRegistration}
+  />;
+
+}
+function PartnerHomeDashboard({ role, profile, approved, application, data, trial, online, busy, requestedOrders, pendingPriceOrders, activeOrders, completedOrders, todayEarnings, totalEarnings, averageRating, money, setRoute, setSheet, act, setAvailability, setOnline, onEditRegistration }) {
+  const config = ROLE_CONFIGS[role] || ROLE_CONFIGS.professional;
+  const name = role === 'influencer'
+    ? profile.creatorName || profile.name || 'Creator profile'
+    : role === 'consultant'
+      ? profile.name || profile.creatorName || 'Consultant profile'
+      : profile.businessName || profile.name || profile.ownerName || 'Service professional';
+  const category = config.getCategory(profile) || (role === 'professional' ? profile.serviceSelections?.[0]?.service : '') || '';
+  const city = profile.city || profile.address?.city || '';
+  const nextJob = activeOrders[0];
+  const amount = value => money ? money(value) : `₹${Number(value || 0).toLocaleString('en-IN')}`;
+  const publishedOffering = data.posts.some(post => post.status === 'published' && (post.details?.postType || 'offering') === 'offering');
+  const statusActive = role === 'professional' ? online : publishedOffering;
+  const roleCopy = {
+    professional: { kind: 'Service Professional', completed: 'Jobs completed', heading: 'Confirmed jobs', emptyTitle: 'No confirmed jobs yet', emptyBody: 'Accepted customer bookings will appear here.', statusTitle: online ? 'You’re available' : 'You’re unavailable', statusBody: online ? 'Customers can send you job requests' : 'Turn on availability to receive job requests', action: 'View requests', audience: 'Customer' },
+    influencer: { kind: 'Influencer', completed: 'Collaborations completed', heading: 'Confirmed collaborations', emptyTitle: 'No active collaborations yet', emptyBody: 'Accepted brand collaborations will appear here.', statusTitle: publishedOffering ? 'Packages are live' : 'Set up your packages', statusBody: 'Manage published packages to receive brand enquiries', action: 'Manage packages', audience: 'Brand' },
+    consultant: { kind: 'Consultant', completed: 'Sessions completed', heading: 'Upcoming appointments', emptyTitle: 'No upcoming appointments yet', emptyBody: 'Confirmed consultation bookings will appear here.', statusTitle: publishedOffering ? 'Consultations are listed' : 'Set up your consultation', statusBody: 'Manage your consultation offering and booking details', action: 'Manage consultations', audience: 'Client' },
+  }[role] || {};
+  const hasServicePost = data.posts.some(post => (post.details?.postType || 'offering') === 'offering' && !['archived', 'rejected'].includes(post.status));
   const trustedTrialEnd = approved && trial?.approval_started_at && !trial?.approval_date_missing ? trial.trial_ends_at : null;
-  const trialExpired = trustedTrialEnd && Date.parse(trustedTrialEnd) <= Date.now();
+  const trialExpired = Boolean(trustedTrialEnd && Date.parse(trustedTrialEnd) <= Date.now());
   const activePaid = trial?.status === 'active' && trial.current_period_end && Date.parse(trial.current_period_end) > Date.now();
-  return <div className={`pd-dashboard pd-${role}`} style={{ '--pd-accent': config.accent }}>
-    {role === 'professional' && <DashboardAvailability online={online} busy={busy} approved={approved} act={act} setAvailability={setAvailability} setOnline={setOnline} />}
-    {role === 'professional' && !hasServicePosts && <section className="pd-card pd-first-service"><span><Icon name="briefcase" size={24} /></span><div><h2>Add your first service</h2><p>Publish a service so customers can review your offering and send a request.</p></div><button className="pd-primary" onClick={() => setSheet('post')}>Add service</button></section>}
-    {urgent && <section className="pd-notice"><Icon name={!approved ? 'shield' : 'bell'} size={20} /><p>{t(urgent.text)}</p><button className="pd-text-button" onClick={urgent.run}>{t(urgent.action)}<Icon name="chevronRight" size={16} /></button></section>}
-    <section className="pd-overview" aria-label={t("Today's overview")}><div className="pd-section-title"><div><h2>{t("Today's overview")}</h2><p>{t('Live activity from your partner account')}</p></div></div>
-      <div className="pd-metrics">{metrics.map(([label, value, icon]) => <article key={label}><span className="pd-metric-icon"><Icon name={icon} size={18} /></span><strong>{value}</strong><span>{t(label)}</span></article>)}</div>
+  const roleClass = role === 'professional' ? 'pd-service-home' : role === 'influencer' ? 'pd-influencer-home' : 'pd-consultant-home';
+  const decidedOrders = data.orders.filter(order => ['requested', 'accepted', 'active', 'awaiting_acceptance', 'completed', 'cancelled', 'disputed'].includes(order.status));
+  const acceptedCount = data.orders.filter(order => ['accepted', 'active', 'awaiting_acceptance', 'completed'].includes(order.status)).length;
+  const acceptRate = decidedOrders.length >= 3 ? Math.round((acceptedCount / decidedOrders.length) * 100) : null;
+  const pipelineItems = [
+    { label: role === 'influencer' ? 'Enquiries' : role === 'consultant' ? 'New requests' : 'Requested', count: requestedOrders.length, tone: 'new' },
+    { label: 'Active', count: activeOrders.length, tone: 'active' },
+    { label: roleCopy.completed, count: completedOrders, tone: 'done' },
+  ];
+  const metrics = [
+    ["Today's earnings", amount(todayEarnings), 'rupee', () => setSheet('Earnings')],
+    ['Total earnings', amount(totalEarnings), 'history', () => setSheet('Earnings')],
+    [roleCopy.completed, completedOrders, 'check', () => setRoute('orders')],
+    [`${roleCopy.audience} rating`, averageRating == null ? '—' : `${averageRating.toFixed(1)} / 5`, 'star', () => setRoute('profile')],
+  ];
+  const upcomingDecisions = [...requestedOrders, ...pendingPriceOrders]
+    .map(order => order.response_due_at || order.deadline)
+    .filter(Boolean)
+    .map(value => Date.parse(value))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  const earliestDecision = upcomingDecisions.length ? new Date(upcomingDecisions[0]) : null;
+  const urgencyText = earliestDecision
+    ? earliestDecision.toDateString() === new Date().toDateString()
+      ? t(`Earliest deadline today at ${earliestDecision.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}`)
+      : t(`Earliest deadline ${earliestDecision.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`)
+    : null;
+  const showAcceptTip = acceptRate != null && acceptRate < 85;
+  const showRatingHint = approved && averageRating == null;
+  const sellerLevel = approved ? computeSellerLevel({ completed: completedOrders, rating: averageRating, acceptedCount, decidedCount: decidedOrders.length }) : null;
+  const toggleAvailability = () => {
+    if (!approved || busy || typeof setAvailability !== 'function') return;
+    const nextOnline = !online;
+    setOnline(nextOnline);
+    const persist = async () => {
+      try {
+        const result = await setAvailability(nextOnline);
+        if (typeof result?.online === 'boolean') setOnline(result.online);
+      } catch (error) {
+        setOnline(!nextOnline);
+        throw error;
+      }
+    };
+    if (act) act(persist);
+    else persist().catch(() => {});
+  };
+  return <div className={`pd-dashboard pro-dashboard partner-home-dashboard ${roleClass}`}>
+    {!approved && <section className="pro-review-notice" role="status"><Icon name="shield" size={19}/><div><strong>{t(application.status === 'under_review' ? 'Verification in progress' : 'Complete your verification')}</strong><p>{t('Your dashboard is ready. Requests, work acceptance, and payouts unlock after approval.')}</p>{approved === false && <ul className="pro-unlock-previews"><li>{t('Accept service requests')}</li><li>{t('Publish services')}</li><li>{t('Receive verified payouts')}</li></ul>}</div><button type="button" onClick={onEditRegistration}>{t('View details')} <Icon name="chevronRight" size={14}/></button></section>}
+    <section className="pro-profile-card" aria-label={t(`${roleCopy.kind} profile`)}>
+      <span className="pro-profile-avatar" aria-hidden="true">{name.trim().charAt(0).toUpperCase()}</span>
+      <div className="pro-profile-copy"><h2>{name}</h2><p>{[category, city].filter(Boolean).join(' · ')}</p><span className={`pro-verified ${approved ? 'approved' : ''}`}><Icon name={approved ? 'check' : 'clock'} size={13}/>{t(approved ? `Verified ${roleCopy.kind.toLowerCase()}` : 'Pending review')}</span>{sellerLevel && <span className={`pro-level-badge level-${sellerLevel.key}`}>{t(sellerLevel.label)}</span>}</div>
     </section>
-    <DashboardWork role={role} title={config.incoming} orders={requestedOrders} incoming setSheet={setSheet} setRoute={setRoute} />
-    {pendingPriceOrders.length>0&&<DashboardWork role={role} title="Awaiting customer price approval" orders={pendingPriceOrders} setSheet={setSheet} setRoute={setRoute} />}
-    {PARTNER_DEMO_ENABLED && onEnterDemo && <div className="pd-preview-control"><span>Interactive sample workspace</span><button type="button" className="pd-text-button" onClick={onEnterDemo}>Enter Demo Mode<Icon name="grid" size={16} /></button></div>}
-      <section className="pd-card pd-actions"><div className="pd-section-title"><h2>{t('Quick actions')}</h2><Icon name="grid" size={18} /></div><button className="pd-primary" onClick={fallbackAction}><Icon name={role === 'consultant' ? 'calendar' : 'plus'} size={20} />{t(config.primary)}</button>
-        <div className="pd-shortcuts">{[...quick, ['Earnings', 'rupee', () => setSheet('Earnings')], ['Support', 'message', () => setSheet('Help & Support')]].map(([label, icon, run]) => <button key={label} onClick={run}><span><Icon name={icon} size={20} /></span>{t(label)}<Icon name="chevronRight" size={15} /></button>)}</div>
-      </section>
-      <DashboardWork role={role} title={config.ongoing} orders={active} setSheet={setSheet} setRoute={setRoute} />
-      {role === 'influencer' && <LatestPosts posts={data.posts} setRoute={setRoute} />}
-      <button type="button" className="pd-growth-link" onClick={() => setRoute('growth')}><span><Icon name="chart" size={20} /></span><span><b>Grow your business</b><small>Profile, enquiries, and reviews</small></span><Icon name="chevronRight" size={18} /></button>
-      {trialExpired && <section className="pd-card pd-subscription"><span className="pd-eyebrow"><Icon name="sparkles" size={16} />{activePaid ? 'Membership active' : 'Your free trial has ended'}</span><p>{activePaid ? `Renewal date: ${new Date(trial.current_period_end).toLocaleDateString('en-IN')}` : 'Choose a plan to continue publishing and receiving new bookings when billing is enabled.'}</p><button className="pd-secondary" onClick={() => setSheet('Subscription')}>{activePaid ? 'View subscription' : 'View Plans'}</button></section>}
+    <section className={`pro-availability ${statusActive ? 'online' : ''}`}>
+      <span className="pro-online-dot" aria-hidden="true"/><div><strong>{t(roleCopy.statusTitle)}</strong><p>{t(roleCopy.statusBody)}</p></div>
+      {role === 'professional'
+        ? <button type="button" role="switch" aria-label={t('Availability')} aria-checked={online} disabled={!approved || busy} onClick={toggleAvailability}><span/></button>
+        : <button type="button" className="pro-availability-action" disabled={!approved} onClick={() => setRoute('post')}>{t(roleCopy.action)} <Icon name="chevronRight" size={14}/></button>}
+    </section>
+    <section className="pro-overview"><div className="pro-section-title"><h2>{t('Overview')}</h2><button type="button" onClick={() => setRoute('growth')}>{t('View insights')} <Icon name="chevronRight" size={14}/></button></div><div className="pro-metrics">
+      {metrics.map(([label, value, icon, action]) => <button type="button" className="pro-metric" key={label} onClick={action}><span className="pro-metric-icon"><Icon name={icon} size={18}/></span><span className="pro-metric-label">{t(label)}</span><strong>{value}</strong></button>)}
+    </div>{approved && <div className="pd-pipeline">{pipelineItems.map(item => <button type="button" key={item.label} className={`pd-pipe ${item.tone}`} onClick={() => setRoute('orders')}><b>{item.count}</b><span>{t(item.label)}</span></button>)}{acceptRate != null && <button type="button" className="pd-pipe accept" onClick={() => setRoute('growth')}><b>{acceptRate}%</b><span>{t('Accept rate')}</span></button>}</div>}{approved && <div className="pro-quick-actions"><button type="button" className="btn btn-outline" onClick={() => setRoute('post')}>{t('Post a service')} <Icon name="plus" size={15}/></button></div>}{(showAcceptTip || showRatingHint) && <div className="pro-tips">{showRatingHint && <p>{t('Complete 1 booking to get rated.')}</p>}{showAcceptTip && <p>{t('Tip: responding faster tends to improve your accept rate.')}</p>}</div>}</section>
+    {role === 'professional' && !hasServicePost && approved && <section className="pro-first-offering"><span className="pro-job-icon"><Icon name="briefcase" size={19}/></span><div><strong>{t('Publish your first service')}</strong><p>{t('Give customers a clear service to review and request.')}</p></div><button type="button" onClick={() => setRoute('post')}>{t('Add service')} <Icon name="chevronRight" size={14}/></button></section>}
+    {(requestedOrders.length > 0 || pendingPriceOrders.length > 0) && <section className="pro-needs-action">
+      <div className="pro-section-title"><h2>{t('Needs action')}</h2><span className="needs-count">{requestedOrders.length + pendingPriceOrders.length}</span><button type="button" onClick={() => setRoute('orders')}>{t('See all')} <Icon name="chevronRight" size={14}/></button></div>
+      {urgencyText && <p className="needs-urgency">{urgencyText}</p>}
+      <div className="needs-list">
+        {pendingPriceOrders.slice(0, 2).map(order => <button type="button" className="needs-item price" key={order.id} onClick={() => setSheet({order})}><span><strong>{order.title || order.details?.service || order.details?.category || t('Booking')}</strong><small>{t('Waiting for customer price approval')}</small></span><b>{t('Review')}</b><Icon name="chevronRight" size={16}/></button>)}
+        {requestedOrders.slice(0, 2).map(order => <button type="button" className="needs-item new" key={order.id} onClick={() => setSheet({order})}><span><strong>{order.title || order.details?.service || order.details?.category || t('New request')}</strong><small>{order.deadline ? formatOrderDeadline(order.deadline) : t(role === 'influencer' ? 'New brand enquiry' : role === 'consultant' ? 'New consultation request' : 'Awaiting your response')}</small></span><b>{t(role === 'influencer' ? 'Review enquiry' : role === 'consultant' ? 'Review consultation' : 'Review request')}</b><Icon name="chevronRight" size={16}/></button>)}
+      </div>
+    </section>}
+    <section className="pro-jobs"><div className="pro-section-title"><h2>{t(roleCopy.heading)}</h2>{requestedOrders.length === 0 && pendingPriceOrders.length === 0 && <button type="button" onClick={() => setRoute('orders')}>{t('See all')} <Icon name="chevronRight" size={14}/></button>}</div>
+      {nextJob ? <button type="button" className="pro-job-card" onClick={() => setSheet({order:nextJob})}><span className="pro-job-icon"><Icon name={role === 'influencer' ? 'video' : role === 'consultant' ? 'calendar' : 'briefcase'} size={19}/></span><span className="pro-job-details"><strong>{nextJob.title || nextJob.details?.service || nextJob.details?.category || t('Work request')}</strong>{nextJob.deadline && <small>{formatOrderDeadline(nextJob.deadline)}</small>}{(role === 'professional' && (nextJob.details?.location || nextJob.details?.address || nextJob.customer_name)) && <small>{nextJob.details?.location || nextJob.details?.address || nextJob.customer_name}</small>}</span><span className="pro-job-status"><Icon name="check" size={12}/>{t(nextJob.status === 'active' ? 'In progress' : nextJob.status === 'awaiting_acceptance' ? 'Awaiting confirmation' : 'Confirmed')}</span><Icon name="chevronRight" size={16}/></button> : <div className="pro-empty-job"><span><Icon name="calendar" size={21}/></span><div><strong>{t(roleCopy.emptyTitle)}</strong><p>{t(roleCopy.emptyBody)}</p></div><button type="button" onClick={() => setRoute('orders')}>{t(roleCopy.action === 'View requests' ? roleCopy.action : 'View requests')}</button></div>}
+    </section>
+    {trialExpired && <section className="pro-trial-card"><div><strong>{t(activePaid ? 'Membership active' : 'Your free trial has ended')}</strong><p>{t(activePaid ? `Renewal date: ${new Date(trial.current_period_end).toLocaleDateString('en-IN')}` : 'Review subscription plans and renewal terms.')}</p></div><button type="button" onClick={() => setSheet('Subscription')}>{t(activePaid ? 'View subscription' : 'View plans')} <Icon name="chevronRight" size={14}/></button></section>}
   </div>;
 }
 
-function DashboardAvailability({ online, busy, approved, act, setAvailability, setOnline }) {
-  return <section className="pd-availability-card" aria-label="Availability">
-    <span className={`pd-availability-dot${online ? ' is-online' : ''}`} aria-hidden="true" />
-    <div><b>{online ? 'You are online' : 'You are offline'}</b><small>{online ? 'You can receive new requests.' : 'Turn on availability to receive new requests.'}</small></div>
-    <button type="button" role="switch" aria-label="Availability" aria-checked={online} disabled={!approved || busy} onClick={() => act(async () => { const result = await setAvailability(!online); setOnline(result.online); })}><span /></button>
-  </section>;
-}
-
+/* ─── Business Growth Dashboard (Tab 4) ───────────────────────────────────── */
 export function PartnerGrowthDashboard({ role, profile, data, setRoute, setSheet, onEditRegistration }) {
   const requested = data.orders.filter(order => order.status === 'requested' && !order.backup_price_approval_pending).length;
   const leads = (data.leads || []).filter(lead => lead.status !== 'lost').length;
   const enquiries = Math.max(requested, leads);
   const bookings = data.orders.filter(order => ['accepted', 'active', 'awaiting_acceptance', 'completed'].includes(order.status)).length;
+  const workLabel = role === 'influencer' ? 'Campaigns' : role === 'consultant' ? 'Appointments' : 'Bookings';
+  const reviewAudience = role === 'influencer' ? 'Brand' : role === 'consultant' ? 'Client' : 'Customer';
   const ratings = data.reviews.map(review => Number(review.rating)).filter(rating => Number.isFinite(rating) && rating > 0);
   const averageRating = ratings.length ? (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1) : null;
   const workMedia = (profile.ownerShopMedia || []).length > 0 || data.posts.some(post => (post.details?.media || []).length > 0);
@@ -106,61 +268,113 @@ export function PartnerGrowthDashboard({ role, profile, data, setRoute, setSheet
       : [['Consultations', 'Manage your consultation offering', 'briefcase', () => setRoute('post')], ['Availability', 'Review appointments and availability', 'calendar', () => setRoute('orders')], ['Qualifications', 'Review your consultant profile', 'person', onEditRegistration], ['Enquiry follow-up', `${enquiries} active enquiries`, 'message', () => setRoute('orders')]];
   const tip = completion < 100
     ? role === 'professional' && !workMedia ? 'Add clear work photos to help customers understand your services.' : 'Complete the remaining profile details to keep your partner profile up to date.'
-    : data.reviews.length ? 'Reply to new enquiries promptly and keep your work details current.' : 'Keep your profile current. Customer reviews will appear here after completed work.';
+    : data.reviews.length ? 'Reply to new enquiries promptly and keep your work details current.' : `Keep your profile current. ${reviewAudience} reviews will appear here after completed work.`;
+  const chart = weeklyEarnings(data.earnings);
 
-  return <div className="pd-dashboard pd-growth-dashboard" style={{ '--pd-accent': 'var(--purple)' }}>
-    <section className="pd-growth-metrics" aria-label="Business growth metrics">
-      {[["Enquiries", enquiries, 'message'], ['Bookings', bookings, 'briefcase'], ['Customer reviews', data.reviews.length, 'star']].map(([label, value, icon]) => <article key={label}><span className="pd-growth-icon"><Icon name={icon} size={20} /></span><div><small>{label}</small><b>{value}</b></div></article>)}
-    </section>
+  return (
+    <div className="pd-dashboard pd-growth-dashboard" style={{ '--pd-accent': 'var(--purple)' }}>
+      <section className="pd-growth-metrics" aria-label="Business growth metrics">
+        {[["Enquiries", enquiries, 'message'], [workLabel, bookings, 'briefcase'], [`${reviewAudience} reviews`, data.reviews.length, 'star']].map(([label, value, icon]) => (
+          <article key={label}>
+            <span className="pd-growth-icon"><Icon name={icon} size={20} /></span>
+            <div><small>{label}</small><b>{value}</b></div>
+          </article>
+        ))}
+      </section>
 
-    <section className="pd-growth-progress pd-card" aria-labelledby="pd-profile-progress-title">
-      <div className="pd-growth-progress-head"><span className="pd-growth-icon"><Icon name="image" size={22} /></span><div><h2 id="pd-profile-progress-title">Complete your profile</h2><p>{completion}% of key profile details are complete</p></div><strong>{completion}%</strong></div>
-      <div className="pd-progress-track" role="progressbar" aria-label="Profile completeness" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion}><span style={{ width: `${completion}%` }} /></div>
-      <p className="pd-growth-hint">{tip}</p>
-      <button type="button" className="pd-primary" onClick={completion < 100 ? onEditRegistration : () => setRoute('profile')}>{completion < 100 ? 'Complete profile' : 'View profile'}</button>
-    </section>
+      <section className="pd-growth-progress pd-card" aria-labelledby="pd-profile-progress-title">
+        <div className="pd-growth-progress-head">
+          <span className="pd-growth-icon"><Icon name="image" size={22} /></span>
+          <div><h2 id="pd-profile-progress-title">Complete your profile</h2><p>{completion}% of key profile details are complete</p></div>
+          <strong>{completion}%</strong>
+        </div>
+        <div className="pd-progress-track" role="progressbar" aria-label="Profile completeness" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion}>
+          <span style={{ width: `${completion}%` }} />
+        </div>
+        <p className="pd-growth-hint">{tip}</p>
+        <button type="button" className="pd-primary" onClick={completion < 100 ? onEditRegistration : () => setRoute('profile')}>
+          {completion < 100 ? 'Complete profile' : 'View profile'}
+        </button>
+      </section>
 
-    <section className="pd-card pd-growth-tools"><div className="pd-section-title"><h2>Business tools</h2><span>Manage your partner account</span></div><div className="pd-growth-tool-list">{tools.map(([title, detail, icon, action]) => <button type="button" key={title} onClick={action}><span className="pd-growth-icon"><Icon name={icon} size={19} /></span><span><b>{title}</b><small>{detail}</small></span><Icon name="chevronRight" size={18} /></button>)}</div></section>
+      <section className="pd-card pd-growth-tools">
+        <div className="pd-section-title"><h2>Business tools</h2><span>Manage your partner account</span></div>
+        <div className="pd-growth-tool-list">
+          {tools.map(([title, detail, icon, action]) => (
+            <button type="button" key={title} onClick={action}>
+              <span className="pd-growth-icon"><Icon name={icon} size={19} /></span>
+              <span><b>{title}</b><small>{detail}</small></span>
+              <Icon name="chevronRight" size={18} />
+            </button>
+          ))}
+        </div>
+      </section>
 
-    <section className="pd-card pd-growth-reviews"><div className="pd-section-title"><h2>Customer reviews</h2><button type="button" className="pd-text-button" onClick={() => setRoute('profile')}>View profile<Icon name="chevronRight" size={15} /></button></div><div className="pd-review-summary"><Icon name="star" size={21} /><strong>{averageRating || '—'}</strong><span>{data.reviews.length ? `${data.reviews.length} ${data.reviews.length === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}</span></div><p>{data.reviews.length ? 'Reviews from completed work appear on your partner profile.' : 'Customer reviews will appear here after completed work.'}</p></section>
+      <section className="pd-card pd-growth-reviews">
+        <div className="pd-section-title">
+          <h2>{reviewAudience} reviews</h2>
+          <button type="button" className="pd-text-button" onClick={() => setRoute('profile')}>View profile<Icon name="chevronRight" size={15} /></button>
+        </div>
+        <div className="pd-review-summary">
+          <Icon name="star" size={21} />
+          <strong>{averageRating || '—'}</strong>
+          <span>{data.reviews.length ? `${data.reviews.length} ${data.reviews.length === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}</span>
+        </div>
+        <p>{data.reviews.length ? `${reviewAudience} reviews from completed work appear on your partner profile.` : `${reviewAudience} reviews will appear here after completed work.`}</p>
+      </section>
 
-    <section className="pd-growth-tip"><span className="pd-growth-icon"><Icon name="sparkles" size={20} /></span><div><b>Growth tip</b><p>{tip}</p></div></section>
-  </div>;
+      <section className="pd-card pd-growth-earnings-chart">
+        <div className="pd-section-title"><h2>{t('Weekly earnings')}</h2><span>{t('Available, pending and paid entries by week')}</span></div>
+        {chart.values.some(value => value !== 0) ? <div className="pd-chart" role="img" aria-label={t('Bar chart of weekly earnings')}>{chart.values.map((value, index) => (
+          <div className="pd-chart-col" key={chart.labels[index]}>
+            <div className="pd-bar-track"><span className={`pd-bar ${value < 0 ? 'negative' : ''}`} style={{ height: `${Math.max(4, Math.abs(value) / chart.peak * 100)}%` }} title={`${chart.labels[index]}: ${value}`} /></div>
+            <small>{chart.labels[index]}</small>
+          </div>
+        ))}</div> : <div className="pd-empty"><span><Icon name="rupee" size={22} /></span><div><b>{t('No earnings yet')}</b><p>{t('Weekly earnings will appear here after paid work.')}</p></div></div>}
+      </section>
+
+      <section className="pd-growth-tip">
+        <span className="pd-growth-icon"><Icon name="sparkles" size={20} /></span>
+        <div><b>Growth tip</b><p>{tip}</p></div>
+      </section>
+    </div>
+  );
 }
 
-export function PartnerEarningsDashboard({ role, data, total, money, setSheet }) {
+/* ─── Partner Earnings Dashboard ──────────────────────────────────────────── */
+export function PartnerEarningsDashboard({ data, total, money, setSheet }) {
   const recent = [...data.earnings].sort((a, b) => Date.parse(b.created_at || 0) - Date.parse(a.created_at || 0)).slice(0, 5);
-  return <div className="pd-dashboard pd-earnings-dashboard" style={{ '--pd-accent': 'var(--purple)' }}>
-    <DashboardPayments role={role} available={money(total('available'))} pending={money(total('pending'))} setSheet={setSheet} />
-    <section className="pd-card pd-earnings-history"><div className="pd-section-title"><h2>Recent earnings</h2><button type="button" className="pd-text-button" onClick={() => setSheet('Earnings')}>View details<Icon name="chevronRight" size={15} /></button></div>{recent.length ? recent.map(entry => <article key={entry.id}><span className="pd-growth-icon"><Icon name="rupee" size={18} /></span><span><b>{entry.state === 'reversed' ? 'Reversed entry' : 'Partner earnings'}</b><small>{entry.created_at ? new Date(entry.created_at).toLocaleDateString('en-IN') : 'Date unavailable'}</small></span><strong>{money(entry.amount)}</strong></article>) : <div className="pd-empty"><span><Icon name="rupee" size={22} /></span><div><h3>No earnings recorded yet</h3><p>Earnings appear here when eligible work is completed and recorded.</p></div></div>}</section>
-  </div>;
-}
-
-function DashboardIdentity({ role, profile, approved, reviews, online, busy, setRoute, act, setAvailability, setOnline }) {
-  const displayName = profile.businessName || profile.creatorName || profile.name || t('Partner profile');
-  const chips = role === 'professional' ? (profile.services || []) : role === 'influencer' ? [...new Set([profile.category, ...(profile.relatedNiches || [])].map(displayInfluencerCategory))].filter(Boolean) : [profile.specialisation, profile.qualificationName].filter(Boolean);
-  return <section className="pd-identity"><span className="pd-identity-icon"><Icon name={presentation[role].icon} size={24} /></span><div className="pd-identity-copy"><div><h2>{displayName}</h2><span className={`pd-status ${approved ? 'is-approved' : ''}`}><span />{t(approved ? 'Verified' : 'Verification pending')}</span></div><p>{[profile.city, role === 'consultant' ? profile.experience : null].filter(Boolean).join(' · ') || t('Details not provided')}{reviews > 0 && <> · {reviews} {t('Reviews')}</>}</p>
-      {chips.length > 0 && <div className="pd-chips">{chips.slice(0, 3).map(chip => <span key={chip}>{chip}</span>)}{chips.length > 3 && <button className="pd-text-button" onClick={() => setRoute('profile')}>+{chips.length - 3} {t('more')}</button>}</div>}
-      {role === 'influencer' && <p className="pd-socials">{(profile.platforms || []).filter(item => item.url).map(item => `${item.name} · ${item.band || t('Audience not provided')} · ${item.verified ? t('Verified') : t('Self-reported')}`).join(' | ') || t('Social accounts not provided')}</p>}
-    </div><div className="pd-identity-actions">{role === 'professional' && <div className="pd-availability"><div><span className={online ? 'is-online' : ''} /><b>{online ? t('Online') : t('Offline')}</b></div><button role="switch" aria-label={t('Availability')} aria-checked={online} disabled={!approved || busy} onClick={() => act(async () => { const result = await setAvailability(!online); setOnline(result.online); })}><span />{online ? t('Go Offline') : t('Go Online')}</button></div>}<button className="pd-text-button" onClick={() => setRoute('profile')}>{t('View Profile')}<Icon name="chevronRight" size={15} /></button></div></section>;
-}
-
-function DashboardWork({ role, title, orders, incoming = false, setSheet, setRoute }) {
-  const icon = incoming ? 'message' : presentation[role].workIcon;
-  return <section className={`pd-card pd-work-section ${incoming ? 'pd-incoming' : ''}`}><div className="pd-section-title"><h2 className="pd-work-heading"><Icon name={icon} size={19} /><span>{t(title)}</span><span className="pd-count">{orders.length}</span></h2><button className="pd-text-button" onClick={() => setRoute('orders')}>{t('View all')}<Icon name="chevronRight" size={15} /></button></div>
-    {orders.length ? <div className="pd-work-list">{orders.slice(0, 3).map(order => <article className={`pd-work-item pd-work-${role}`} key={order.id}>
-      <span className="pd-work-icon">{role === 'consultant' && order.deadline ? <><b>{new Date(order.deadline).getDate()}</b><small>{new Date(order.deadline).toLocaleDateString('en-IN', { month: 'short' })}</small></> : <Icon name={presentation[role].workIcon} size={21} />}</span>
-      <div className="pd-work-copy"><span className="pd-work-customer">{order.customer_name || order.customerName || t('Customer')}</span><h3>{order.title || order.details?.service || order.details?.category || t('Booking')}</h3><p><Icon name="calendar" size={14} />{order.deadline ? new Date(order.deadline).toLocaleString('en-IN') : t('Date not scheduled')}</p>{role === 'influencer' && typeof order.details?.deliverables === 'string' && <p><Icon name="video" size={14} />{order.details.deliverables}</p>}<span className="pd-order-status">{t((role==='influencer'||role==='consultant')&&order.status==='requested'?'Enquiry received':(role==='influencer'||role==='consultant')&&order.status==='accepted'?'Enquiry accepted':role==='professional'&&order.backup_price_approval_pending?'Waiting for customer price approval':role==='professional'&&order.status==='accepted'&&order.journey_status==='on_the_way'?'On the way':order.status)}</span></div>
-      <button className={incoming ? 'pd-secondary' : 'pd-text-button'} onClick={() => setSheet({ order })}>{t(incoming ? 'View request' : 'View details')}<Icon name="chevronRight" size={15} /></button>
-    </article>)}</div> : <div className="pd-empty"><span><Icon name={icon} size={25} /></span><div><h3>{t(incoming ? 'Nothing new right now' : role === 'influencer' || role === 'consultant' ? 'No accepted enquiries' : 'No upcoming jobs')}</h3><p>{t(incoming ? 'New requests will appear here when they arrive.' : 'Your work will appear here when it is scheduled.')}</p></div></div>}
-  </section>;
-}
-
-function LatestPosts({ posts, setRoute }) {
-  const latest = posts.filter(post => post.status !== 'archived').slice(0, 2);
-  return <section className="pd-card"><div className="pd-section-title"><h2><Icon name="megaphone" size={19} />{t('My Latest Posts')}</h2><button className="pd-text-button" onClick={() => setRoute('post')}>{t('View all')}</button></div>{latest.length ? <div className="pd-latest-posts">{latest.map(post => <article key={post.id}><Icon name="video" size={20} /><div><h3>{(post.details.caption || post.details.title || t('Post')).slice(0, 72)}</h3><span className="pd-order-status">{t(post.status)}</span></div></article>)}</div> : <div className="pd-empty"><span><Icon name="megaphone" size={23} /></span><div><h3>{t('No posts yet')}</h3><button className="pd-text-button" onClick={() => setRoute('post')}>{t('Create Post')}</button></div></div>}</section>;
-}
-
-function DashboardPayments({ role, available, pending, setSheet }) {
-  return <section className="pd-card pd-earnings"><div className="pd-section-title"><h2><Icon name="rupee" size={19} />{t('Earnings')}</h2><button className="pd-text-button" onClick={() => setSheet('Earnings')}>{t('View details')}</button></div><div className="pd-payout"><span>{t('Available payout')}</span><strong>{available}</strong></div><div className="pd-pending"><span>{t('Pending payout')}</span><b>{pending}</b></div><button className="pd-rewards" onClick={() => setSheet('Rewards')}><Icon name="sparkles" size={19} /><span>{t('Rewards')}</span><Icon name="chevronRight" size={16} /></button>{(role === 'influencer' || role === 'consultant') && <p className="pd-payment-note">{t('Enquiries do not create paid bookings or earnings. Official payment and payout setup is pending.')}</p>}</section>;
+  return (
+    <div className="pd-dashboard pd-earnings-dashboard" style={{ '--pd-accent': 'var(--purple)' }}>
+      <section className="pd-card pd-earnings">
+        <div className="pd-section-title">
+          <h2><Icon name="rupee" size={19} />{t('Earnings')}</h2>
+          <button type="button" className="pd-text-button" onClick={() => setSheet('Earnings')}>{t('View details')}</button>
+        </div>
+        <div className="pd-payout"><span>{t('Available payout')}</span><strong>{money(total('available'))}</strong></div>
+        <div className="pd-pending"><span>{t('Pending payout')}</span><b>{money(total('pending'))}</b></div>
+        <button type="button" className="pd-rewards" onClick={() => setSheet('Rewards')}>
+          <Icon name="sparkles" size={19} /><span>{t('Rewards')}</span><Icon name="chevronRight" size={16} />
+        </button>
+      </section>
+      <section className="pd-card pd-earnings-history">
+        <div className="pd-section-title">
+          <h2>Recent earnings</h2>
+          <button type="button" className="pd-text-button" onClick={() => setSheet('Earnings')}>View details<Icon name="chevronRight" size={15} /></button>
+        </div>
+        {recent.length ? recent.map(entry => (
+          <article key={entry.id}>
+            <span className="pd-growth-icon"><Icon name="rupee" size={18} /></span>
+            <span><b>{entry.state === 'reversed' ? 'Reversed entry' : 'Partner earnings'}</b><small>{entry.created_at ? new Date(entry.created_at).toLocaleDateString('en-IN') : 'Date unavailable'}</small></span>
+            <strong>{money(entry.amount)}</strong>
+          </article>
+        )) : (
+          <div className="pd-empty">
+            <span><Icon name="rupee" size={22} /></span>
+            <div><h3>No earnings recorded yet</h3><p>Earnings appear here when eligible work is completed and recorded.</p></div>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }

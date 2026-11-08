@@ -12,8 +12,10 @@ export async function bookPartnerOffering(payload) {
   return rpc('book_partner_offering', { p_post: payload.partnerPostId, p_slot: payload.slot, p_key: payload.idempotencyKey });
 }
 
-export async function getServiceBookingEstimate(partnerPostId) {
-  return rpc('service_booking_estimate', { p_post: partnerPostId });
+export async function getServiceBookingEstimate(partnerPostId, packageName) {
+  const args = { p_post: partnerPostId };
+  if (packageName) args.p_package = packageName;
+  return rpc('service_booking_estimate', args);
 }
 
 export async function getServiceMatchCapabilities() {
@@ -28,6 +30,7 @@ export async function requestProfessionalBooking(payload) {
     p_post: payload.partnerPostId, p_slot: payload.slot, p_key: payload.idempotencyKey,
     p_backup: Boolean(payload.backup), p_city: payload.city,
     p_address: address, p_requirement: requirement,
+    ...(payload.photos?.length ? { p_photos: payload.photos } : {}),
   });
 }
 
@@ -99,6 +102,32 @@ export async function getNearbyCustomerProfessionals(location) {
     .slice(0, 8);
 }
 
+export async function searchProfessionals(term, location) {
+  if (!supabase || !term?.trim()) return [];
+  const query = term.trim().toLowerCase().replace(/[%_\\]/g, ' ');
+  if (!query) return [];
+  const like = `%${query}%`;
+  const [modern, legacy] = await readDirectorySources(
+    () => readRows('customer_professional_directory', rowQuery => rowQuery
+      .or(`display_name.ilike.${like},business_name.ilike.${like},city.ilike.${like},specialisation.ilike.${like}`)
+      .limit(30)),
+    () => readRows('vendor_directory', rowQuery => rowQuery
+      .or(`display_name.ilike.${like},business_name.ilike.${like},city.ilike.${like}`)
+      .limit(30))
+  );
+  const rows = dedupeProfessionals([...(await withServicePartnerFacts(modern)), ...legacy]);
+  const results = [];
+  for (const row of rows) {
+    const services = [...(row.service_names || [])];
+    const serviceName = services.find(name => isCustomerEligibleProfessional(row, name, location))
+      || services.find(name => isCustomerEligibleProfessional(row, name, ''));
+    if (!serviceName) continue;
+    results.push({ ...row, matchedService: serviceName });
+    if (results.length >= 10) break;
+  }
+  return results;
+}
+
 export async function getCustomerProfessionalById(id, serviceName, location) {
   if (!supabase) return null;
   const tables = ['customer_professional_directory', 'vendor_directory'];
@@ -115,7 +144,6 @@ export async function getCustomerProfessionalById(id, serviceName, location) {
 }
 
 export async function getCustomerProfessionalReviews(vendor, serviceName) {
-  if (vendor.demo) return vendor.demo_reviews || [];
   if (vendor.partner_id) {
     return readRows('customer_professional_reviews', query => query.eq('partner_id', vendor.partner_id).order('created_at', { ascending: false }).limit(100)).catch(() => []);
   }
