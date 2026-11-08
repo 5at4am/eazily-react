@@ -94,6 +94,8 @@ export default function UserHome({
   const bulkTickerText = useRef(null);
   const bulkTickerTrack = useRef(null);
   const serviceShowcases = useRef([]);
+  const heroRef = useRef(null);
+  const exploreGridRef = useRef(null);
   const slide = heroSlides[heroIndex];
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -162,6 +164,45 @@ export default function UserHome({
     document.head.append(link);
     return () => link.remove();
   }, []);
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || motionReduced || !('requestAnimationFrame' in window)) return undefined;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const rect = hero.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const progress = ((rect.top + rect.height / 2) - vh / 2) / (vh / 2);
+      const clamped = Math.max(-1, Math.min(1, progress));
+      hero.style.setProperty('--px', clamped.toFixed(4));
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [motionReduced]);
+  useEffect(() => {
+    const grid = exploreGridRef.current;
+    if (!grid) return undefined;
+    if (motionReduced || !('IntersectionObserver' in window)) {
+      grid.classList.add('is-visible');
+      return undefined;
+    }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.15 });
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, [motionReduced]);
   function completeSwipe(event) {
     const movement = event.changedTouches[0].clientX - (touchStart.current ?? event.changedTouches[0].clientX);
     if (Math.abs(movement) > 45) setHeroIndex(index => (index + (movement < 0 ? 1 : heroSlides.length - 1)) % heroSlides.length);
@@ -170,7 +211,7 @@ export default function UserHome({
   }
   return <main className="screen home-v3 user-art-home marketplace-home">
     <section className="home-discovery-header"><header className="user-home-header"><div className="user-brand-row"><span className="user-brand-lead">{onMenu && <button type="button" className="user-menu-button" onClick={onMenu} aria-label={translate("Open menu")}><Icon name="menu" size={22} /></button>}<span className="marketplace-brand">eazily<span>.</span><small>{translate("A little help, every day.")}</small></span></span><button className="location-selector compact-location" onClick={() => { setAddressSearch(city); setLocationOpen(true); }}><Icon name="location" size={15} /><span><b>{translate(location.locality)}</b><small>{translate(location.address)}</small></span><Icon name="chevronRight" size={13} /></button></div><h1>{translate(greeting)}{translate(customer?.full_name ? `, ${customer.full_name}` : "")}</h1><p>{translate("What can we make easier for you today?")}</p></header><div className="search-cart-row">{translate(searchArea)}</div></section>
-    <section className={`hero-carousel hero-header hero-theme-${slide.id}`} style={{ '--promotion-image': `url("${homeHeroArtwork[slide.id]}")` }} onFocusCapture={() => setHeroPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHeroPaused(false); }} onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onTouchStart={event => {
+    <section ref={heroRef} className={`hero-carousel hero-header hero-parallax hero-theme-${slide.id}`} style={{ '--promotion-image': `url("${homeHeroArtwork[slide.id]}")` }} onFocusCapture={() => setHeroPaused(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setHeroPaused(false); }} onMouseEnter={() => setHeroPaused(true)} onMouseLeave={() => setHeroPaused(false)} onTouchStart={event => {
       touchStart.current = event.touches[0].clientX;
       setHeroPaused(true);
     }} onTouchEnd={completeSwipe}><div className={`hero-promotion hero-promotion-${slide.id}`} key={slide.id}><div className="hero-copy"><span>{translate(slide.eyebrow)}</span><h2>{translate(slide.title)}</h2><p>{translate(slide.text)}</p><button className="btn btn-white" onClick={() => setRequest({
@@ -179,7 +220,7 @@ export default function UserHome({
         })}>{translate(slide.action)} <Icon name="chevronRight" size={15} /></button></div><div className="hero-person" aria-hidden="true"><img src={homeHeroArtwork[slide.id]} alt="" width="480" height="600" loading={heroIndex === 0 ? "eager" : "lazy"} fetchPriority={heroIndex === 0 ? "high" : "low"} decoding="async" /></div></div><div className="hero-art" aria-hidden="true"><i /><i /></div><div className="hero-controls"><div className="hero-dots home-bulk-orders-dots">{translate(heroSlides.map((item, index) => <button type="button" key={item.id} className={index === heroIndex ? "active" : ""} aria-pressed={index === heroIndex} aria-label={`Show promotion ${index + 1}`} onClick={() => setHeroIndex(index)} />))}</div>
       {!motionReduced && <button type="button" className="promotion-play" aria-pressed={!heroStopped} onClick={() => setHeroStopped(value => !value)}><Icon name={heroStopped ? "play" : "pause"} size={16} /><span className="user-sr-only">{translate(heroStopped ? "Play promotions" : "Pause promotions")}</span></button>}</div>
     </section>
-    <section className="section"><div className="section-head"><h2>{translate("What's on your to-do list?")}</h2><button onClick={() => navigate("categories")}>{translate("View all")}</button></div><div className="explore-grid">{translate(topServices.map(service => <button key={service.id} onClick={() => setRequest({
+    <section className="section"><div className="section-head"><h2>{translate("What's on your to-do list?")}</h2><button onClick={() => navigate("categories")}>{translate("View all")}</button></div><div ref={exploreGridRef} className="explore-grid">{translate(topServices.map((service, index) => <button key={service.id} style={{ '--i': index }} onClick={() => setRequest({
           categoryId: service.categoryId ?? "manpower",
           serviceName: service.requestName
         })}><i><ServiceIllustration name={service.requestName} /></i><b>{translate(service.name)}</b></button>))}</div></section>

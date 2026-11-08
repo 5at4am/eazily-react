@@ -111,3 +111,17 @@
 .hero-header .search-cart-row{grid-template-columns:minmax(0,1fr);gap:0}
 @keyframes home-bulk-ticker{to{transform:translateX(calc(-1 * var(--bulk-ticker-distance, 50%)))}}
 @media(prefers-reduced-motion:reduce){.home-bulk-orders-ticker-window{height:auto;min-height:36px;overflow:visible}.home-bulk-orders-ticker-window::before,.home-bulk-orders-ticker-window::after,.home-bulk-orders-ticker-track span+span{display:none}.home-bulk-orders-ticker-track{width:auto;height:auto;min-height:36px;padding:7px 10px;white-space:normal;animation:none}.home-bulk-orders-ticker-track span{min-width:0;white-space:normal}}
+
+/* ---- Professional hero parallax + parallel reveals ---- */
+.hero-header.hero-parallax{overflow:hidden;will-change:transform}
+.hero-header.hero-parallax .hero-art i{transition:transform .2s linear}
+.hero-header.hero-parallax .hero-art i:nth-child(1){transform:translate3d(calc(var(--px,0)*14px),calc(var(--px,0)*8px),0)}
+.hero-header.hero-parallax .hero-art i:nth-child(2){transform:translate3d(calc(var(--px,0)*-12px),calc(var(--px,0)*-6px),0)}
+.hero-header.hero-parallax .hero-person{transform:translate3d(0,calc(var(--px,0)*9px),0);will-change:transform}
+.hero-header.hero-parallax .hero-promotion{transform:translate3d(0,calc(var(--px,0)*4px),0)}
+.explore-grid button{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease;transition-delay:calc(var(--i,0)*55ms)}
+.explore-grid.is-visible button{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .hero-header.hero-parallax .hero-art i,.hero-header.hero-parallax .hero-person,.hero-header.hero-parallax .hero-promotion{transform:none;transition:none}
+  .explore-grid button{opacity:1;transform:none;transition:none}
+}

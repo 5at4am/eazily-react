@@ -2,6 +2,72 @@
 
 All notable changes to the Eazily customer & partner app (`eazily-react`) are documented here.
 
+## [1.19.4] - 2026-11-08
+
+### Added
+- **Professional hero parallax** — the home hero now responds to scroll with layered depth: the background art, promotion card, and foreground imagery move at different speeds for a polished, sense-of-depth feel. Uses the existing campaign imagery, runs on a scroll/RAF throttle, and is fully disabled under `prefers-reduced-motion`.
+- **Parallel staggered reveals** — the "to-do list" discovery grid now fades/slides in with a per-card stagger when it scrolls into view (skipped for reduced-motion users).
+
+## [1.19.3] - 2026-11-08
+
+### Changed
+- **Profile screenshot follow-up** — reduced section gaps, consolidated profile statistics into one compact strip, constrained header actions to readable 44px-minimum targets, softened the secondary action, and improved menu-label hierarchy and supporting-text readability.
+- **Profile header compressed** — the vendor profile card is now a tight block: 36px avatar, smaller role/name/location type, and the verified/reviews status moved inline under the name. The Edit/View actions sit as a compact side-by-side row, so the header no longer takes a large vertical slab. (Location line also uses a proper "·" separator.)
+
+## [1.19.2] - 2026-11-08
+
+### Changed
+- **Vendor profile hero avatar reduced again** — the initials tile went 48px → 40px with a smaller radius and 14px initials; the name size was tightened so the identity text and actions lead the view, not the icon (applies to all roles).
+
+## [1.19.1] - 2026-11-08
+
+### Changed
+- **Profile hero avatar smaller** — the vendor profile initials/photo tile was reduced from 68px → 48px with a tighter radius, and the hero card is more compact so the identity text and actions read as the focus rather than the icon.
+
+## [1.19.0] - 2026-11-08
+
+### Changed
+- **Human-readable order statuses** — job cards and filter chips now show "Requested / Accepted / Active / Awaiting confirmation / Completed / Cancelled / Disputed" instead of raw database values.
+- **Clearer names** — profile menu items renamed for consistency: "Enquiries & leads", "Documents & verification", and "Switch to customer home"; section titles and descriptions kept consistent across roles.
+
+## [1.18.1] - 2026-11-08
+
+### Fixed
+- **Vendor offers query column bug** — the Jobs load referenced `service_booking_offers.created_at`, which doesn't exist; it now orders by the real `offered_at` column. Quick-accept gating loads correctly again.
+
+### Changed
+- **Profile menu trimmed to essentials** — removed the standalone "Payment History" row (transaction history is now described inside the Earnings tile), leaving My Work (Business, Services, Leads, Orders, Growth), Money & Membership (Earnings, Rewards, Subscription), Messages, and Account & Support.
+
+## [1.18.0] - 2026-11-08
+
+### Added
+- **Expired-offer transparency on job cards** — a requested professional job without a live offer now shows an amber "Offer expired — open to review" note instead of silently missing the Quick accept button.
+
+### Changed
+- **Quick accept is double-tap-safe** — a per-job lock prevents duplicate accept calls, shows "Accepting…" while in flight, and releases on completion/failure.
+
+## [1.17.0] - 2026-11-08
+
+### Added
+- **Starter descriptions for posting** — when creating a service, the form now offers a one-tap "Insert starter description" (service-specific, editable) so new/inexperienced vendors don't have to write from a blank box.
+
+### Changed
+- **Order detail accept** — for professional requests with a valid offer the primary action is now a clear green "Accept at listed price" button (Reject stays secondary), matching the one-tap Quick accept on the Jobs list.
+
+## [1.16.1] - 2026-11-08
+
+### Fixed
+- **Quick accept no longer errors on requests without an active offer.** The Jobs list now loads the partner's offered/unexpired offers and only shows the green Quick accept button when a valid offer exists (previously it called the accept RPC and hit "Current unexpired Service Partner offer required").
+
+## [1.16.0] - 2026-11-08
+
+### Added
+- **Quick accept on job cards** — professional vendors can accept a request in one tap right from the Jobs list (green Quick accept button) without opening the full order sheet; it uses the same safe accept RPC and respects offer availability/expiry server-side.
+- **Plain-language money line on the dashboard** — approved vendors now see "You can withdraw ₹X · Pending ₹Y" in one glance, instead of having to interpret financial states.
+
+### Changed
+- Job cards are now keyboard-accessible (Enter/Space opens) with the quick action as a nested button so it doesn't navigate.
+
 ## [1.15.0] - 2026-11-08
 
 ### Changed
